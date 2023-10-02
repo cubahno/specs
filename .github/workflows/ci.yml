@@ -13,8 +13,8 @@ jobs:
     steps:
       - name: Copy specs
         run: |
-          mkdir -p documents
-          cp -r ./* documents
+          mkdir -p /docs
+          cp -r ./* /docs
           ls -l documents
 
       - name: Checkout Connexions
