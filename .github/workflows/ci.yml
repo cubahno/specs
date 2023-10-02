@@ -14,7 +14,8 @@ jobs:
       - name: Copy specs
         run: |
           mkdir -p documents
-          cp -r $pwd documents
+          cp -r $PWD/* documents
+          ls -l documents
 
       - name: Checkout Connexions
         uses: actions/checkout@v2
