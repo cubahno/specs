@@ -13,14 +13,12 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Contents
-        run: ls -l
+
       - name: Copy specs
         run: |
           mkdir documents
           cp -r ./2.0/* documents
           cp -r ./3.*/* documents
-          ls -l documents
 
       - name: Checkout Connexions
         uses: actions/checkout@v2
