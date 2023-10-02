@@ -1,0 +1,642 @@
+openapi: "3.0.0"
+info:
+  version: 1.0.0
+  title: "Credit commons"
+  description: The external facing API
+  contact:
+    name: Matthew Slater
+    url: https://matslats.net/contact
+  license:
+    name: GNU GPL
+paths:
+  "/":
+    get:
+      summary: Handshake with the node, including with an integrity check.
+      operationId: handShake
+      parameters:
+        - name: User-Agent
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Node
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Hash
+          in: header
+          description: The corresponding hash of the calling ledger (if the caller isn't
+            the client)
+          required: false
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The node is online and the ratchet is congruent.
+        "409":
+          description: The ledger is online but the ratchets are not congruent.
+  "/account/{acc_id}":
+    get:
+      summary: Get a summary of an account trading activity, balance, pending balance,
+        trade volume, partners etc.
+      operationId: AccountSummary
+      parameters:
+        - name: User-Agent
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Node
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Hash
+          in: header
+          description: The corresponding hash of the calling ledger (if the caller isn't
+            the client)
+          required: false
+          schema:
+            type: string
+        - name: acc_id
+          in: path
+          required: true
+          description: the local name of the account
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The account summary object
+          content:
+            "application/json":
+              type: object
+              properties:
+                finished:
+                  type:
+                    ref: "#/components/schemas/AccountActivity"
+                pending:
+                  type:
+                    ref: "#/components/schemas/AccountActivity"
+        "403":
+          description: This endpoint is private to parent nodes.
+        "404":
+          description: Invalid account ID
+        "409":
+          description: Integrity error. The hashes do not correspond.
+  "/history/{acc_id}":
+    get:
+      summary: Get an array of balances and transaction times.
+      operationId: AccountHistory
+      parameters:
+        - name: User-Agent
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Node
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Hash
+          in: header
+          description: The corresponding hash of the calling ledger (if the caller isn't
+            the client)
+          required: false
+          schema:
+            type: string
+        - name: acc_id
+          in: path
+          required: true
+          description: the local name of the account
+          schema:
+            type: string
+      responses:
+        "200":
+          description: The account summary object
+          content:
+            "application/json":
+              schema:
+                $ref: "#/components/schemas/AccountHistory"
+        "403":
+          description: Not permitted to view
+        "404":
+          description: Invalid account ID
+        "409":
+          description: Integrity error. The hashes do not correspond.
+  /build:
+    post:
+      summary: Send a proposed transaction (From the client)
+      operationId: buildTransaction
+      requestBody:
+        $ref: '#/components/requestBodies/NewEntry'
+      responses:
+        "200":
+          description: the transaction was not validated
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Violation"
+        "201":
+          description: A list of ledger written to the temp table in state validated
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Entry"
+        "409":
+          description: Integrity error. The hashes do not correspond.
+  /buildrelay:
+    post:
+      summary: Send a proposed transaction (From another ledger)
+      operationId: relayTransaction
+      parameters:
+        - name: User-Agent
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Node
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Hash
+          in: header
+          description: The corresponding hash of the calling ledger (if the caller isn't
+            the client)
+          required: false
+          schema:
+            type: string
+      requestBody:
+        $ref: '#/components/requestBodies/Transaction'
+      responses:
+        "200":
+          description: the transaction was not validated
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Violation"
+        "201":
+          description: A list of ledger written to the temp table in state validated
+          content:
+            "*/*":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Entry"
+        "409":
+          description: Integrity error. The hashes do not correspond.
+
+  /filter:
+    get:
+      summary: Retrieve transactions
+      operationId: filterTransactions
+      parameters:
+        - name: User-Agent
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Node
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Hash
+          in: header
+          description: The corresponding hash of the calling ledger (if the caller isn't
+            the client)
+          required: false
+          schema:
+            type: string
+        - name: limit
+          in: query
+          description: number of results to return
+          required: false
+          schema:
+            type: integer
+            default: 10
+        - name: fragment
+          in: query
+          description: String on which to filter the transaction description
+          required: false
+          schema:
+            type: string
+        - name: payer
+          in: query
+          description: User ID of the payer
+          required: false
+          schema:
+            type: integer
+        - name: payee
+          in: query
+          description: User ID of the payee
+          required: false
+          schema:
+            type: integer
+        - name: involving
+          in: query
+          description: Filter where the payer OR payee was in this transaction
+          required: false
+          schema:
+            type: integer
+        - name: states
+          in: query
+          description: The workflow state of the transactions; supported states are
+            validated, pending, completed, erased, timedout
+          required: false
+          schema:
+            type: string
+            default: completed
+        - name: before
+          in: query
+          description: The date after which the filtered transaction were first written for comparison with a mysql DATETIME value. e.g. 2020-07-25 12:55:54
+          required: false
+          schema:
+            type: string
+        - name: after
+          in: query
+          description: The date before which the filtered transaction were first written for comparison with a mysql DATETIME value e.g. 2020-07-25 12:55:54
+          required: false
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: Sort field and direction; direction is optional
+          required: false
+          schema:
+            type: string
+            default: title,desc
+        - name: is_primary
+          in: query
+          description: true to include dependent transactions in the results
+          required: false
+          schema:
+            type: string
+            default: true
+        - name: full
+          in: query
+          description: true to show full transactions, false to return uuids
+          required: false
+          schema:
+            type: string
+            default: true
+      responses:
+        "200":
+          description: Ledger entries (if 'full' is true)
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Entry"
+        "403":
+          description: This endpoint is private to parent nodes.
+        "409":
+          description: Integrity error. The hashes do not correspond.
+  /accounts:
+    get:
+      summary: Get all account names rootwards of this ledger
+      operationId: getMap
+      description: A list or tree of account names
+      parameters:
+        - name: User-Agent
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Node
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Hash
+          in: header
+          description: The corresponding hash of the calling ledger (if the caller isn't
+            the client)
+          required: false
+          schema:
+            type: string
+        - name: details
+          in: query
+          description: true to show full account details, false to show names only
+          required: false
+          schema:
+            type: string
+            default: true
+        - name: tree
+          in: query
+          description: true to show whole ledger tree, false to show current node only
+          required: false
+          schema:
+            type: string
+            default: false
+      responses:
+        "200":
+          description: the tree of names
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+        "403":
+          description: This endpoint is private to parent nodes.
+        "409":
+          description: Integrity error. The hashes do not correspond.
+  "/transaction/{uuid}/{dest_state}":
+    patch:
+      summary: Change transaction state
+      operationId: stateChange
+      parameters:
+        - name: User-Agent
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Node
+          in: header
+          description: the hostname of the calling ledger (if the caller isn't the client)
+          required: false
+          schema:
+            type: string
+        - name: Upstream-Hash
+          in: header
+          description: The corresponding hash of the calling ledger (if the caller isn't
+            the client)
+          required: false
+          schema:
+            type: string
+        - in: path
+          name: uuid
+          description: The unique id of the temp transaction.
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: dest_state
+          description: The desired workflow state
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: There was a problem, and here are the errors.
+          content:
+            "application/json":
+              schema:
+                type: array
+                items:
+                  type: string
+        "201":
+          description: The transaction state was changed
+        "403":
+          description: Not permitted to do this operation to this transaction.
+        "404":
+          description: No transaction with that uuid.
+        "409":
+          description: Integrity error. The hashes do not correspond.
+  "/workflows":
+    get:
+      summary: retrieve all the workflows, translated where appropriate.
+      operationId: getWorkflows
+      description: For branchwards nodes to know what workflows are available
+      responses:
+        "200":
+          description: Here are the workflow objects
+          content:
+            "application/json":
+              type: array
+              items:
+                $ref: "#/components/schemas/Workflow"
+  "/config":
+    patch:
+      summary: Edit one or more config values
+      operationId: editConfig
+      description: Change the settings of the service (admin only!)
+      requestBody:
+        description: Dictionary of config values to set.
+        $ref: "#/components/requestBodies/KeyValue"
+      responses:
+        "200":
+          description: the config value(s) were updated
+        "403":
+          description: the overrides were written.
+        "400":
+          description: One of more of the given values failed validation. Others written
+components:
+  requestBodies:
+    NewEntry:
+      description: The components of a transaction to be built
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NewEntry'
+      required: true
+    Transaction:
+      description: A fullly formed transaction
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Transaction'
+      required: true
+    KeyValue:
+      description: arbitrary object
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/KeyValue'
+  schemas:
+    KeyValue:
+      type: object
+      additionalProperties: {}
+    AccountActivity:
+      type: object
+      description: A summary of transactions
+      properties:
+        balance:
+          type: number
+          description: the sum of all complete transactions; the gross_in minus the
+            gross_out
+          example: -99
+        pending:
+          type: number
+          description: the sum of all complete and pending transactions
+          example: -129
+        gross_in:
+          type: number
+          description: The total of transactions where this account was the payee
+          example: 900
+        gross_out:
+          type: number
+          description: The total of transactions where this account was the payer
+          example: 999
+        partners:
+          type: number
+          description: The number of different accounts traded with (in this group?)
+          example: 9
+        trades:
+          type: number
+          description: the number of primary entries the account was involved in
+          example: 99
+        entries:
+          type: number
+          description: the number of entries in the database the account was involved in
+          example: 99
+        name:
+          type: string
+          description: The name of the account in the ledger
+          example: jack99
+    Violation:
+      type: object
+      description: One of four types of violation, each with different fields
+        on which ledger.
+      required:
+        - class
+        - node
+      properties:
+        class:
+          type: string
+          description: Used to reconstruct the violation object on the client.
+          example: UnresolvedAccountnameViolation
+        node:
+          type: string
+          description: the name of the node on which the violation was flagged
+          example: child2
+        additionalProperties:
+          type: string
+    NewEntry:
+      type: object
+      description: a proposed transaction sent by a client.
+      required:
+        - payer
+        - payee
+        - quant
+        - description
+      properties:
+        payee:
+          description: The absolute or relative ledger path to the payee
+          example: child1/alice
+        payer:
+          description: The absolute or relative ledger path to the payer
+          type: string
+          example: child2/bob
+        quant:
+          description: An integer value.
+          type: integer
+          example: 100
+        description:
+          description: User-entered note about the transaction
+          type: string
+          example: blah blah
+        type:
+          description: The name of the workflow path. Only 'default' is supported a.t.m
+          type: string
+          example: default
+    Transaction:
+      type: object
+      description: A complete transaction object. Note that the first entry is ALWAYS
+      required:
+        - uuid
+        - type
+        - version
+      properties:
+        uuid:
+          description: The uuid of the transaction. If not supplied one will be generated
+          type: string
+          example: a6f5ae5d-3b4b-4e1b-a54a-00e510fd3c99
+        type:
+          description: The transaction type, which determines its workflow path. NB We don't pass around the current state of the transaction, because it is implicit and in the hash, only the desired state.
+          type: string
+          example: default
+        version:
+          description: Version number is incremented from 1 each time the transaction is written;
+          type: string
+          example: 2
+    Entry:
+      type: object
+      description: A single flow of currency between two accounts; Part of a transaction.
+      required:
+        - payer
+        - payee
+        - quant
+        - description
+      properties:
+        primary:
+          description: TRUE if this is the main Entry of the group.
+          type: boolean
+          example: 1
+        payee:
+          description: The absolute or relative ledger path to the payee
+          example: child1/alice
+        payer:
+          description: The absolute or relative ledger path to the payer
+          type: string
+          example: child2/bob
+        author:
+          description: id of the account which initiated this entry
+          type: string
+          example: child2/fees
+        quant:
+          description: An integer value.
+          type: integer
+          example: 100
+        description:
+          description: User-entered note about the transaction
+          type: string
+          example: blah blah
+        metadata:
+          description: Any other information to be stored in key/value pairs, as determined by convention
+          type: object
+          additionalProperties: {}
+          example: {"payer_name": "Alice Liddell"}
+    AccountHistory:
+      # Not sure about this. See https://swagger.io/docs/specification/data-models/dictionaries/
+      type: object
+      description: a list of values summarising the account's trading activity.
+      additionalProperties:
+        type: number
+      example:
+        152847346726: 0
+        152847684373: 18
+        152847973621: 6
+    Workflow:
+      type: object
+      description: An object defining who can move transactions between states.
+      properties:
+        label:
+          description: The name of the workflow.
+          type: string
+          example: MyWorkflow
+        summary:
+          description: Short description of what or who the workflow is for.
+          type: string
+          example: For business payments.
+        active:
+          description: if set to false, no new transactions should use this.
+          type: boolean
+          example: true
+        states:
+          description: states that the transaction might be in.
+          type: object
+          additionalProperties: {}

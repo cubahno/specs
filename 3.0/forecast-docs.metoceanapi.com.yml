@@ -1,0 +1,1525 @@
+openapi: 3.0.0
+servers:
+  - description: Point Forecast API
+    url: https://forecast-v2.metoceanapi.com
+
+info:
+  description: |
+    Point Forecast API
+
+    Use the `x-api-key` request header for authorization
+  version: 2.0.0
+  title: Point Forecast API
+  contact:
+    email: support@metocean.co.nz
+
+security:
+  - APIAuth: []
+
+tags:
+  - name: point
+    description: endpoints for forecast point / time series data
+  - name: route
+    description: endpoints for forecast route / time series data. experimental.
+  - name: info
+    description: endpoints for information about variables / models / units
+
+paths:
+
+  /point/time:
+    get:
+      tags:
+        - point
+      operationId: point
+      summary: Fetches forecast data of the supplied point and variables
+      parameters:
+        - in: query
+          required: true
+          name: lat
+          schema:
+            $ref: '#/components/schemas/Latitude'
+        - in: query
+          required: true
+          name: lon
+          schema:
+            $ref: '#/components/schemas/Longitude'
+        - in: query
+          name: variables
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: [wind.speed.at-10m,wind.direction.at-10m]
+        - in: query
+          name: from
+          schema:
+            type: string
+            format: date-time
+          # N.B. the 'to' parameter is deliberately not specified here,
+          # because it may prevent Swagger from generating valid requests
+        - in: query
+          name: interval
+          schema:
+            type: string
+            example: '1h'
+        - in: query
+          name: repeat
+          schema:
+            type: integer
+            minimum: 0
+            example: 24
+        - in: query
+          name: models
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: baseModels
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BaseAtmosphericModelGroupParameter'
+          examples:
+            empty:
+              value:
+            auto:
+              value: "wave:auto,atmospheric:auto"
+              summary: "Use the API default base models for each variable group"
+            wave.ecmwf:
+              value: "wave:ecmwf"
+              summary: "Set wave variables to use models with an ECMWF base model"
+            atmospheric.gfs:
+              value: "atmospheric:gfs"
+              summary: "Set atmospheric variables to use models with a GFS base model"
+            both.mixed:
+              value: "wave:gfs,atmospheric:ecmwf"
+              summary: "Set wave variables to use GFS and atmospheric variables to use ECMWF"
+        - in: query
+          name: outputFormat
+          schema:
+            type: string
+            example:
+        - in: query
+          name: cycleLock
+          schema:
+            $ref: '#/components/schemas/CycleLockConfig'
+        - in: query
+          name: explain
+          schema:
+            type: boolean
+            default: false
+            example:
+        - in: query
+          name: extrapolate
+          schema:
+            type: boolean
+            default: true
+            example:
+        - in: query
+          name: kind
+          schema:
+            type: string
+            example:
+        - in: query
+          name: joinModels
+          schema:
+            type: string
+            default: "true"
+            enum: ["false", "true", smooth]
+            example:
+
+      responses:
+        '200':
+          description: Zero or more model names or details in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsResponse'
+            application/vnd.metocean.base64+json:
+              schema:
+                $ref: '#/components/schemas/PointsResponseBase64'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+           $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags:
+        - point
+      summary: Fetches forecast data of the supplied points and variables
+      operationId: pointByPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PointRequest'
+      responses:
+        '200':
+          description: Zero or more model names or details in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsResponse'
+            application/vnd.metocean.base64+json:
+              schema:
+                $ref: '#/components/schemas/PointsResponseBase64'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /point:
+    get:
+      tags:
+        - point
+      operationId: pointOnly
+      summary: Fetches forecast data of the supplied point and variables
+      parameters:
+        - in: query
+          required: true
+          name: lat
+          schema:
+            $ref: '#/components/schemas/Latitude'
+        - in: query
+          required: true
+          name: lon
+          schema:
+            $ref: '#/components/schemas/Longitude'
+        - in: query
+          name: variables
+          required: true
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+            example: [sea.depth.below-sea-level]
+        - in: query
+          name: models
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - in: query
+          name: baseModels
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/BaseAtmosphericModelGroupParameter'
+        - in: query
+          name: outputFormat
+          schema:
+            type: string
+            example:
+        - in: query
+          name: explain
+          schema:
+            type: boolean
+            default: false
+            example:
+        - in: query
+          name: extrapolate
+          schema:
+            type: boolean
+            default: true
+            example:
+        - in: query
+          name: kind
+          schema:
+            type: string
+            example:
+
+      responses:
+        '200':
+          description: Zero or more model names or details in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsResponse'
+            application/vnd.metocean.base64+json:
+              schema:
+                $ref: '#/components/schemas/PointsResponseBase64'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+           $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+    post:
+      tags:
+        - point
+      summary: Fetches forecast data of the supplied points and variables
+      operationId: pointOnlyByPost
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PointOnlyRequest'
+      responses:
+        '200':
+          description: Zero or more model names or details in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PointsResponse'
+            application/vnd.metocean.base64+json:
+              schema:
+                $ref: '#/components/schemas/PointsResponseBase64'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /route/time:
+    post:
+      tags:
+        - route
+      operationId: routeByTime
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteTimeRequest'
+      responses:
+        '200':
+          description: Zero or more model names or details in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrajectoryResponse'
+            application/vnd.metocean.base64+json:
+              schema:
+                $ref: '#/components/schemas/TrajectoryResponseBase64'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /route/speed:
+    post:
+      tags:
+        - route
+      operationId: routeBySpeed
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RouteSpeedRequest'
+
+      responses:
+        '200':
+          description: Zero or more model names or details in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TrajectoryResponse'
+            application/vnd.metocean.base64+json:
+              schema:
+                $ref: '#/components/schemas/TrajectoryResponseBase64'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /variables/:
+    get:
+      tags:
+        - info
+      operationId: listVariables
+      responses:
+        '200':
+          description: A map containing zero or more variable names and their details in body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/VariableInfo'
+                example:
+                  wave.direction.mean:
+                    units: degreeC
+                    standardName: sea_surface_wave_mean_from_direction
+                    shortName: mean wave direction
+                    description: Mean wave direction of where the waves are coming from
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /units/:
+    get:
+      tags:
+        - info
+      operationId: listUnits
+      responses:
+        '200':
+          description: A map containing zero or more unit names and their details in body
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties:
+                  $ref: '#/components/schemas/UnitsInfo'
+                example:
+                  joulePerKilogram:
+                    symbol: J/kg
+                    siUnits: J/kg
+                    siBaseUnits: m^2.s^-2
+                    description: joules per kilogram
+                  degreeC:
+                    symbol: °C
+                    description: degree Celsius
+
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /models/:
+    get:
+      tags:
+        - info
+      operationId: listModels
+      parameters:
+        - in: query
+          name: all
+          schema:
+            type: boolean
+            default: false
+            example:
+
+      responses:
+        '200':
+          description: Zero or more forecast model names in body. If 'all' is specified (false by default) all models there is metadata for are listed. Otherwise, only models the user has access to are listed.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+                  example: gfs_glob-st4
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /models/{model}:
+    get:
+      tags:
+        - info
+      operationId: modelDetails
+      parameters:
+        - name: model
+          in: path
+          description: Model name
+          required: true
+          schema:
+            type: string
+            example: gfs.global
+      responses:
+        '200':
+          description: Model details in body
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ModelInfo'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+  /modelsummaries/:
+    get:
+      tags:
+        - info
+      operationId: listModelSummaries
+      parameters:
+        - in: query
+          name: sort
+          schema:
+            type: string
+            format: comma-separated-pair
+            example: area,asc
+            description: Sort field (name or areas) followed by direction (asc or desc). If the sort parameter is not set, results will not be sorted. If field is specified but direction is not, direction defaults to ascending.
+        - in: query
+          name: accessLevel
+          schema:
+            type: integer
+            minimum: 0
+            example:
+            description: limit results to the minimum of this parameter and your API key's access level
+
+      responses:
+        '200':
+          description: Zero or more forecast model summaries in body. If 'sort' is specified, the results will be sorted in the requested order by the requested field, defaulting to ascending order if only the field is specified. If 'accessLevel' is specified (the default is the maximum access level for the user), only models available at the minimum of the user access level and the specified access level will be summarised.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ModelSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '4XX':
+          $ref: '#/components/responses/UserError'
+        default:
+          $ref: '#/components/responses/ServerError'
+
+components:
+
+  securitySchemes:
+    APIAuth:
+      type: apiKey
+      in: header
+      name: x-api-key
+
+  responses:
+    NotFound:
+      description: The specified resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessages'
+          example:
+            - forecast model not found.
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessages'
+          example:
+            - please supply a valid API key
+
+    UserError:
+      description: The input has caused some kind of error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessages'
+
+    ServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorMessages'
+          example:
+            - server overloaded
+
+  schemas:
+    ErrorMessages:
+      description: Error messages on individual lines
+      type: array
+      items:
+        type: string
+      example:
+        - points field not supplied
+        - times or time field not supplied
+
+    TimeArray:
+      type: array
+      items:
+        type: string
+        format: date-time
+        uniqueItems: true
+
+    TimeInterval:
+      type: object
+      oneOf:
+        - $ref: '#/components/schemas/TimeIntervalRepeatFrom'
+        - $ref: '#/components/schemas/TimeIntervalRepeatTo'
+        - $ref: '#/components/schemas/TimeIntervalSpan'
+
+    TimeIntervalRepeatFrom:
+      type: object
+      required:
+        - from
+        - repeat
+      properties:
+        from:
+          type: string
+          format: date-time
+        interval:
+          type: string
+          format: duration
+          example: '1h'
+        repeat:
+          type: integer
+          minimum: 0
+
+    TimeIntervalRepeatTo:
+      type: object
+      required:
+        - to
+        - repeat
+      properties:
+        to:
+          type: string
+          format: date-time
+        interval:
+          type: string
+          format: duration
+          example: '1h'
+        repeat:
+          type: integer
+          minimum: 0
+
+    TimeIntervalSpan:
+      type: object
+      properties:
+        from:
+          type: string
+          format: date-time
+        to:
+          type: string
+          format: date-time
+        interval:
+          type: string
+          format: duration
+          example: '1h'
+
+
+    Longitude:
+      type: number
+      minimum: -180
+      maximum: 360
+      example: 174.492
+
+    Latitude:
+      type: number
+      minimum: -90
+      maximum: 90
+      example: -37.819
+
+    Point:
+      type: object
+      required:
+        - lat
+        - lon
+      properties:
+        lat:
+          $ref: '#/components/schemas/Latitude'
+        lon:
+          $ref: '#/components/schemas/Longitude'
+
+    PointArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/Point'
+
+    Altitude:
+      type: number
+      format: float
+      description: elevation above mean sea level in meters
+      minimum: 0
+      maximum: 10000
+      example: 80.0
+
+    AltitudeArray:
+      type: array
+      description: elevation above mean sea level in meters
+      items:
+        $ref: '#/components/schemas/Altitude'
+
+    Depth:
+      type: number
+      format: float
+      description: depth below mean sea level in meters
+      minimum: 0
+      maximum: 10000
+      example: 2.6
+
+    DepthArray:
+      description: depth below mean sea level in meters
+      type: array
+      items:
+        $ref: '#/components/schemas/Depth'
+
+    PointAndTime:
+      type: object
+      required:
+        - time
+        - lat
+        - lon
+      properties:
+        time:
+          type: string
+          format: date-time
+        lat:
+          $ref: '#/components/schemas/Latitude'
+        lon:
+          $ref: '#/components/schemas/Longitude'
+
+    BaseAtmosphericModel:
+      description: The base wind / forcing model that other forecast models are derived from.
+      type: string
+      enum: [gfs, ecmwf]
+
+    BaseAtmosphericModels:
+      description: Base models per configurable variable group
+      type: object
+      properties:
+        wave:
+          $ref: '#/components/schemas/BaseAtmosphericModelParameter'
+        atmospheric:
+          $ref: '#/components/schemas/BaseAtmosphericModelParameter'
+      example:
+
+    BaseAtmosphericModelParameter:
+      oneOf:
+        - $ref: '#/components/schemas/BaseAtmosphericModel'
+        - type: string
+          description: Let the API choose the best outcome. Where allowed, this is equivalent to leaving the parameter unspecified.
+          enum: [auto]
+
+    BaseAtmosphericModelGroupParameter:
+      description: "A configurable variable group name and a BaseAtmosphericModelParameter, separated by a colon"
+      type: string
+      format: colon-separated-pair
+      example: "wave:auto"
+
+    Kind:
+      description: The kind of model this is
+      type: string
+      example:
+
+    ModelJoin:
+      description: How to join data from different models within a variable. Only compatible models may be joined. Smoothing does not apply to angles. Smoothing may not be applied to all model boundaries.
+      type: object
+      oneOf:
+        - type: boolean
+        - type: string
+          enum: [smooth]
+      example:
+
+    PointRequest:
+      type: object
+      required:
+        - points
+        - variables
+      properties:
+        points:
+          $ref: '#/components/schemas/PointArray'
+        variables:
+          type: array
+          items:
+            type: string
+            example: wind.speed.at-10m
+        models:
+          type: array
+          items:
+            type: string
+          example:
+        baseModels:
+          $ref: '#/components/schemas/BaseAtmosphericModels'
+        modelSort:
+          $ref: '#/components/schemas/ModelSort'
+        outputFormat:
+           $ref: '#/components/schemas/OutputFormat'
+        cycleLock:
+          $ref: '#/components/schemas/CycleLockConfig'
+        explain:
+          type: boolean
+          default: false
+          example:
+        extrapolate:
+          type: boolean
+          default: true
+          example:
+        kind:
+          $ref: '#/components/schemas/Kind'
+        joinModels:
+          $ref: '#/components/schemas/ModelJoin'
+      oneOf:
+        - type: object
+          required: [time]
+          properties:
+            time:
+              $ref: '#/components/schemas/TimeInterval'
+        - type: object
+          required: [times]
+          properties:
+            times:
+             $ref: '#/components/schemas/TimeArray'
+
+    PointOnlyRequest:
+      type: object
+      required:
+        - points
+        - variables
+      properties:
+        points:
+          $ref: '#/components/schemas/PointArray'
+        variables:
+          type: array
+          items:
+            type: string
+            example: sea.depth.below-sea-level
+        models:
+          type: array
+          items:
+            type: string
+          example:
+        baseModels:
+          $ref: '#/components/schemas/BaseAtmosphericModels'
+        modelSort:
+          $ref: '#/components/schemas/ModelSort'
+        explain:
+          type: boolean
+          default: false
+          example:
+        extrapolate:
+          type: boolean
+          default: true
+          example:
+        outputFormat:
+           $ref: '#/components/schemas/OutputFormat'
+        kind:
+          $ref: '#/components/schemas/Kind'
+
+    RouteTimeRequest:
+      type: object
+      required:
+        - route
+        - variables
+      properties:
+        route:
+          type: array
+          items:
+            $ref: '#/components/schemas/PointAndTime'
+          description: times must be unique
+        variables:
+          type: array
+          items:
+            type: string
+            example: wind.speed.at-10m
+        models:
+          type: array
+          items:
+            type: string
+          example:
+        baseModels:
+          $ref: '#/components/schemas/BaseAtmosphericModels'
+        modelSort:
+          $ref: '#/components/schemas/ModelSort'
+        outputFormat:
+           $ref: '#/components/schemas/OutputFormat'
+        explain:
+          type: boolean
+          default: false
+          example:
+        extrapolate:
+          type: boolean
+          default: true
+          example:
+        kind:
+          $ref: '#/components/schemas/Kind'
+
+    RouteSpeedRequest:
+      type: object
+      required:
+        - points
+        - speeds
+        - variables
+        - start
+      properties:
+        start:
+          type: string
+          format: date-time
+        points:
+          type: array
+          items:
+            $ref: '#/components/schemas/Point'
+          example:
+            - lat: -27.1
+              lon: 176.2
+            - lat: -29.6
+              lon: 179.9
+          description: there must be nSpeeds+1 points in the route
+        speeds:
+          type: array
+          items:
+            type: number
+            format: float
+            exclusiveMinimum: true
+            minimum: 0.0
+            example: 15
+            description: speed in metres per second
+        variables:
+          type: array
+          items:
+            type: string
+            example: wind.speed.at-10m
+        models:
+          type: array
+          items:
+            type: string
+          example:
+        baseModels:
+          $ref: '#/components/schemas/BaseAtmosphericModels'
+        modelSort:
+          $ref: '#/components/schemas/ModelSort'
+        outputFormat:
+           $ref: '#/components/schemas/OutputFormat'
+        explain:
+          type: boolean
+          default: false
+          example:
+        extrapolate:
+          type: boolean
+          default: true
+          example:
+        kind:
+          $ref: '#/components/schemas/Kind'
+
+    Dimension:
+      type: object
+      required:
+       - type
+      properties:
+        type:
+          type: string
+        units:
+          type: string
+      discriminator:
+        propertyName: type
+        mapping:
+          time: '#/components/schemas/TimeDimension'
+          point: '#/components/schemas/PointDimension'
+          height: '#/components/schemas/AltitudeDimension'
+          depth: '#/components/schemas/DepthDimension'
+          timepoint: '#/components/schemas/TimePointDimension'
+
+# if units is empty and the type is time, the dimension should contain timestamps
+    TimeDimension:
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/Dimension'
+        - type: object
+          required:
+            - data
+          properties:
+            type:
+              enum:
+               - time
+            data:
+              $ref: '#/components/schemas/TimeArray'
+
+    PointDimension:
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/Dimension'
+        - type: object
+          required:
+           - data
+           - units
+          properties:
+            type:
+              enum:
+               - point
+            data:
+              $ref: '#/components/schemas/PointArray'
+
+    AltitudeDimension:
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/Dimension'
+        - type: object
+          required:
+            - data
+            - units
+          properties:
+            type:
+              enum:
+               - height
+            data:
+              $ref: '#/components/schemas/AltitudeArray'
+
+    DepthDimension:
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/Dimension'
+        - type: object
+          required:
+             - data
+             - units
+          properties:
+            type:
+              enum:
+               - depth
+            data:
+              $ref: '#/components/schemas/DepthArray'
+
+    TimePointDimension:
+      additionalProperties: false
+      allOf:
+        - $ref: '#/components/schemas/Dimension'
+        - type: object
+          required:
+            - data
+          properties:
+            type:
+              enum:
+                - timepoint
+            data:
+              type: array
+              items:
+                $ref: '#/components/schemas/PointAndTime'
+
+    VariableResponse:
+      type: object
+      required:
+        - units
+        - dimensions
+        - data
+      properties:
+        standardName:
+          type: string
+          description: our extended version of the cf-variables.
+          example: sea_surface_wave_period_at_variance_spectral_density_maximum
+        units:
+          type: string
+          example: degreeC
+        dimensions:
+          type: array
+          items:
+            type: string
+        data:
+          type: array
+          items:
+            type: number
+            nullable: true
+            format: float
+          example: [2.23, 1.64, null]
+        noData:
+          type: array
+          items:
+            type: integer
+          example: [0, 0, 1]
+
+    VariableResponseBase64:
+      type: object
+      required:
+        - dimensions
+        - data
+      properties:
+        standardName:
+          type: string
+          description: our extended version of the cf-variables.
+          example: sea_surface_wave_period_at_variance_spectral_density_maximum
+        units:
+          type: string
+          example: degreeC
+        dimensions:
+          type: array
+          items:
+            type: string
+          example:
+            - times
+            - points
+        data:
+          type: string
+          format: byte
+          description: base64-encoded little-endian 32-bit floats
+          example: U3dhZ2dlciByb2Nrcw==
+
+    PointsResponseBase:
+      type: object
+      properties:
+        dimensions:
+          type: object
+          properties:
+            dimension_map:
+              type: object
+              additionalProperties:
+                oneOf:
+                  - $ref: '#/components/schemas/PointDimension'
+                  - $ref: '#/components/schemas/TimeDimension'
+                  - $ref: '#/components/schemas/AltitudeDimension'
+                  - $ref: '#/components/schemas/DepthDimension'
+
+    PointsResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PointsResponseBase'
+      properties:
+        variables:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/VariableResponse'
+        noDataReasons:
+          type: object
+          additionalProperties:
+            type: integer
+            description: unsigned 32-bit integers
+
+      example:
+        dimensions:
+          times:
+            type: time
+            data:
+              - "2020-09-02T00:00:00Z"
+              - "2020-09-02T01:00:00Z"
+              - "2020-09-02T02:00:00Z"
+          points:
+            type: point
+            units: degree
+            data:
+              - lat: -37.7
+                lon: 173.39
+          depths:
+            type: depth
+            units: meter
+            data:
+              - 0
+              - 10
+        noDataReasons:
+          data: 0
+          land: 1
+          ice: 2
+        variables:
+          wind.speed.at-10m:
+            units: meterPerSecond
+            dimensions:
+              - times
+              - points
+            data: [5.2, 5.1, 6.3]
+            noData: [0, 0, 0]
+          sea.temperature.at-surface:
+            units: degreeC
+            dimensions:
+              - times
+              - depths
+              - points
+            data: [5.2, 5.1, 6.3, 6.1, null, null]
+            noData: [0, 0, 0, 0, 1, 1]
+
+    PointsResponseBase64:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/PointsResponseBase'
+      properties:
+        variables:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/VariableResponseBase64'
+        noDataMask:
+          type: object
+          additionalProperties:
+            type: integer
+            description: unsigned 32-bit integers
+
+      example:
+        dimensions:
+          times:
+            type: time
+            data:
+              - "2020-09-02T00:00:00Z"
+              - "2020-09-02T01:00:00Z"
+              - "2020-09-02T02:00:00Z"
+          points:
+            type: point
+            units: degree
+            data:
+              - lat: -37.7
+                lon: 173.39
+          depths:
+            type: depth
+            units: meter
+            data:
+              - 0
+              - 10
+        noDataReasons:
+          data: 0
+          land: 1
+          ice: 2
+        variables:
+          wind.speed.at-10m:
+            units: meterPerSecond
+            dimensions:
+              - times
+              - points
+            data: U3dhZ2dlci
+          sea.temperature.at-surface:
+            units: degreeC
+            dimensions:
+              - times
+              - depths
+              - points
+            data: U3dhZ2dlciByb2Nrcw==
+
+    TrajectoryResponseBase:
+      type: object
+      properties:
+        dimensions:
+          type: object
+          properties:
+            dimension_map:
+              type: object
+              additionalProperties:
+                oneOf:
+                  - $ref: '#/components/schemas/TimePointDimension'
+                  - $ref: '#/components/schemas/AltitudeDimension'
+                  - $ref: '#/components/schemas/DepthDimension'
+
+    TrajectoryResponse:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/TrajectoryResponseBase'
+      properties:
+        variables:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/VariableResponse'
+        noDataReasons:
+          type: object
+          additionalProperties:
+            type: integer
+            description: unsigned 32-bit integers
+
+    TrajectoryResponseBase64:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/TrajectoryResponseBase'
+      properties:
+        variables:
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/VariableResponseBase64'
+        noDataMask:
+          type: object
+          additionalProperties:
+            type: integer
+            description: unsigned 32-bit integers
+
+    UnitsInfo:
+      description: Units details
+      required:
+        - symbol
+        - description
+      properties:
+        symbol:
+          type: string
+          example: Pa
+        siUnits:
+          type: string
+          example: N/m^-2
+          description: If the unit is SI this is the devired SI units expression (render with latex)
+        siBaseUnits:
+          type: string
+          example: kg.m^-1.s^-2
+          description: If the unit is SI this is the base SI units expression (render with latex)
+        description:
+          type: string
+          example: joules per kilogram
+
+    VariableInfo:
+      description: Variable details
+      required:
+        - standardName
+      properties:
+        standardName:
+          type: string
+          example: sea_surface_wave_significant_height
+          description: Our extended version of the cf-variables.
+        siUnits:
+          type: string
+          example: m
+          description: The symbol for a unit in the International System of Units
+        technicalDescription:
+          type: string
+          example: Sea surface significant wave height from the full spectrum
+
+    SourceVariableInfo:
+      description: Variable details within a model source
+      required:
+        - standardName
+      properties:
+        standardName:
+          type: string
+          example: sea_surface_wave_significant_height
+          description: our extended version of the cf-variables.
+        dimensions:
+          description: The standard names of the dimensions this variable has.
+          type: array
+          items:
+            type: string
+            example: "time"
+
+    ModelInfo:
+      description: Model summary
+      required:
+        - name
+        - sources
+      properties:
+        name:
+          type: string
+          example: gfs.global
+          description: Our extended version of the cf-variables.
+        sources:
+          type: array
+          items:
+            $ref: '#/components/schemas/SourceInfo'
+
+    SourceInfo:
+      description: Source details
+      required:
+        - bounds
+        - range
+      properties:
+        range:
+          description: The time range of this source.
+          type: object
+          properties:
+            from:
+              type: string
+              format: date-time
+              example: '2020-04-25T02:27:35.417Z'
+            to:
+              type: string
+              format: date-time
+              example: '2020-05-14T01:13:35.059Z'
+        bounds:
+          description: The spatial bounds of this source.
+          type: object
+          properties:
+            east:
+              $ref: '#/components/schemas/Longitude'
+            west:
+              $ref: '#/components/schemas/Longitude'
+            north:
+              $ref: '#/components/schemas/Latitude'
+            south:
+              $ref: '#/components/schemas/Latitude'
+        dimensions:
+          description: The standard names of each dimension in this source.
+          type: array
+          items:
+            type: string
+            example: "time"
+        variables:
+          description: The details of each variable in this source.
+          type: object
+          additionalProperties:
+            $ref: '#/components/schemas/SourceVariableInfo'
+        temporalResolution:
+          description: The temporal resolution of this source.
+          type: string
+          format: duration
+          example: '1h'
+        longitudeResolution:
+          type: number
+          description: The longitudinal spatial resolution of this source.
+          example: 0.117
+        latitudeResolution:
+          type: number
+          description: The latitudinal spatial resolution of this source.
+          example: 0.007
+        modelRun:
+          description: The timestamp for the model run that produced this source.
+          type: string
+          format: date-time
+        baseModel:
+          allOf:
+            - description: The base wind / forcing model that this source was derived from.
+            - $ref: '#/components/schemas/BaseAtmosphericModel'
+        temporalNature:
+          description: The temporal nature of this source.
+          type: string
+          enum: [forecast, nowcast]
+
+    ModelSummary:
+      description: Model details
+      required:
+        - name
+        - range
+        - bounds
+      properties:
+        name:
+          type: string
+          example: gfs.global
+          description: The name of this model.
+        range:
+          type: object
+          properties:
+            from:
+              type: string
+              format: date-time
+              example: '2020-04-25T02:27:35.417Z'
+            to:
+              type: string
+              format: date-time
+              example: '2020-05-14T01:13:35.059Z'
+          description: The time range this model covers.
+        bounds:
+          type: object
+          properties:
+            east:
+              $ref: '#/components/schemas/Longitude'
+            west:
+              $ref: '#/components/schemas/Longitude'
+            north:
+              $ref: '#/components/schemas/Latitude'
+            south:
+              $ref: '#/components/schemas/Latitude'
+          description: The spatial bounds of this model.
+        dimensions:
+          description: The standard dimension names present in this model.
+          type: array
+          items:
+            type: string
+            example: "time"
+        variables:
+          description: The standard variable names present in this model.
+          type: array
+          items:
+            type: string
+            example: "air.temperature.at-surface"
+        temporalResolution:
+          description: The temporal resolution of this model.
+          type: string
+          format: duration
+          example: '1h'
+        longitudeResolution:
+          type: number
+          description: The longitudinal spatial resolution of this model.
+          example: 0.117
+        latitudeResolution:
+          type: number
+          description: The latitudinal spatial resolution of this model.
+          example: 0.007
+        modelRun:
+          description: The timestamp for the model run that produced the data in this model.
+          type: string
+          format: date-time
+        baseModel:
+          allOf:
+            - description: The base wind / forcing model that this model was derived from.
+            - $ref: '#/components/schemas/BaseAtmosphericModel'
+        accessLevel:
+          type: integer
+          description: The minimum API access level required to access this model.
+          example: 10
+        area:
+          description: The geographic area this model covers.
+          type: number
+          example: 509899585.24
+        priority:
+          description: The ranking priority of this model.
+          type: integer
+          example: 5
+
+    ModelSort:
+      description: Model sorting configuration. Duplicate entries will raise an error. Fields are prioritised relative to each other in the order the caller specifies them. Any fields specified take precedence over unspecified ones, and the default order for unspecified fields is priority, spaceResolution, timeResolution, and lastly area.
+      type: array
+      items:
+        $ref: '#/components/schemas/ModelSortFieldConfig'
+      example:
+
+    ModelSortFieldConfig:
+      oneOf:
+        - $ref: '#/components/schemas/ModelSortFieldPriority'
+        - $ref: '#/components/schemas/ModelSortFieldArea'
+        - $ref: '#/components/schemas/ModelSortFieldTimeResolution'
+        - $ref: '#/components/schemas/ModelSortFieldSpaceResolution'
+
+    ModelSortFieldPriority:
+      description: Ordering for ranking models by priority. Defaults to high if unspecified.
+      type: object
+      properties:
+        priority:
+          $ref: '#/components/schemas/ModelRankOrder'
+      required:
+        - priority
+
+    ModelSortFieldArea:
+      description: Ordering for ranking models by area. Defaults to low if unspecified.
+      type: object
+      properties:
+        area:
+          $ref: '#/components/schemas/ModelRankOrder'
+      required:
+        - area
+
+    ModelSortFieldTimeResolution:
+      description: Ordering for ranking models by time resolution. Defaults to high if unspecified.
+      type: object
+      properties:
+        timeResolution:
+          $ref: '#/components/schemas/ModelRankOrder'
+      required:
+        - timeResolution
+
+    ModelSortFieldSpaceResolution:
+      description: Ordering for ranking models by space resolution. Defaults to high if unspecified.
+      type: object
+      properties:
+        spaceResolution:
+          $ref: '#/components/schemas/ModelRankOrder'
+      required:
+        - spaceResolution
+
+    ModelRankOrder:
+      description: How the value of a given model field should be ranked. High means models with high values will be ranked higher.
+      type: string
+      enum: [high, low]
+
+    OutputFormat:
+      description: The format of the response data.
+      type: string
+      enum: [number, base64]
+      example:
+
+    CycleLockConfig:
+      type: string
+      enum: [none, variable, group, stack]
+      default: group
+      example:

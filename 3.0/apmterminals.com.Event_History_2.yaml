@@ -1,0 +1,230 @@
+openapi: 3.0.1
+info:
+  title: APMT Track & Trace - Container Event History
+  description: Provides series of events the container has been through and the most latest update
+  contact:
+    name: APM Terminals API Management Team
+    url: https://developer.apmterminals.com
+    email: api.support@apmterminals.com
+  license:
+    name: APM Terminals
+    url: https://developer.apmterminals.com/terms
+  version: v1.0
+
+servers:
+- url: https://api-sandbox.apmterminals.com
+  description: Sandbox API
+- url: https://api.apmterminals.com
+  description: Production API
+
+paths:
+  /container-event-history:
+    get:
+      description: Returns time stamped description of events registered against container ID(s)
+      parameters:
+      - name: facilityCode
+        in: query
+        description: The Terminal UN Location Code to search for (USLAX for Los Angeles etc). Only accepts a single Terminal Code. Possible values are USLAX (Los Angeles, US), USMOB (Mobile, US), USNWK (Port Elizabeth, US), SEGOT (Gothenburg, Sweden), ITVDL (Vado, Italy) NGAPP (Apapa, Nigeria),NLRTM (Rotterdam Maasvlakte II), USMIA (Miami, US) and BHKBS (Bahrain).
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+        example: LSA
+      - name: assetId
+        in: query
+        description: Either single or multiple Container IDs or Bill of Lading numbers seperated by commas (e.g. MRSU3638119,TCNU6736993).
+        required: true
+        style: form
+        explode: true
+        schema:
+          type: string
+        example: MRSU3638119
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  containerId:
+                    type : string
+                    description : The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number.
+                  shippingLine:
+                    type : string
+                    description : The name of the shipper or container operator.
+                  eventDetails: 
+                    type : object
+                    properties: 
+                      performedDateTimeLocal:
+                        type : string
+                        description : Timestamp of event occurance.
+                      eventType : 
+                        type : string
+                        description : Description of the event registered against the container ID(s)
+                      positionNotes :
+                        type : string
+                        description : Description of the containers position
+              example: [{"containerId": "TCLU1619533","shippingLine": "MAE","eventDetails": [{"performedDateTimeLocal": "2020-09-30T19:23:12-07:00","eventType": "Unit reserved for an order (booking or EDO)","positionNotes": "Unit is reserved against Bill Of Lading 239911171"},{"performedDateTimeLocal": "2020-09-30T19:22:25-07:00",
+                "eventType": "Unit routing changed",
+                "positionNotes": "none"},{
+                "performedDateTimeLocal": "2020-09-29T04:12:23-07:00","eventType": "Storage details are updated.",
+                "positionNotes": "none"},{
+                "performedDateTimeLocal": "2020-09-25T20:49:41-07:00","eventType": "Unit position updated","positionNotes": "Unit Position Updated"}]},{"containerId": "MRSU3638119","shippingLine": "MAE","eventDetails": [{"performedDateTimeLocal": "2020-09-30T19:22:45-07:00","eventType": "Unit reserved for an order (booking or EDO)","positionNotes": "Unit is reserved against Bill Of Lading 239911171"},{"performedDateTimeLocal": "2020-09-30T19:21:13-07:00","eventType": "Unit routing changed","positionNotes": "none"},{"performedDateTimeLocal": "2020-09-29T04:12:15-07:00","eventType": "Storage details are updated.",
+                "positionNotes": "none"}]}]
+                
+        '400':
+          description: Bad Request.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+              example:
+                StatusCode: "400"
+                ReasonPhrase: "Bad Request"
+                Payload:
+                  code: "400"
+                  message: "Bad Request"
+                  debugMessage: "Invalid content or request details"
+          
+        '401':
+          description: The user is not authenticated in the system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+              example :
+                1 :
+                  StatusCode: "401"
+                  ReasonPhrase: "Unauthorized"
+                  Payload:
+                    code: "401"
+                    message: "Unauthorized"
+                    debugMessage: "Failed to Authenticate, invalid access token"
+                2:
+                  StatusCode: "401"
+                  ReasonPhrase: "Unauthorized"
+                  Payload:
+                    code: "401"
+                    message: "Unauthorized"
+                    debugMessage: "Access Token Expired, please renew"
+        '403':
+          description: The user does not have permissions to access this endpoint, Inadequate credits for the api call or Rate Plan not selected
+          content:
+            application/json:
+              schema:          
+                $ref: '#/components/schemas/Exception'
+              example :
+                StatusCode: "403"
+                ReasonPhrase: "Forbidden"
+                Payload:
+                  code: "400"
+                  message: "Bad Request"
+                  debugMessage: "Inadequate credits for the api call or Rate Plan not selected"
+        '404':
+          description: Not Found.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+        '405':
+          description: Method Not Allowed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+              example :
+                StatusCode: "405"
+                ReasonPhrase: "Method Not Allowed"
+                Payload:
+                  code: "405"
+                  message: "Method Not Allowed"
+                  debugMessage: "Method Not Allowed"
+        '429':
+          description: Too Many Requests
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+              example :
+                StatusCode: "429"
+                ReasonPhrase: "Too Many Requests"
+                Payload:
+                  code: "429"
+                  message: "Too Many Requests"
+                  debugMessage: "Sudden usage spike, please try after sometime"
+        '500':
+          description: Internal Server Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+              example :
+                StatusCode: "500"
+                ReasonPhrase: "InternalServerError"
+                Payload:
+                  code: "500"
+                  message: "InternalServerError"
+                  debugMessage: "Unexpected server error"
+        '502':
+          description: BadGateway
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+              example :
+                StatusCode: "502"
+                ReasonPhrase: "BadGateway"
+                Payload:
+                  code: "502"
+                  message: "BadGateway"
+                  debugMessage: "The remote server returned an error: Bad Gateway"
+        '503':
+          description: ServiceUnavailable
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Exception'
+              example :
+                StatusCode: "503"
+                ReasonPhrase: "ServiceUnavailable"
+                Payload:
+                  code: "503"
+                  message: "ServiceUnavailable"
+                  debugMessage: "Target Service Unavailable"          
+components:
+  schemas: 
+    Exception:
+      type: object
+      properties:
+        payload:
+          $ref: '#/components/schemas/ExceptionPayload'
+        statusCode:
+          type: string
+          description: Standard http error code
+        reasonPhrase:
+          type: string
+          description: Reason for the error
+          
+    ExceptionPayload:
+      type: object
+      properties:
+        code:
+          type: string
+          description: Standard http code.
+        message:
+          type: string
+          description: Standard http message with respect to http code.
+        debugMessage:
+          type: string
+          description: Reason for the failure of message.
+  securitySchemes:
+    oauth2:
+      type: oauth2
+      description: APMT IAM OAuth 2.0 with client credentials only.
+      flows:
+        clientCredentials:
+          tokenUrl: https://api.apmterminals.com/oauth/client_credential/accesstoken?grant_type=client_credentials
+          scopes:
+            client_write: Write data

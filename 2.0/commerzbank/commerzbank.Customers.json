@@ -1,0 +1,527 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This API covers customer data of a natural person from Commerzbank",
+    "version": "2.0.2",
+    "title": "customers"
+  },
+  "host": "api.commerzbank.com",
+  "basePath": "/customers-api/v2",
+  "tags": [
+    {
+      "name": "customersResource",
+      "description": "Reads customer data"
+    },
+    {
+      "name": "healthcheck",
+      "description": "Returns status of backend service"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/customers": {
+      "get": {
+        "tags": [
+          "customersResource"
+        ],
+        "summary": "/customers",
+        "description": "Reads customer data of an authenticated natural person from Commerzbank",
+        "operationId": "readCustomerFromCommerzbank",
+        "produces": [
+          "application/json;charset=utf-8"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "schema": {
+              "$ref": "#/definitions/Customer"
+            },
+            "examples": {
+              "Julia Meininger": {
+                "naturalPerson": {
+                  "lastName": "Meininger",
+                  "firstName": "Julia",
+                  "dateOfBirth": "1995-07-27",
+                  "salutation": "Frau",
+                  "phoneNumbers": [
+                    {
+                      "phoneNumber": "020212345",
+                      "phoneType": "phone"
+                    },
+                    {
+                      "phoneNumber": "022334455667",
+                      "phoneType": "mobile phone"
+                    }
+                  ],
+                  "emailAddresses": [
+                    {
+                      "emailAddress": "julia_Meininger@apitest.de"
+                    }
+                  ],
+                  "postalAddresses": [
+                    {
+                      "streetNumber": "12a",
+                      "zipCode": "42119",
+                      "street": "Musterpfad",
+                      "city": "Wuppertal",
+                      "country": "DE",
+                      "addressType": "legal address"
+                    }
+                  ],
+                  "nationalities": [
+                    "DE"
+                  ]
+                }
+              },
+              "Jakub Haas": {
+                "naturalPerson": {
+                  "lastName": "Haas",
+                  "firstName": "Jakub",
+                  "dateOfBirth": "1987-01-22",
+                  "salutation": "Herrn",
+                  "phoneNumbers": [
+                    {
+                      "phoneNumber": "0618112345",
+                      "phoneType": "phone"
+                    },
+                    {
+                      "phoneNumber": "011112223344",
+                      "phoneType": "mobile phone"
+                    }
+                  ],
+                  "emailAddresses": [
+                    {
+                      "emailAddress": "JakubHaas@apitest.de"
+                    }
+                  ],
+                  "postalAddresses": [
+                    {
+                      "street": "Ahornstraße",
+                      "streetNumber": "5",
+                      "zipCode": "63450",
+                      "city": "Hanau",
+                      "country": "DE",
+                      "addressType": "legal address"
+                    }
+                  ],
+                  "nationalities": [
+                    "DE",
+                    "CZ"
+                  ]
+                }
+              },
+              "Susanne Claussen": {
+                "naturalPerson": {
+                  "lastName": "Claussen",
+                  "firstName": "Susanne",
+                  "dateOfBirth": "1975-03-16",
+                  "salutation": "Frau",
+                  "title": "Dr.",
+                  "phoneNumbers": [
+                    {
+                      "phoneNumber": "042112345",
+                      "phoneType": "phone"
+                    },
+                    {
+                      "phoneNumber": "011112223344",
+                      "phoneType": "mobile phone"
+                    }
+                  ],
+                  "emailAddresses": [
+                    {
+                      "emailAddress": "susanne-claussen@apitest.de"
+                    }
+                  ],
+                  "postalAddresses": [
+                    {
+                      "street": "Sandweg",
+                      "streetNumber": "5",
+                      "city": "Bremen",
+                      "zipCode": "28239",
+                      "country": "DE",
+                      "addressType": "legal address"
+                    }
+                  ],
+                  "nationalities": [
+                    "DE",
+                    "US"
+                  ]
+                }
+              },
+              "Karl Hauser": {
+                "naturalPerson": {
+                  "lastName": "Hauser",
+                  "firstName": "Karl",
+                  "dateOfBirth": "1949-08-23",
+                  "salutation": "Herrn",
+                  "phoneNumbers": [
+                    {
+                      "phoneNumber": "0337112345",
+                      "phoneType": "phone"
+                    }
+                  ],
+                  "emailAddresses": [
+                    {
+                      "emailAddress": "Karlhauser@apitest.de"
+                    }
+                  ],
+                  "postalAddresses": [
+                    {
+                      "street": "Oderweg",
+                      "streetNumber": "17a",
+                      "city": "Luckenwalde",
+                      "zipCode": "14943",
+                      "country": "DE",
+                      "addressType": "legal address"
+                    }
+                  ],
+                  "nationalities": [
+                    "DE"
+                  ]
+                }
+              }
+            }
+          },
+          "204": {
+            "description": "No Content"
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Bad Request",
+                "status": 400,
+                "detail": "The request could not be understood by the server due to malformed syntax. The client SHOULD NOT repeat the request without modifications"
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Unauthorized",
+                "status": 401,
+                "detail": "Client failed to authenticate with the server"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Forbidden",
+                "status": 403,
+                "detail": "Client authenticated but does not have permission to access the requested resource"
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Not Found",
+                "status": 404,
+                "detail": "The requested resource does not exist"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Internal Server Error",
+                "status": 500,
+                "detail": "A generic error occurred on the server"
+              }
+            }
+          }
+        }
+      },
+      "parameters": []
+    },
+    "/healthcheck": {
+      "get": {
+        "summary": "Returns status of backend service",
+        "description": "If backend Service is working correctly, resource will respond with 200 - OK.",
+        "operationId": "getHealthcheck",
+        "produces": [
+          "application/json;charset=utf-8"
+        ],
+        "tags": [
+          "healthcheck"
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "examples": {
+              "example-1": {}
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Unauthorized",
+                "status": 401,
+                "detail": "Client failed to authenticate with the server"
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Forbidden",
+                "status": 403,
+                "detail": "Client authenticated but does not have permission to access the requested resource"
+              }
+            }
+          },
+          "500": {
+            "description": "Internal Server Error",
+            "schema": {
+              "$ref": "#/definitions/Problem"
+            },
+            "examples": {
+              "example-1": {
+                "title": "Internal Server Error",
+                "status": 503,
+                "detail": "A generic error occurred on the server"
+              }
+            }
+          }
+        },
+        "parameters": []
+      }
+    }
+  },
+  "definitions": {
+    "Customer": {
+      "type": "object",
+      "x-examples": {},
+      "description": "Data of the customer",
+      "properties": {
+        "naturalPerson": {
+          "$ref": "#/definitions/NaturalPerson"
+        }
+      },
+      "required": [
+        "naturalPerson"
+      ]
+    },
+    "NaturalPerson": {
+      "type": "object",
+      "description": "Data if customer is a natural person",
+      "properties": {
+        "lastName": {
+          "type": "string",
+          "description": "The last name of the customer",
+          "example": "Mustermann"
+        },
+        "firstName": {
+          "type": "string",
+          "description": "The first name of the customer",
+          "example": "Max"
+        },
+        "dateOfBirth": {
+          "type": "string",
+          "format": "date",
+          "pattern": "([12]\\d{3}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01]))",
+          "example": "1991-12-06",
+          "description": "The date of birth of the customer"
+        },
+        "salutation": {
+          "type": "string",
+          "description": "The salutation for the customer ",
+          "example": "Herrn"
+        },
+        "title": {
+          "type": "string",
+          "description": "The academic title of the customer (if existing and known)",
+          "example": "Dr."
+        },
+        "phoneNumbers": {
+          "type": "array",
+          "description": "A list of phone numbers of the customers. Returns all private mobile numbers and all private landline numbers known for the customer",
+          "items": {
+            "$ref": "#/definitions/PhoneNumber"
+          }
+        },
+        "emailAddresses": {
+          "type": "array",
+          "description": "A list of all known private e-mail addresses of the customer",
+          "items": {
+            "$ref": "#/definitions/EmailAddress"
+          }
+        },
+        "postalAddresses": {
+          "type": "array",
+          "description": "A list of postal addresses of the customer. Always contains the legal address of the customer",
+          "items": {
+            "$ref": "#/definitions/PostalAddress"
+          }
+        },
+        "nationalities": {
+          "type": "array",
+          "description": "All known nationalities of the customer, as ISO codes",
+          "items": {
+            "type": "string",
+            "example": "DE"
+          }
+        }
+      },
+      "required": [
+        "lastName",
+        "firstName",
+        "dateOfBirth",
+        "salutation",
+        "postalAddresses",
+        "nationalities"
+      ]
+    },
+    "PostalAddress": {
+      "title": "PostalAddress",
+      "type": "object",
+      "description": "Postal address of the customer, always the legal address",
+      "properties": {
+        "street": {
+          "type": "string",
+          "description": "The street name of the address",
+          "example": "Kaiserplatz"
+        },
+        "streetNumber": {
+          "type": "string",
+          "description": "The street number / house number of the address",
+          "example": "1"
+        },
+        "city": {
+          "type": "string",
+          "description": "The city name of the address",
+          "example": "Frankfurt am Main"
+        },
+        "zipCode": {
+          "type": "string",
+          "description": "The postal Zone Improvement Plan-code of the address",
+          "example": "60311"
+        },
+        "country": {
+          "type": "string",
+          "description": "The country of the address, as ISO code",
+          "example": "DE"
+        },
+        "addressType": {
+          "type": "string",
+          "description": "The type of the address, always 'legal address'",
+          "example": "legal address"
+        }
+      },
+      "required": [
+        "streetNumber",
+        "zipCode",
+        "street",
+        "city",
+        "country",
+        "addressType"
+      ]
+    },
+    "Problem": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "example": "Service Unavailable",
+          "description": "A short, summary of the problem type. Written in english and readable for engineers (usually not suited for non technical stakeholders and not localized)"
+        },
+        "status": {
+          "type": "integer",
+          "format": "int32",
+          "example": 503,
+          "description": "The HTTP status code generated by the origin server for this occurrence of the problem."
+        },
+        "detail": {
+          "type": "string",
+          "example": "Connection to database timed out",
+          "description": "A human-readable explanation specific to this occurrence of the problem."
+        }
+      },
+      "description": "A problem compliant to RFC-7807."
+    },
+    "EmailAddress": {
+      "title": "EmailAddress",
+      "type": "object",
+      "description": "An e-mail address of the customer",
+      "properties": {
+        "emailAddress": {
+          "type": "string",
+          "example": "info@commerzbank.com",
+          "description": "The e-mail address"
+        }
+      },
+      "required": [
+        "emailAddress"
+      ]
+    },
+    "PhoneNumber": {
+      "title": "PhoneNumber",
+      "type": "object",
+      "description": "A phone number of the customer",
+      "properties": {
+        "phoneNumber": {
+          "type": "string",
+          "example": "+49 69 1 36 20",
+          "description": "The phone number of the corresponding type "
+        },
+        "phoneType": {
+          "type": "string",
+          "description": "Type of the phone number: mobile number ('mobile phone') or landline number ('phone')",
+          "example": "phone"
+        }
+      },
+      "required": [
+        "phoneNumber",
+        "phoneType"
+      ]
+    }
+  },
+  "securityDefinitions": {
+    "OAuth (External) Password": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for external services.",
+      "flow": "password",
+      "tokenUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/token",
+      "scopes": {}
+    },
+    "OAuth (External) AuthorizationCode": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for external services.",
+      "flow": "accessCode",
+      "authorizationUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/auth",
+      "tokenUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/token",
+      "scopes": {}
+    }
+  }
+}

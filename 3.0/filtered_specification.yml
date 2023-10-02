@@ -1,0 +1,954 @@
+components:
+  schemas:
+    BlankEnum:
+      enum:
+      - ''
+    ConsentSerializerBrief:
+      properties:
+        consent_given_at:
+          format: date
+          nullable: true
+          type: string
+        type:
+          allOf:
+          - $ref: '#/components/schemas/ConsentTypeSerializerBrief'
+          readOnly: true
+      required:
+      - type
+      type: object
+    ConsentType:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        description_en:
+          type: string
+        description_nb:
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        identifier:
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+          type: string
+        link_en:
+          format: uri
+          maxLength: 200
+          nullable: true
+          type: string
+        link_nb:
+          format: uri
+          maxLength: 200
+          nullable: true
+          type: string
+        name_en:
+          maxLength: 256
+          type: string
+        name_nb:
+          maxLength: 256
+          type: string
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+        user_allowed_to_change:
+          type: boolean
+        valid_from:
+          format: date
+          type: string
+      required:
+      - created
+      - description_en
+      - description_nb
+      - id
+      - identifier
+      - name_en
+      - name_nb
+      - updated
+      - user_allowed_to_change
+      type: object
+    ConsentTypeSerializerBrief:
+      properties:
+        identifier:
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+          type: string
+        user_allowed_to_change:
+          type: boolean
+        valid_from:
+          format: date
+          type: string
+      required:
+      - identifier
+      - user_allowed_to_change
+      type: object
+    OrganizationalUnit:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        name_en:
+          maxLength: 256
+          type: string
+        name_nb:
+          maxLength: 256
+          type: string
+        orgreg_id:
+          maxLength: 256
+          type: string
+        parent:
+          nullable: true
+          type: integer
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+      required:
+      - created
+      - id
+      - name_en
+      - name_nb
+      - orgreg_id
+      - updated
+      type: object
+    PaginatedConsentTypeList:
+      properties:
+        next:
+          nullable: true
+          type: string
+        previous:
+          nullable: true
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/ConsentType'
+          type: array
+      type: object
+    PaginatedOrganizationalUnitList:
+      properties:
+        next:
+          nullable: true
+          type: string
+        previous:
+          nullable: true
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/OrganizationalUnit'
+          type: array
+      type: object
+    PaginatedPersonIdentityList:
+      properties:
+        next:
+          nullable: true
+          type: string
+        previous:
+          nullable: true
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/PersonIdentity'
+          type: array
+      type: object
+    PaginatedPersonList:
+      properties:
+        next:
+          nullable: true
+          type: string
+        previous:
+          nullable: true
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/Person'
+          type: array
+      type: object
+    PaginatedRoleList:
+      properties:
+        next:
+          nullable: true
+          type: string
+        previous:
+          nullable: true
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/Role'
+          type: array
+      type: object
+    PaginatedRoleTypeList:
+      properties:
+        next:
+          nullable: true
+          type: string
+        previous:
+          nullable: true
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/RoleType'
+          type: array
+      type: object
+    PaginatedSponsorList:
+      properties:
+        next:
+          nullable: true
+          type: string
+        previous:
+          nullable: true
+          type: string
+        results:
+          items:
+            $ref: '#/components/schemas/Sponsor'
+          type: array
+      type: object
+    PatchedConsentType:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        description_en:
+          type: string
+        description_nb:
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        identifier:
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+          type: string
+        link_en:
+          format: uri
+          maxLength: 200
+          nullable: true
+          type: string
+        link_nb:
+          format: uri
+          maxLength: 200
+          nullable: true
+          type: string
+        name_en:
+          maxLength: 256
+          type: string
+        name_nb:
+          maxLength: 256
+          type: string
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+        user_allowed_to_change:
+          type: boolean
+        valid_from:
+          format: date
+          type: string
+      type: object
+    PatchedOrganizationalUnit:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        name_en:
+          maxLength: 256
+          type: string
+        name_nb:
+          maxLength: 256
+          type: string
+        orgreg_id:
+          maxLength: 256
+          type: string
+        parent:
+          nullable: true
+          type: integer
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+      type: object
+    PatchedPerson:
+      properties:
+        consents:
+          items:
+            $ref: '#/components/schemas/ConsentSerializerBrief'
+          readOnly: true
+          type: array
+        date_of_birth:
+          format: date
+          nullable: true
+          type: string
+        email:
+          format: email
+          maxLength: 254
+          type: string
+        email_verified_date:
+          format: date
+          nullable: true
+          type: string
+        first_name:
+          maxLength: 256
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        identities:
+          items:
+            $ref: '#/components/schemas/PersonIdentity'
+          readOnly: true
+          type: array
+        last_name:
+          maxLength: 256
+          type: string
+        mobile_phone:
+          maxLength: 15
+          type: string
+        mobile_phone_verified_date:
+          format: date
+          nullable: true
+          type: string
+        registration_completed_date:
+          format: date
+          nullable: true
+          type: string
+        roles:
+          items:
+            $ref: '#/components/schemas/Role'
+          readOnly: true
+          type: array
+        token:
+          maxLength: 32
+          type: string
+      type: object
+    PatchedPersonIdentity:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        person:
+          type: integer
+        source:
+          maxLength: 256
+          type: string
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+        value:
+          maxLength: 256
+          type: string
+        verified:
+          oneOf:
+          - $ref: '#/components/schemas/VerifiedEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        verified_by:
+          nullable: true
+          type: integer
+        verified_when:
+          format: date
+          nullable: true
+          type: string
+      type: object
+    PatchedRole:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        end_date:
+          format: date
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        registered_by:
+          type: integer
+        start_date:
+          format: date
+          nullable: true
+          type: string
+        type:
+          type: string
+        unit:
+          type: integer
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+      type: object
+    PatchedRoleType:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        default_duration_days:
+          nullable: true
+          type: integer
+        description_en:
+          type: string
+        description_nb:
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        identifier:
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+          type: string
+        name_en:
+          maxLength: 256
+          type: string
+        name_nb:
+          maxLength: 256
+          type: string
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+      type: object
+    PatchedSponsor:
+      properties:
+        feide_id:
+          maxLength: 256
+          type: string
+        first_name:
+          maxLength: 256
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        last_name:
+          maxLength: 256
+          type: string
+      type: object
+    Person:
+      properties:
+        consents:
+          items:
+            $ref: '#/components/schemas/ConsentSerializerBrief'
+          readOnly: true
+          type: array
+        date_of_birth:
+          format: date
+          nullable: true
+          type: string
+        email:
+          format: email
+          maxLength: 254
+          type: string
+        email_verified_date:
+          format: date
+          nullable: true
+          type: string
+        first_name:
+          maxLength: 256
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        identities:
+          items:
+            $ref: '#/components/schemas/PersonIdentity'
+          readOnly: true
+          type: array
+        last_name:
+          maxLength: 256
+          type: string
+        mobile_phone:
+          maxLength: 15
+          type: string
+        mobile_phone_verified_date:
+          format: date
+          nullable: true
+          type: string
+        registration_completed_date:
+          format: date
+          nullable: true
+          type: string
+        roles:
+          items:
+            $ref: '#/components/schemas/Role'
+          readOnly: true
+          type: array
+        token:
+          maxLength: 32
+          type: string
+      required:
+      - consents
+      - first_name
+      - id
+      - identities
+      - last_name
+      - roles
+      type: object
+    PersonIdentity:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        person:
+          type: integer
+        source:
+          maxLength: 256
+          type: string
+        type:
+          $ref: '#/components/schemas/TypeEnum'
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+        value:
+          maxLength: 256
+          type: string
+        verified:
+          oneOf:
+          - $ref: '#/components/schemas/VerifiedEnum'
+          - $ref: '#/components/schemas/BlankEnum'
+        verified_by:
+          nullable: true
+          type: integer
+        verified_when:
+          format: date
+          nullable: true
+          type: string
+      required:
+      - created
+      - id
+      - person
+      - source
+      - type
+      - updated
+      - value
+      type: object
+    Role:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        end_date:
+          format: date
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        registered_by:
+          type: integer
+        start_date:
+          format: date
+          nullable: true
+          type: string
+        type:
+          type: string
+        unit:
+          type: integer
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+      required:
+      - created
+      - end_date
+      - id
+      - registered_by
+      - type
+      - unit
+      - updated
+      type: object
+    RoleType:
+      properties:
+        created:
+          format: date-time
+          readOnly: true
+          type: string
+        default_duration_days:
+          nullable: true
+          type: integer
+        description_en:
+          type: string
+        description_nb:
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        identifier:
+          maxLength: 64
+          pattern: ^[-a-zA-Z0-9_]+$
+          type: string
+        name_en:
+          maxLength: 256
+          type: string
+        name_nb:
+          maxLength: 256
+          type: string
+        updated:
+          format: date-time
+          readOnly: true
+          type: string
+      required:
+      - created
+      - description_en
+      - description_nb
+      - id
+      - identifier
+      - name_en
+      - name_nb
+      - updated
+      type: object
+    Sponsor:
+      properties:
+        feide_id:
+          maxLength: 256
+          type: string
+        first_name:
+          maxLength: 256
+          type: string
+        id:
+          readOnly: true
+          type: integer
+        last_name:
+          maxLength: 256
+          type: string
+      required:
+      - feide_id
+      - first_name
+      - id
+      - last_name
+      type: object
+    TypeEnum:
+      enum:
+      - ID_PORTEN
+      - FEIDE_ID
+      - PASSPORT
+      - DRIVERS_LICENSE
+      - NATIONAL_ID_CARD
+      - NATIONAL_ID_NUMBER
+      - OTHER
+      type: string
+    VerifiedEnum:
+      enum:
+      - AUTOMATIC
+      - MANUAL
+      type: string
+  securitySchemes:
+    cookieAuth:
+      in: cookie
+      name: Session
+      type: apiKey
+    tokenAuth:
+      description: Token-based authentication with required prefix "Token"
+      in: header
+      name: Authorization
+      type: apiKey
+info:
+  description: Guest REGistration
+  title: Greg
+  version: 0.0.0 (v1)
+openapi: 3.0.3
+paths:
+  /api/v1/consenttypes/:
+    get:
+      description: Consent API
+      operationId: api_v1_consenttypes_list
+      parameters:
+      - description: The pagination cursor value.
+        in: query
+        name: cursor
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedConsentTypeList'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/consenttypes/{id}/:
+    get:
+      description: Consent API
+      operationId: api_v1_consenttypes_retrieve
+      parameters:
+      - description: A unique integer value identifying this consent type.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConsentType'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/orgunit/:
+    get:
+      description: OrganizationalUnit API
+      operationId: api_v1_orgunit_list
+      parameters:
+      - description: The pagination cursor value.
+        in: query
+        name: cursor
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrganizationalUnitList'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/orgunit/{id}/:
+    get:
+      description: OrganizationalUnit API
+      operationId: api_v1_orgunit_retrieve
+      parameters:
+      - description: A unique integer value identifying this organizational unit.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationalUnit'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/persons/:
+    get:
+      description: Person API
+      operationId: api_v1_persons_list
+      parameters:
+      - description: If try only include persons with an active role
+        in: query
+        name: active
+        schema:
+          type: boolean
+      - description: The pagination cursor value.
+        in: query
+        name: cursor
+        required: false
+        schema:
+          type: integer
+      - in: query
+        name: first_name
+        schema:
+          type: string
+      - in: query
+        name: last_name
+        schema:
+          type: string
+      - description: Only include verified or only not verified. When nothing is set,
+          both verified and not verified are returned
+        in: query
+        name: verified
+        schema:
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPersonList'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/persons/{id}/:
+    get:
+      description: Person API
+      operationId: api_v1_persons_retrieve
+      parameters:
+      - description: A unique integer value identifying this person.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Person'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/persons/{person_id}/identities/:
+    get:
+      description: Person identity API
+      operationId: api_v1_persons_identities_list
+      parameters:
+      - description: The pagination cursor value.
+        in: query
+        name: cursor
+        required: false
+        schema:
+          type: integer
+      - in: path
+        name: person_id
+        required: true
+        schema:
+          type: integer
+      - in: query
+        name: type
+        schema:
+          enum:
+          - DRIVERS_LICENSE
+          - FEIDE_ID
+          - ID_PORTEN
+          - NATIONAL_ID_CARD
+          - NATIONAL_ID_NUMBER
+          - OTHER
+          - PASSPORT
+          type: string
+      - in: query
+        name: verified_by_id
+        schema:
+          nullable: true
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPersonIdentityList'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/persons/{person_id}/roles/:
+    get:
+      description: Person role API
+      operationId: api_v1_persons_roles_list
+      parameters:
+      - description: The pagination cursor value.
+        in: query
+        name: cursor
+        required: false
+        schema:
+          type: integer
+      - in: path
+        name: person_id
+        required: true
+        schema:
+          type: integer
+      - description: Multiple values may be separated by commas.
+        explode: false
+        in: query
+        name: type
+        schema:
+          items:
+            type: string
+          type: array
+        style: form
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoleList'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/roletypes/:
+    get:
+      description: Role type API
+      operationId: api_v1_roletypes_list
+      parameters:
+      - description: The pagination cursor value.
+        in: query
+        name: cursor
+        required: false
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRoleTypeList'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api
+  /api/v1/roletypes/{id}/:
+    get:
+      description: Role type API
+      operationId: api_v1_roletypes_retrieve
+      parameters:
+      - description: A unique integer value identifying this role type.
+        in: path
+        name: id
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RoleType'
+          description: ''
+      security:
+      - tokenAuth: []
+      - cookieAuth: []
+      tags:
+      - api

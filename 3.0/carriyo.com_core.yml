@@ -1,0 +1,1305 @@
+openapi: 3.0.1
+info:
+  title: Carriyo Core API
+  contact:
+    name: Carriyo Support
+    url: 'https://help.carriyo.com'
+    email: support@carrriyo.com
+  version: ''
+servers:
+  - url: 'https://api.carriyo.com'
+  - url: 'https://demo-api.carriyo.com'
+security:
+  - OAuth2.0: []
+paths:
+  /delivery-types:
+    get:
+      summary: List Delivery Types
+      operationId: list-delivery-types
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/delivery-type-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns a list of delivery types you’ve previously created.
+      tags:
+        - Delivery Types
+    post:
+      summary: Create Delivery Type
+      operationId: create-delivery-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/delivery-type-request'
+        required: false
+      responses:
+        '201':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/delivery-type-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: Creates a new Delivery Type using the parameters passed in the request.
+      tags:
+        - Delivery Types
+    parameters: []
+  '/delivery-types/{delivery-type-id}':
+    get:
+      tags:
+        - Delivery Types
+      summary: Get Delivery Types
+      operationId: get-delivery-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: delivery-type-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/delivery-type-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns the Delivery Type object for a valid identifier. If it’s for a deleted Delivey Type it returns the deleted property that’s set to true.
+    put:
+      summary: Update Delivery Type
+      operationId: update-delivery-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: delivery-type-id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/delivery-type-request'
+        required: false
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/delivery-type-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: 'Updates the specified Delivery Type by setting the values of the parameters passed. All parameters are updated except the code, so any parameters not provided will be cleared. '
+      tags:
+        - Delivery Types
+    delete:
+      summary: Delete Delivery Type
+      operationId: delete-delivery-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: delivery-type-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/delivery-type-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Permanently deletes a Delivery Type. It cannot be undone. Also also removes any references to the Delivery Type in rules and other settings.
+      tags:
+        - Delivery Types
+    parameters:
+      - schema:
+          type: string
+        name: delivery-type-id
+        in: path
+        required: true
+  /locations:
+    get:
+      tags:
+        - Locations
+      summary: List Locations
+      operationId: list-locations
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/location-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns a list of locations you’ve previously created.
+    post:
+      tags:
+        - Locations
+      summary: Create Location
+      operationId: create-location
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/location-request'
+        required: false
+      responses:
+        '201':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/location-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: Creates a new Location using the parameters passed in the request.
+  '/locations/{location-id}':
+    get:
+      tags:
+        - Locations
+      summary: Get Location
+      operationId: get-location
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: location-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/location-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns the Location object for a valid identifier. If it’s for a deleted Location it returns the deleted property that’s set to true.
+    put:
+      tags:
+        - Locations
+      summary: Update Location
+      operationId: update-location
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: location-id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/location-request'
+        required: false
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/location-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: 'Updates the specified Location by setting the values of the parameters passed. All parameters are updated, so any parameters not provided will be cleared. '
+    delete:
+      tags:
+        - Locations
+      summary: Delete Location
+      operationId: delete-location
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: location-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/location-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Permanently deletes a Location. It cannot be undone. Also also removes any references to the Location in rules and other settings.
+  /order-types:
+    get:
+      summary: List Order Types
+      operationId: list-order-types
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/order-type-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns a list of order types you’ve previously created. The order types are returned in sorted order, with the most recent order types appearing first.
+      tags:
+        - Order Types
+    post:
+      summary: Create Order Type
+      operationId: create-order-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/order-type-request'
+        required: false
+      responses:
+        '201':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/order-type-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: Creates a new Order Type using the parameters passed in the request.
+      tags:
+        - Order Types
+    parameters: []
+  '/order-types/{order-type-id}':
+    get:
+      summary: Get Order Types
+      operationId: get-order-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: order-type-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/order-type-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns the Order Type object for a valid identifier. If it’s for a deleted Order Type it returns the deleted property that’s set to true.
+      tags:
+        - Order Types
+    put:
+      summary: Update Order Type
+      operationId: update-order-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: order-type-id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/order-type-request'
+        required: false
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/order-type-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: 'Updates the specified Order Type by setting the values of the parameters passed. All parameters are updated except the code, so any parameters not provided will be cleared. '
+      tags:
+        - Order Types
+    delete:
+      summary: Delete Order Type
+      operationId: delete-order-type
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: order-type-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/order-type-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Permanently deletes a Order Type. It cannot be undone. Also also removes any references to the Order Type in rules and other settings.
+      tags:
+        - Order Types
+    parameters:
+      - schema:
+          type: string
+        name: order-type-id
+        in: path
+        required: true
+  /time-slots:
+    get:
+      summary: List Time Slots
+      operationId: list-time-slots
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/time-slot'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns a list of time slots you’ve previously created.
+      tags:
+        - Time Slots
+    post:
+      summary: Create Time Slot
+      operationId: create-time-slot
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/time-slot'
+        required: false
+      responses:
+        '201':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/time-slot'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: Creates a new Time Slot using the parameters passed in the request.
+      tags:
+        - Time Slots
+    parameters: []
+  '/time-slots/{time-slot-id}':
+    get:
+      summary: Get Time Slot
+      operationId: get-time-slot
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: time-slot-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/time-slot'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns the Time Slot object for a valid identifier.
+      tags:
+        - Time Slots
+    put:
+      summary: Update Time Slot
+      operationId: update-time-slot
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: time-slot-id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/time-slot'
+        required: false
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/time-slot'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: 'Updates the specified Time Slot by setting the values of the parameters passed. All parameters are updated, so any parameters not provided will be cleared. '
+      tags:
+        - Time Slots
+    delete:
+      summary: Delete Time Slot
+      operationId: delete-time-slot
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: time-slot-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/time-slot'
+      security:
+        - OAuth2.0: []
+      description: |
+        Permanently deletes a Time Slot. It cannot be undone.
+      tags:
+        - Time Slots
+    parameters:
+      - schema:
+          type: string
+        name: time-slot-id
+        in: path
+        required: true
+  /webhooks:
+    get:
+      tags:
+        - Webhooks
+      summary: List Webhooks
+      operationId: list-webhooks
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/webhook-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns a list of webhooks you’ve previously created.
+    post:
+      tags:
+        - Webhooks
+      summary: Create Webhook
+      operationId: create-webhook
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/webhook-request'
+        required: false
+      responses:
+        '201':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/webhook-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: Creates a new Webhook using the parameters passed in the request.
+  '/webhooks/{webhook-id}':
+    get:
+      tags:
+        - Webhooks
+      summary: Get Webhook
+      operationId: get-webhook
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: webhook-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/webhook-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Returns the Webhook object for a valid identifier.
+    put:
+      tags:
+        - Webhooks
+      summary: Update Webhook
+      operationId: update-webhook
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: webhook-id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          'application/json':
+            schema:
+              $ref: '#/components/schemas/webhook-request'
+        required: false
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/webhook-response'
+      security:
+        - OAuth2.0: []
+      x-codegen-request-body-name: body
+      description: 'Updates the specified Webhook by setting the values of the parameters passed. All parameters are updated, so any parameters not provided will be cleared. '
+    delete:
+      tags:
+        - Webhooks
+      summary: Delete Webhook
+      operationId: delete-webhook
+      parameters:
+        - name: x-api-key
+          in: header
+          schema:
+            type: string
+        - name: tenant-id
+          in: header
+          schema:
+            type: string
+        - name: Content-Type
+          in: header
+          schema:
+            type: string
+            default: application/json
+        - name: webhook-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+          content:
+            'application/json':
+              schema:
+                $ref: '#/components/schemas/webhook-response'
+      security:
+        - OAuth2.0: []
+      description: |
+        Permanently deletes a Webhook. It cannot be undone.
+components:
+  schemas:
+    delivery-type-request:
+      title: Delivery Type Request
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+        merchants:
+          type: array
+          items:
+            type: string
+      x-examples: {}
+    delivery-type-response:
+      title: Delivery Type Response
+      required:
+        - delivery_type_id
+        - code
+      type: object
+      properties:
+        delivery_type_id:
+          type: string
+        code:
+          type: string
+        merchants:
+          type: array
+          items:
+            type: string
+        deleted:
+          type: boolean
+      x-examples: {}
+    location-request:
+      title: Location Request
+      required:
+        - address1
+        - city
+        - contact_name
+        - contact_phone
+        - country
+        - location_name
+      type: object
+      properties:
+        location_code:
+          type: string
+        location_name:
+          type: string
+        contact_name:
+          type: string
+        contact_email:
+          type: string
+        contact_phone:
+          type: string
+        alternate_phone:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+        coords:
+          type: string
+        what3words:
+          type: string
+        type:
+          type: string
+          enum:
+            - business
+            - residential
+        shopify_location_id:
+          type: string
+        deleted:
+          type: boolean
+        merchants:
+          type: array
+          items:
+            type: string
+      x-examples: {}
+    location-response:
+      title: Location Response
+      required:
+        - address1
+        - city
+        - contact_name
+        - contact_phone
+        - country
+        - location_id
+        - location_name
+      type: object
+      properties:
+        location_id:
+          type: string
+        location_code:
+          type: string
+        location_name:
+          type: string
+        contact_name:
+          type: string
+        contact_email:
+          type: string
+        contact_phone:
+          type: string
+        alternate_phone:
+          type: string
+        address1:
+          type: string
+        address2:
+          type: string
+        city:
+          type: string
+        state:
+          type: string
+        postcode:
+          type: string
+        country:
+          type: string
+        coords:
+          type: string
+        what3words:
+          type: string
+        type:
+          type: string
+          enum:
+            - business
+            - residential
+        shopify_location_id:
+          type: string
+        deleted:
+          type: boolean
+        merchants:
+          type: array
+          items:
+            type: string
+    order-type-request:
+      title: Order Type Request
+      required:
+        - code
+      type: object
+      properties:
+        code:
+          type: string
+        merchants:
+          type: array
+          items:
+            type: string
+      x-examples: {}
+    time-slot:
+      title: Time Slot
+      type: object
+      x-examples: {}
+      properties:
+        time_slot_id:
+          type: string
+          description: The ID to identify the time slot
+        from:
+          type: string
+          pattern: '^[0-2][0-3]:[0-5][0-9]$'
+          example: '23:00'
+          description: The start time for the time slot
+        to:
+          type: string
+          pattern: '^[0-2][0-3]:[0-5][0-9]$'
+          example: '20:00'
+          description: The end time for the time slot
+      required:
+        - time_slot_id
+        - from
+        - to
+      description: ''
+    order-type-response:
+      title: Order Type Response
+      required:
+        - id
+        - code
+      type: object
+      properties:
+        id:
+          type: string
+        code:
+          type: string
+        merchants:
+          type: array
+          items:
+            type: string
+        deleted:
+          type: boolean
+      x-examples: {}
+    webhook-request:
+      title: Webhook Request
+      required:
+        - config_name
+        - url
+      type: object
+      properties:
+        headers:
+          type: object
+          properties: {}
+        merchants:
+          type: array
+          items:
+            type: string
+        pickup:
+          type: object
+          properties: {}
+        dropoff:
+          type: object
+          properties: {}
+        pickup_partner_location_ids:
+          type: string
+        dropoff_partner_location_ids:
+          type: string
+        custom_conditions:
+          type: array
+          items:
+            type: object
+            properties: {}
+        config_name:
+          type: string
+        url:
+          type: string
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        entity_type:
+          type: string
+          enum:
+            - Shipment
+            - ReverseShipment
+            - ReturnRequest
+        notify_label_update:
+          type: boolean
+        notify_carriyo_label_update:
+          type: boolean
+        notify_rma_received_items:
+          type: boolean
+        notify_rma_returned_items:
+          type: boolean
+        notify_status:
+          type: array
+          items:
+            type: string
+        initial_retry_frequency:
+          type: integer
+        max_retry_count:
+          type: integer
+        internal:
+          type: boolean
+      x-examples: {}
+    webhook-response:
+      title: Webhook Response
+      required:
+        - config_name
+        - url
+      type: object
+      properties:
+        headers:
+          type: object
+          properties: {}
+        merchants:
+          type: array
+          items:
+            type: string
+        pickup:
+          type: object
+          properties: {}
+        dropoff:
+          type: object
+          properties: {}
+        pickup_partner_location_ids:
+          type: string
+        dropoff_partner_location_ids:
+          type: string
+        custom_conditions:
+          type: array
+          items:
+            type: object
+            properties: {}
+        config_id:
+          type: string
+        config_name:
+          type: string
+        url:
+          type: string
+        status:
+          type: string
+          enum:
+            - ACTIVE
+            - INACTIVE
+        entity_type:
+          type: string
+          enum:
+            - Shipment
+            - ReverseShipment
+            - ReturnRequest
+        notify_label_update:
+          type: boolean
+        notify_carriyo_label_update:
+          type: boolean
+        notify_rma_received_items:
+          type: boolean
+        notify_rma_returned_items:
+          type: boolean
+        notify_status:
+          type: array
+          items:
+            type: string
+        initial_retry_frequency:
+          type: integer
+        max_retry_count:
+          type: integer
+        internal:
+          type: boolean
+        update_date:
+          type: string
+    AddressModel:
+      title: AddressModel
+      type: object
+      properties:
+        country:
+          type: string
+        captured_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/CapturedField'
+        computed_fields:
+          type: array
+          items:
+            $ref: '#/components/schemas/ComputedField'
+    CapturedField:
+      title: CapturedField
+      type: object
+      properties:
+        name:
+          type: string
+        display_name:
+          type: string
+        mandatory:
+          type: boolean
+        custom_field:
+          type: boolean
+    ComputedField:
+      title: ComputedField
+      type: object
+      properties:
+        name:
+          type: string
+        template:
+          type: string
+  securitySchemes:
+    OAuth2.0:
+      type: oauth2
+      flows:
+        clientCredentials:
+          tokenUrl: 'https://api.carriyo.com/oauth/token'
+          scopes: {}

@@ -1,0 +1,2408 @@
+openapi: 3.0.3
+info:
+  title: Weather Source Astronomy API
+  description: |
+    Daily and hourly astronomical data for latitude/longitude points, ZIP/Postal Codes, Designated Market Areas, and OnPoint™ points. The Weather Source Astronomy API is built upon the [OnPoint™ Platform](https://weathersource.com/products/onpoint-platform/) which ensures data that is gap-free, homogeneous, and ready for immediate analysis. We offer the highest resolution grid on the market, covering every landmass in the world and up to 200 miles offshore.
+
+    An API key is required to authorize requests. If you do not have a Weather Source API key [sign up for a free 30-day developer account](https://developer.weathersourceapis.com/account/sign-up/).
+  termsOfService: https://weathersource.com/company/legal/terms-of-service/
+  contact:
+    name: Weather Source APIs
+    url: https://developer.weathersourceapis.com/
+    email: support@weathersource.com
+  version: 2.0.0
+servers:
+- url: https://astronomy.weathersourceapis.com/v2
+security:
+- ApiKeyAuth: []
+tags:
+- name: points
+  description: Latitude/Longitude astronomy
+- name: postcodes
+  description: Postcode astronomy
+- name: dmas
+  description: Designated Market Area astronomy
+- name: onpoints
+  description: OnPoint™ point astronomy
+paths:
+  /points/{latitude},{longitude}/days/{date}:
+    get:
+      tags:
+      - points
+      summary: A day of astronomy data for a Latitude/Longitude point.
+      description: Returns a single day of astronomical data for a Latitude/Longitude
+        point.
+      parameters:
+      - name: latitude
+        in: path
+        description: A latitude value between -90° and 90°.
+        required: true
+        schema:
+          maximum: 90.0
+          minimum: -90.0
+          type: number
+          format: float
+          example: 38.8552
+      - name: longitude
+        in: path
+        description: A longitude value between -180° (West) and 180° (East).
+        required: true
+        schema:
+          maximum: 180.0
+          minimum: -180.0
+          type: number
+          format: float
+          example: -77.0513
+      - name: date
+        in: path
+        description: An date formatted as a RFC3339 date value.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for a Latitude/Longitude point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPointDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /points/{latitude},{longitude}/days/{dateStart},{dateEnd}:
+    get:
+      tags:
+      - points
+      summary: A contiguous range of daily astronomy for a Latitude/Longitude point.
+      description: Returns a contiguous range of daily astronomical data for a Latitude/Longitude
+        point.
+      parameters:
+      - name: latitude
+        in: path
+        description: A latitude value between -90° and 90°.
+        required: true
+        schema:
+          maximum: 90.0
+          minimum: -90.0
+          type: number
+          format: float
+          example: 38.8552
+      - name: longitude
+        in: path
+        description: A longitude value between -180° (West) and 180° (East).
+        required: true
+        schema:
+          maximum: 180.0
+          minimum: -180.0
+          type: number
+          format: float
+          example: -77.0513
+      - name: dateStart
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          before dateEnd.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: dateEnd
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          after dateStart.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for a Latitude/Longitude point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPointDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /points/{latitude},{longitude}/hours/{timestamp}:
+    get:
+      tags:
+      - points
+      summary: An hour of astronomy data for a Latitude/Longitude point.
+      description: Returns a single hour of astronomical data for a Latitude/Longitude
+        point.
+      parameters:
+      - name: latitude
+        in: path
+        description: A latitude value between -90° and 90°.
+        required: true
+        schema:
+          maximum: 90.0
+          minimum: -90.0
+          type: number
+          format: float
+          example: 38.8552
+      - name: longitude
+        in: path
+        description: A longitude value between -180° (West) and 180° (East).
+        required: true
+        schema:
+          maximum: 180.0
+          minimum: -180.0
+          type: number
+          format: float
+          example: -77.0513
+      - name: timestamp
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value. The UTC
+          offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for a Latitude/Longitude point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPointHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /points/{latitude},{longitude}/hours/{timestampStart},{timestampEnd}:
+    get:
+      tags:
+      - points
+      summary: A contiguous range of hourly astronomy for a Latitude/Longitude point.
+      description: Returns a contiguous range of hourly astronomical data for a Latitude/Longitude
+        point.
+      parameters:
+      - name: latitude
+        in: path
+        description: A latitude value between -90° and 90°.
+        required: true
+        schema:
+          maximum: 90.0
+          minimum: -90.0
+          type: number
+          format: float
+          example: 38.8552
+      - name: longitude
+        in: path
+        description: A longitude value between -180° (West) and 180° (East).
+        required: true
+        schema:
+          maximum: 180.0
+          minimum: -180.0
+          type: number
+          format: float
+          example: -77.0513
+      - name: timestampStart
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally before timestampEnd. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: timestampEnd
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally after timestampStart. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for a Latitude/Longitude point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPointHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /postcodes/{postcode},{countryCode}/days/{date}:
+    get:
+      tags:
+      - postcodes
+      summary: A day of astronomy data for a postcode.
+      description: Returns a single day of astronomical data for a postcode.
+      parameters:
+      - name: postcode
+        in: path
+        description: A postcode string.
+        required: true
+        schema:
+          type: string
+          example: "22222"
+      - name: countryCode
+        in: path
+        description: An uppercase 2-character [ISO 3166-1 Alpha-2 country code](https://developer.weathersourceapis.com/apis/countries-with-postal-code-support/).
+        required: true
+        schema:
+          pattern: ^([A-Z]){2}$
+          type: string
+          example: US
+      - name: date
+        in: path
+        description: An date formatted as a RFC3339 date value.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for a postcode.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPostcodeDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /postcodes/{postcode},{countryCode}/days/{dateStart},{dateEnd}:
+    get:
+      tags:
+      - postcodes
+      summary: A contiguous range of daily astronomy for a postcode.
+      description: Returns a contiguous range of daily astronomical data for a postcode.
+      parameters:
+      - name: postcode
+        in: path
+        description: A postcode string.
+        required: true
+        schema:
+          type: string
+          example: "22222"
+      - name: countryCode
+        in: path
+        description: An uppercase 2-character [ISO 3166-1 Alpha-2 country code](https://developer.weathersourceapis.com/apis/countries-with-postal-code-support/).
+        required: true
+        schema:
+          pattern: ^([A-Z]){2}$
+          type: string
+          example: US
+      - name: dateStart
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          before dateEnd.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: dateEnd
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          after dateStart.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for a postcode.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPostcodeDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /postcodes/{postcode},{countryCode}/hours/{timestamp}:
+    get:
+      tags:
+      - postcodes
+      summary: An hour of astronomy data for a postcode.
+      description: Returns a single hour of astronomical data for a postcode.
+      parameters:
+      - name: postcode
+        in: path
+        description: A postcode string.
+        required: true
+        schema:
+          type: string
+          example: "22222"
+      - name: countryCode
+        in: path
+        description: An uppercase 2-character [ISO 3166-1 Alpha-2 country code](https://developer.weathersourceapis.com/apis/countries-with-postal-code-support/).
+        required: true
+        schema:
+          pattern: ^([A-Z]){2}$
+          type: string
+          example: US
+      - name: timestamp
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value. The UTC
+          offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for a postcode.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPostcodeHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /postcodes/{postcode},{countryCode}/hours/{timestampStart},{timestampEnd}:
+    get:
+      tags:
+      - postcodes
+      summary: A contiguous range of hourly astronomy for a postcode.
+      description: Returns a contiguous range of hourly astronomical data for a postcode.
+      parameters:
+      - name: postcode
+        in: path
+        description: A postcode string.
+        required: true
+        schema:
+          type: string
+          example: "22222"
+      - name: countryCode
+        in: path
+        description: An uppercase 2-character [ISO 3166-1 Alpha-2 country code](https://developer.weathersourceapis.com/apis/countries-with-postal-code-support/).
+        required: true
+        schema:
+          pattern: ^([A-Z]){2}$
+          type: string
+          example: US
+      - name: timestampStart
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally before timestampEnd. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: timestampEnd
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally after timestampStart. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for a postcode.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyPostcodeHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /dmas/{dmaId}/days/{date}:
+    get:
+      tags:
+      - dmas
+      summary: A day of astronomy data for a DMA.
+      description: Returns a single day of astronomical data for a Designated Market
+        Area.
+      parameters:
+      - name: dmaId
+        in: path
+        description: A [Designated Market Area ID](https://developer.weathersourceapis.com/apis/supported-dmas/).
+        required: true
+        schema:
+          type: integer
+          example: 529
+      - name: date
+        in: path
+        description: An date formatted as a RFC3339 date value.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for a Designated Market Area.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyDmaDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /dmas/{dmaId}/days/{dateStart},{dateEnd}:
+    get:
+      tags:
+      - dmas
+      summary: A contiguous range of daily astronomy for a DMA.
+      description: Returns a contiguous range of daily astronomical data for a Designated
+        Market Area.
+      parameters:
+      - name: dmaId
+        in: path
+        description: A [Designated Market Area ID](https://developer.weathersourceapis.com/apis/supported-dmas/).
+        required: true
+        schema:
+          type: integer
+          example: 529
+      - name: dateStart
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          before dateEnd.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: dateEnd
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          after dateStart.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for a Designated Market Area.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyDmaDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /dmas/{dmaId}/hours/{timestamp}:
+    get:
+      tags:
+      - dmas
+      summary: An hour of astronomy data for a DMA
+      description: Returns a single hour of astronomical data for a Designated Market
+        Area.
+      parameters:
+      - name: dmaId
+        in: path
+        description: A [Designated Market Area ID](https://developer.weathersourceapis.com/apis/supported-dmas/).
+        required: true
+        schema:
+          type: integer
+          example: 529
+      - name: timestamp
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value. The UTC
+          offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for a Designated Market Area.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyDmaHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /dmas/{dmaId}/hours/{timestampStart},{timestampEnd}:
+    get:
+      tags:
+      - dmas
+      summary: A contiguous range of hourly astronomy for a DMA.
+      description: Returns a contiguous range of hourly astronomical data for a Designated
+        Market Area.
+      parameters:
+      - name: dmaId
+        in: path
+        description: A [Designated Market Area ID](https://developer.weathersourceapis.com/apis/supported-dmas/).
+        required: true
+        schema:
+          type: integer
+          example: 529
+      - name: timestampStart
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally before timestampEnd. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: timestampEnd
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally after timestampStart. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for a Designated Market Area.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyDmaHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /onpoints/{onpointId}/days/{date}:
+    get:
+      tags:
+      - onpoints
+      summary: A day of astronomy data for an OnPoint™ point.
+      description: Returns a single day of astronomical data for an OnPoint™ point.
+      parameters:
+      - name: onpointId
+        in: path
+        description: An OnPoint™ ID.
+        required: true
+        schema:
+          type: integer
+          example: 10725864
+      - name: date
+        in: path
+        description: An date formatted as a RFC3339 date value.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for an OnPoint™ point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyOnpointDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /onpoints/{onpointId}/days/{dateStart},{dateEnd}:
+    get:
+      tags:
+      - onpoints
+      summary: A contiguous range of daily astronomy for an OnPoint™ point.
+      description: Returns a contiguous range of daily astronomical data for an OnPoint™
+        point.
+      parameters:
+      - name: onpointId
+        in: path
+        description: An OnPoint™ ID.
+        required: true
+        schema:
+          type: integer
+          example: 10725864
+      - name: dateStart
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          before dateEnd.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: dateEnd
+        in: path
+        description: An date formatted as a RFC3339 date value that must occur temporally
+          after dateStart.
+        required: true
+        schema:
+          type: string
+          format: date
+          example: 2019-12-20
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The date field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunTransit
+            - sunrise
+            - sunset
+            - civilRise
+            - civilSet
+            - nauticalRise
+            - nauticalSet
+            - astroRise
+            - astroSet
+            - moonDistance
+            - moonRadius
+            - moonrise
+            - moonset
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Daily astronomical response for an OnPoint™ point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyOnpointDayObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /onpoints/{onpointId}/hours/{timestamp}:
+    get:
+      tags:
+      - onpoints
+      summary: An hour of astronomy data for an OnPoint™ point.
+      description: Returns a single hour of astronomical data for an OnPoint™ point.
+      parameters:
+      - name: onpointId
+        in: path
+        description: An OnPoint™ ID.
+        required: true
+        schema:
+          type: integer
+          example: 10725864
+      - name: timestamp
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value. The UTC
+          offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for an OnPoint™ point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyOnpointHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+  /onpoints/{onpointId}/hours/{timestampStart},{timestampEnd}:
+    get:
+      tags:
+      - onpoints
+      summary: A contiguous range of hourly astronomy for an OnPoint™ point.
+      description: Returns a contiguous range of hourly astronomical data for an OnPoint™
+        point.
+      parameters:
+      - name: onpointId
+        in: path
+        description: An OnPoint™ ID.
+        required: true
+        schema:
+          type: integer
+          example: 10725864
+      - name: timestampStart
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally before timestampEnd. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: timestampEnd
+        in: path
+        description: A timestamp formatted as an RFC3339 date-time value that must
+          occur temporally after timestampStart. The UTC offset is required.
+        required: true
+        schema:
+          type: string
+          format: date-time
+          example: 2019-12-20T23:00:00-05:00
+      - name: fields
+        in: query
+        description: |
+          A comma separated list of field names to return. The timestamp field is always returned.
+
+          **Limiting the query to needed fields will improve the query response time.**
+
+          In addition to individual field names, following convenience field groups are also supported:
+          * all *(all fields)*
+          * allMoon *(moon related fields)*
+          * allSun *(sun related fields)*
+          * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+        required: true
+        style: form
+        explode: false
+        schema:
+          type: array
+          example: all
+          items:
+            type: string
+            enum:
+            - sunDistance
+            - sunRadius
+            - sunAzimuth
+            - sunElevation
+            - moonDistance
+            - moonRadius
+            - moonAzimuth
+            - moonElevation
+            - moonPhase
+            - moonIllum
+            - moonAge
+            - all
+            - allMoon
+            - allSun
+            - popular
+      - name: unitScale
+        in: query
+        description: The unit scale for returned values.<br>
+        required: false
+        schema:
+          type: string
+          example: IMPERIAL
+          default: IMPERIAL
+          enum:
+          - IMPERIAL
+          - METRIC
+          - SI
+      responses:
+        "200":
+          description: Hourly astronomical response for an OnPoint™ point.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/astronomyOnpointHourObj'
+        default:
+          description: Unexpected error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/errorObj'
+components:
+  schemas:
+    fieldListDayObj:
+      title: fieldListObj
+      required:
+      - fields
+      type: object
+      properties:
+        fields:
+          $ref: '#/components/schemas/fields'
+      description: A list of returned field names the associated units.
+      example:
+        fields:
+          date: 'Date as string: "YYYY-MM-DD"'
+          sunDistance: Miles
+          sunRadius: Radial Degrees
+          sunTransit: 'Timestamp as string: RFC 3339'
+          sunrise: 'Timestamp as string: RFC 3339'
+          sunset: 'Timestamp as string: RFC 3339'
+          civilRise: 'Timestamp as string: RFC 3339'
+          civilSet: 'Timestamp as string: RFC 3339'
+          nauticalRise: 'Timestamp as string: RFC 3339'
+          nauticalSet: 'Timestamp as string: RFC 3339'
+          astroRise: 'Timestamp as string: RFC 3339'
+          astroSet: 'Timestamp as string: RFC 3339'
+          moonDistance: Miles
+          moonRadius: Radial Degrees
+          moonrise: 'Timestamp as string: RFC 3339'
+          moonset: 'Timestamp as string: RFC 3339'
+          moonPhase: Phase of moon as string
+          moonIllum: Percent value in [0,100]
+          moonAge: Count of days
+    fieldListHourObj:
+      title: fieldListObj
+      required:
+      - fields
+      type: object
+      properties:
+        fields:
+          $ref: '#/components/schemas/fields'
+      description: A list of returned field names the associated units.
+      example:
+        fields:
+          timestamp: 'Timestamp as string: RFC 3339'
+          sunDistance: Miles
+          sunRadius: Radial Degrees
+          sunAzimuth: Radial Degrees
+          sunElevation: Radial Degrees
+          moonDistance: Miles
+          moonRadius: Radial Degrees
+          moonAzimuth: Radial Degrees
+          moonElevation: Radial Degrees
+          moonPhase: Phase of moon as string
+          moonIllum: Percent value in [0,100]
+          moonAge: Count of days
+    astronomyDayArr:
+      type: array
+      description: An array of daily astronomy objects.
+      items:
+        $ref: '#/components/schemas/astronomyDayObj'
+    astronomyDayObj:
+      required:
+      - date
+      type: object
+      properties:
+        date:
+          $ref: '#/components/schemas/date'
+        sunDistance:
+          $ref: '#/components/schemas/sunDistance'
+        sunRadius:
+          $ref: '#/components/schemas/sunRadius'
+        sunTransit:
+          $ref: '#/components/schemas/sunTransit'
+        sunrise:
+          $ref: '#/components/schemas/sunrise'
+        sunset:
+          $ref: '#/components/schemas/sunset'
+        civilRise:
+          $ref: '#/components/schemas/civilRise'
+        civilSet:
+          $ref: '#/components/schemas/civilSet'
+        nauticalRise:
+          $ref: '#/components/schemas/nauticalRise'
+        nauticalSet:
+          $ref: '#/components/schemas/nauticalSet'
+        astroRise:
+          $ref: '#/components/schemas/astroRise'
+        astroSet:
+          $ref: '#/components/schemas/astroSet'
+        moonDistance:
+          $ref: '#/components/schemas/moonDistance'
+        moonRadius:
+          $ref: '#/components/schemas/moonRadius'
+        moonrise:
+          $ref: '#/components/schemas/moonrise'
+        moonset:
+          $ref: '#/components/schemas/moonset'
+        moonPhase:
+          $ref: '#/components/schemas/moonPhase'
+        moonIllum:
+          $ref: '#/components/schemas/moonIllum'
+        moonAge:
+          $ref: '#/components/schemas/moonAge'
+      description: A daily astronomy object.
+    astronomyHourArr:
+      type: array
+      description: An array of hourly astronomy objects.
+      items:
+        $ref: '#/components/schemas/astronomyHourObj'
+    astronomyHourObj:
+      required:
+      - timestamp
+      type: object
+      properties:
+        timestamp:
+          $ref: '#/components/schemas/timestamp'
+        sunDistance:
+          $ref: '#/components/schemas/sunDistance'
+        sunRadius:
+          $ref: '#/components/schemas/sunRadius'
+        sunAzimuth:
+          $ref: '#/components/schemas/sunAzimuth'
+        SunElevation:
+          $ref: '#/components/schemas/sunElevation'
+        moonDistance:
+          $ref: '#/components/schemas/moonDistance'
+        moonRadius:
+          $ref: '#/components/schemas/moonRadius'
+        moonAzimuth:
+          $ref: '#/components/schemas/moonAzimuth'
+        moonElevation:
+          $ref: '#/components/schemas/moonElevation'
+        moonPhase:
+          $ref: '#/components/schemas/moonPhase'
+        moonIllum:
+          $ref: '#/components/schemas/moonIllum'
+        moonAge:
+          $ref: '#/components/schemas/moonAge'
+      description: An hourly astronomy object.
+    astronomyPointDayObj:
+      required:
+      - astronomy
+      - dateRange
+      - fieldList
+      - location
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/pointObj'
+        dateRange:
+          $ref: '#/components/schemas/dateRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListDayObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyDayArr'
+      description: Daily Latitude/Longitude astronomical object
+    astronomyPointHourObj:
+      required:
+      - astronomy
+      - fieldList
+      - location
+      - timestampRange
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/pointObj'
+        timestampRange:
+          $ref: '#/components/schemas/timestampRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListHourObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyHourArr'
+      description: Hourly Latitude/Longitude astronomical object
+    astronomyPostcodeDayObj:
+      required:
+      - astronomy
+      - dateRange
+      - fieldList
+      - location
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/postcodeObj'
+        dateRange:
+          $ref: '#/components/schemas/dateRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListDayObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyDayArr'
+      description: Daily Postcode astronomical object
+    astronomyPostcodeHourObj:
+      required:
+      - astronomy
+      - fieldList
+      - location
+      - timestampRange
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/postcodeObj'
+        timestampRange:
+          $ref: '#/components/schemas/timestampRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListHourObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyHourArr'
+      description: Hourly Postcode astronomical object
+    astronomyDmaDayObj:
+      required:
+      - astronomy
+      - dateRange
+      - fieldList
+      - location
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/dmaObj'
+        dateRange:
+          $ref: '#/components/schemas/dateRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListDayObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyDayArr'
+      description: Daily Designated Market Area astronomical object
+    astronomyDmaHourObj:
+      required:
+      - astronomy
+      - fieldList
+      - location
+      - timestampRange
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/dmaObj'
+        timestampRange:
+          $ref: '#/components/schemas/timestampRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListHourObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyHourArr'
+      description: Hourly Designated Market Area astronomical object
+    astronomyOnpointDayObj:
+      required:
+      - astronomy
+      - dateRange
+      - fieldList
+      - location
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/onpointObj'
+        dateRange:
+          $ref: '#/components/schemas/dateRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListDayObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyDayArr'
+      description: Daily OnPoint™ astronomical object
+    astronomyOnpointHourObj:
+      required:
+      - astronomy
+      - fieldList
+      - location
+      - timestampRange
+      type: object
+      properties:
+        location:
+          $ref: '#/components/schemas/onpointObj'
+        timestampRange:
+          $ref: '#/components/schemas/timestampRangeObj'
+        fieldList:
+          $ref: '#/components/schemas/fieldListHourObj'
+        astronomy:
+          $ref: '#/components/schemas/astronomyHourArr'
+      description: Hourly OnPoint™ astronomical object
+    sunDistance:
+      type: number
+      description: Distance from Earth to Sun in miles (imperial) or km (metric, si).
+      format: float
+      example: 91455570
+    sunRadius:
+      maximum: 360
+      minimum: 0
+      type: number
+      description: Apparent angular radius of the Sun.
+      format: float
+      example: 0.26
+    sunAzimuth:
+      maximum: 360
+      minimum: 0
+      type: number
+      description: Azimuth of the Sun in degrees, angle along the local horizon measured
+        clockwise from due north.
+      format: float
+      example: 354.91
+    sunElevation:
+      maximum: 90
+      minimum: -90
+      type: number
+      description: Altitude of the Sun in degrees, angle between the horizon and the
+        center of the Sun's disc.
+      format: float
+      example: -74.51
+    sunTransit:
+      type: string
+      description: Time of Sun's transit (solar noon) formatted RFC 3339.
+      format: date-time
+      example: 2019-12-20T12:05:41-05:00
+    sunrise:
+      type: string
+      description: Time of sunrise formatted RFC 3339.
+      format: date-time
+      example: 2019-12-20T07:22:27-05:00
+    sunset:
+      type: string
+      description: Time of sunset formatted RFC 3339.
+      format: date-time
+      example: 2019-12-20T16:48:55-05:00
+    civilRise:
+      type: string
+      description: Time of the beginning of civil twilight before sunrise formatted
+        RFC 3339.
+      format: date-time
+      example: 2019-12-20T06:52:29-05:00
+    civilSet:
+      type: string
+      description: Time of the end of civil twilight after sunset formatted RFC 3339.
+      format: date-time
+      example: 2019-12-20T17:18:53-05:00
+    nauticalRise:
+      type: string
+      description: Time of the beginning of nautical twilight before sunrise formatted
+        RFC 3339.
+      format: date-time
+      example: 2019-12-20T06:19:00-05:00
+    nauticalSet:
+      type: string
+      description: Time of the end of nautical twilight after sunset formatted RFC
+        3339.
+      format: date-time
+      example: 2019-12-20T17:52:22-05:00
+    astroRise:
+      type: string
+      description: Time of the beginning of astronomical twilight before sunrise formatted
+        RFC 3339.
+      format: date-time
+      example: 2019-12-20T05:46:33-05:00
+    astroSet:
+      type: string
+      description: Time of the end of astronomical twilight after sunset formatted
+        RFC 3339.
+      format: date-time
+      example: 2019-12-20T18:24:49-05:00
+    moonDistance:
+      type: number
+      description: Distance from Earth to Moon in miles (imperial) or km (metric,
+        si).
+      format: float
+      example: 226632.73
+    moonRadius:
+      maximum: 360
+      minimum: 0
+      type: number
+      description: Apparent angular radius of the Moon in degrees.
+      format: float
+      example: 0.27
+    moonAzimuth:
+      maximum: 360
+      minimum: 0
+      type: number
+      description: Azimuth of the Moon in degrees, angle along the local horizon measured
+        clockwise from due north.
+      format: float
+      example: 79.28
+    moonElevation:
+      maximum: 90
+      minimum: -90
+      type: number
+      description: Altitude of the Moon in degrees, angle between the horizon and
+        the center of the Moon's disc.
+      format: float
+      example: -12.23
+    moonrise:
+      type: string
+      description: Time of moonrise formatted RFC 3339.
+      format: date-time
+      example: 2019-12-20T01:08:09-05:00
+    moonset:
+      type: string
+      description: Time of moonset formatted RFC 3339.
+      format: date-time
+      example: 2019-12-20T13:25:07-05:00
+    moonPhase:
+      type: string
+      description: The Moon Phase as a string.
+      example: Waning Crescent
+      enum:
+      - New Moon
+      - First Quarter
+      - Full Moon
+      - Last Quarter
+      - Waxing Crescent
+      - Waxing Gibbous
+      - Waning Gibbous
+      - Waning Crescent
+    moonIllum:
+      maximum: 100
+      minimum: 0
+      type: number
+      description: Portion of the Moon illuminated by the Sun as a percentage.
+      format: float
+      example: 38.24
+    moonAge:
+      type: number
+      description: Age in days of the Moon in the Synodic month.
+      format: float
+      example: 23.26
+    errorObj:
+      type: object
+      properties:
+        errorCode:
+          maximum: 600
+          minimum: 100
+          type: integer
+          example: 404
+        errorMessage:
+          type: string
+          example: NOT FOUND. Item not found.
+    fields:
+      type: object
+      additionalProperties:
+        type: string
+        description: Unit value for field identified in the related key.
+        example: Fahrenheit
+    date:
+      type: string
+      description: A date formatted as an RFC3339 date value.
+      format: date
+      example: 2019-12-20
+    timestamp:
+      type: string
+      description: A timestamp formatted as an RFC3339 date-time value.
+      format: date-time
+      example: 2019-12-20T23:00:00-05:00
+    pointObj:
+      required:
+      - boundingPoints
+      - grid
+      - latitude
+      - longitude
+      - timezone
+      type: object
+      properties:
+        latitude:
+          $ref: '#/components/schemas/latitude'
+        longitude:
+          $ref: '#/components/schemas/longitude'
+        timezone:
+          $ref: '#/components/schemas/timezone'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        countryName:
+          $ref: '#/components/schemas/countryName'
+        subdivCode:
+          $ref: '#/components/schemas/subdivCode'
+        subdivName:
+          $ref: '#/components/schemas/subdivName'
+        boundingPoints:
+          $ref: '#/components/schemas/boundingPoints'
+        grid:
+          $ref: '#/components/schemas/grid'
+      description: Metadata object for a postcode
+    latitude:
+      maximum: 90.0
+      minimum: -90.0
+      type: number
+      description: A latitude value between -90° and 90°.
+      format: float
+      example: 38.8552
+    longitude:
+      maximum: 180.0
+      minimum: -180.0
+      type: number
+      description: A longitude value between -180° (West) and 180° (East).
+      format: float
+      example: -77.0513
+    timezone:
+      type: string
+      description: An Olson timezone ID.
+      example: America/New_York
+    countryCode:
+      type: string
+      description: An [ISO 3166-1 Alpha-2 country code](https://developer.weathersourceapis.com/apis/countries-with-postal-code-support/).
+      example: US
+    countryName:
+      type: string
+      description: A common country name.
+      example: United States of America
+    subdivCode:
+      type: string
+      description: An ISO 3166-2 country subdivision code.
+      example: US-VA
+    subdivName:
+      type: string
+      description: A common country subdivision name.
+      example: Virginia
+    boundingPoints:
+      type: array
+      description: A list of OnPoint™ points related to the location
+      items:
+        $ref: '#/components/schemas/boundingPoints_inner'
+    onpointId:
+      type: integer
+      description: An OnPoint™ ID.
+      example: 10725864
+    grid:
+      type: string
+      description: The OnPoint™ grid on which the resource exists.
+      example: NORTH_AMERICA_GRID
+      enum:
+      - GLOBAL_GRID
+      - NORTH_AMERICA_GRID
+    distance:
+      type: number
+      description: A distance from the provided point in miles.
+      format: float
+      example: 2.6772
+    dateRangeObj:
+      required:
+      - dateEnd
+      - dateStart
+      type: object
+      properties:
+        dateStart:
+          $ref: '#/components/schemas/dateStart'
+        dateEnd:
+          $ref: '#/components/schemas/dateEnd'
+      description: A date range object.
+    dateStart:
+      type: string
+      description: A start date for a date range formatted as an RFC3339 date value.
+      format: date
+      example: 2019-12-20
+    dateEnd:
+      type: string
+      description: An end date for a date range formatted as an RFC3339 date value.
+      format: date
+      example: 2019-12-20
+    timestampRangeObj:
+      required:
+      - timestampEnd
+      - timestampStart
+      type: object
+      properties:
+        timestampStart:
+          $ref: '#/components/schemas/timestampStart'
+        timestampEnd:
+          $ref: '#/components/schemas/timestampEnd'
+      description: A timestamp range object
+    timestampStart:
+      type: string
+      description: A start timestamp for a timestamp range formatted as an RFC3339
+        date-time value.
+      format: date-time
+      example: 2019-12-20T23:00:00-05:00
+    timestampEnd:
+      type: string
+      description: An end timestamp for a timestamp range formatted as an RFC3339
+        date-time value.
+      format: date-time
+      example: 2019-12-20T23:00:00-05:00
+    postcodeObj:
+      required:
+      - boundingPoints
+      - countryCode
+      - countryName
+      - grid
+      - latitude
+      - latitude
+      - longitude
+      - postcode
+      - timezone
+      type: object
+      properties:
+        postcode:
+          $ref: '#/components/schemas/postcode'
+        latitude:
+          $ref: '#/components/schemas/latitude'
+        longitude:
+          $ref: '#/components/schemas/longitude'
+        timezone:
+          $ref: '#/components/schemas/timezone'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        countryName:
+          $ref: '#/components/schemas/countryName'
+        subdivCode:
+          $ref: '#/components/schemas/subdivCode'
+        subdivName:
+          $ref: '#/components/schemas/subdivName'
+        boundingPoints:
+          $ref: '#/components/schemas/boundingPoints'
+        grid:
+          $ref: '#/components/schemas/grid'
+      description: A postcode location metadata object
+    postcode:
+      type: string
+      description: A postcode string.
+      example: "22222"
+    dmaObj:
+      required:
+      - countryCode
+      - countryName
+      - dmaId
+      - dmaName
+      - grid
+      - population
+      - samplePoints
+      - timezone
+      type: object
+      properties:
+        dmaId:
+          $ref: '#/components/schemas/dmaId'
+        dmaName:
+          $ref: '#/components/schemas/dmaName'
+        timezone:
+          $ref: '#/components/schemas/timezone'
+        population:
+          $ref: '#/components/schemas/population'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        countryName:
+          $ref: '#/components/schemas/countryName'
+        samplePoints:
+          $ref: '#/components/schemas/samplePoints'
+        grid:
+          $ref: '#/components/schemas/grid'
+      description: A Designated Market Area location metadata object
+    dmaId:
+      type: integer
+      description: A [Designated Market Area ID](https://developer.weathersourceapis.com/apis/supported-dmas/).
+      example: 529
+    dmaName:
+      type: string
+      description: A Designated Market Area name.
+      example: Louisville
+    population:
+      type: integer
+      description: The population as represented in the 2010 census.
+      example: 1584746
+    samplePoints:
+      type: array
+      description: A list of OnPoint™ points used for interpolation for the Designated
+        Market Area. These points are the OnPoint™ ID closest to the centroid of the
+        10 most populous  postcodes within the target DMA.
+      items:
+        $ref: '#/components/schemas/samplePoints_inner'
+    distancePop:
+      type: integer
+      description: The difference in population for the whole Designated Market Area
+        and the population for the postcode represented by this sample point.
+      example: 1536552
+    onpointObj:
+      required:
+      - grid
+      - latitude
+      - longitude
+      - onpointId
+      - timezone
+      type: object
+      properties:
+        onpointId:
+          $ref: '#/components/schemas/onpointId'
+        latitude:
+          $ref: '#/components/schemas/latitude'
+        longitude:
+          $ref: '#/components/schemas/longitude'
+        timezone:
+          $ref: '#/components/schemas/timezone'
+        countryCode:
+          $ref: '#/components/schemas/countryCode'
+        countryName:
+          $ref: '#/components/schemas/countryName'
+        subdivCode:
+          $ref: '#/components/schemas/subdivCode'
+        subdivName:
+          $ref: '#/components/schemas/subdivName'
+        grid:
+          $ref: '#/components/schemas/grid'
+      description: An OnPoint™ point location metadata object
+    boundingPoints_inner:
+      required:
+      - distance
+      - grid
+      - latitude
+      - longitude
+      - onpointId
+      type: object
+      properties:
+        onpointId:
+          $ref: '#/components/schemas/onpointId'
+        latitude:
+          $ref: '#/components/schemas/latitude'
+        longitude:
+          $ref: '#/components/schemas/longitude'
+        grid:
+          $ref: '#/components/schemas/grid'
+        distance:
+          $ref: '#/components/schemas/distance'
+    samplePoints_inner:
+      required:
+      - distance
+      - grid
+      - latitude
+      - longitude
+      - onpointId
+      type: object
+      properties:
+        onpointId:
+          $ref: '#/components/schemas/onpointId'
+        latitude:
+          $ref: '#/components/schemas/latitude'
+        longitude:
+          $ref: '#/components/schemas/longitude'
+        grid:
+          $ref: '#/components/schemas/grid'
+        distance:
+          $ref: '#/components/schemas/distancePop'
+  parameters:
+    fieldsDay:
+      name: fields
+      in: query
+      description: |
+        A comma separated list of field names to return. The date field is always returned.
+
+        **Limiting the query to needed fields will improve the query response time.**
+
+        In addition to individual field names, following convenience field groups are supported:
+        * all *(all fields)*
+        * allMoon *(moon related fields)*
+        * allSun *(sun related fields)*
+        * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+      required: true
+      style: form
+      explode: false
+      schema:
+        type: array
+        example: all
+        items:
+          type: string
+          enum:
+          - sunDistance
+          - sunRadius
+          - sunTransit
+          - sunrise
+          - sunset
+          - civilRise
+          - civilSet
+          - nauticalRise
+          - nauticalSet
+          - astroRise
+          - astroSet
+          - moonDistance
+          - moonRadius
+          - moonrise
+          - moonset
+          - moonPhase
+          - moonIllum
+          - moonAge
+          - all
+          - allMoon
+          - allSun
+          - popular
+    fieldsHour:
+      name: fields
+      in: query
+      description: |
+        A comma separated list of field names to return. The timestamp field is always returned.
+
+        **Limiting the query to needed fields will improve the query response time.**
+
+        In addition to individual field names, following convenience field groups are also supported:
+        * all *(all fields)*
+        * allMoon *(moon related fields)*
+        * allSun *(sun related fields)*
+        * popular *(sunrise, sunset, moonrise, moonset, and moonPhase)*
+      required: true
+      style: form
+      explode: false
+      schema:
+        type: array
+        example: all
+        items:
+          type: string
+          enum:
+          - sunDistance
+          - sunRadius
+          - sunAzimuth
+          - sunElevation
+          - moonDistance
+          - moonRadius
+          - moonAzimuth
+          - moonElevation
+          - moonPhase
+          - moonIllum
+          - moonAge
+          - all
+          - allMoon
+          - allSun
+          - popular
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      description: |-
+        API key to authorize requests. If you do not have a Weather Source API key [sign up for a free 30-day developer account](https://developer.weathersourceapis.com/account/sign-up/).
+
+        You can use the evaluation API Key `C0W60UOFRML47ytbXk4xlLBfv`. This evaluation API Key can only access the example locations found in this documentation.
+      name: X-API-KEY
+      in: header

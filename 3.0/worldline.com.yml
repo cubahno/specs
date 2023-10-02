@@ -1,0 +1,863 @@
+openapi: 3.0.3
+info:
+  title: Worldline Acquiring Accept Transactions API
+  description: This API provides support for Payment Service Providers to accept transactions
+    via Worldline.
+  contact:
+    name: Worldline Acquiring Processing API team.
+    url: https://financial-services.developer.worldline.com/
+    email: dl-fr-dp2si-acquiring@worldline.com
+  license:
+    name: proprietary Worldline Financial Services
+  version: 0.1.9
+paths:
+  /v1.0/acquiring/acquirers/{acquirerId}/transactions:
+    post:
+      tags:
+      - Ecommerce messages
+      summary: Post a transaction
+      description: This action posts a transaction to the acquiring host of Worldline
+      parameters:
+        - in: path
+          name: acquirerId
+          description: Unique identification of the acquirer, determined by Worldline
+          required: true
+          schema:
+            type: string
+            maxLength: 11
+            minLength: 1
+          example: "671234567"
+        - in: header
+          name: actionId
+          required: true
+          description: Unique identification of the action, determined by the caller. Mandatory UUID format.
+          schema:
+            type: string
+            maxLength: 36
+            minLength: 36
+          example: "292acfe1-cdd1-4263-85b7-5cab0bfc08f4"
+      requestBody:
+        description: Transaction request message data
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PostTransactionRequest'
+            examples:
+              Authorization (Mastercard):
+                value:
+                  actionType: "AUTH"
+                  service: "Purchase"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "e9bd7129-7377-4d1a-9c91-5abdfeaba145"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                  financial: 
+                    requestAmount: 
+                      amount: "23.32"
+                      currency: "EUR"
+                  circumstance:
+                    actionDateTime: "2022-07-28T13:06:12+02:00"
+                    channel: "ECommerce"
+                  acceptor:
+                    merchantCategoryCode: "5712"
+                    name: "De groothandel online (LtV-IG)"
+                    address: "Eendrachtslaan 315"
+                    postalCode: "3526LB"
+                    city: "Utrecht"
+                    state: "NL"
+                    countryCode: "NLD"
+                  card:
+                    cardNumber: "5413330089600010"
+                    expiryDate: "2512"
+                  3DSecure:
+                    result: "Full"
+                    ucaf: "900E82430319CE57E33F419D1A2454002A1E1D87"
+                    transactionId: "4c754b56-c6c0-468b-bfc9-905ceab69618"
+                    version: "V2"
+              Authorization (VISA):
+                value:
+                  actionType: "AUTH"
+                  service: "Purchase"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "4b4e9894-e98c-434c-8737-3422c2edc61e"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                  financial: 
+                    requestAmount: 
+                      amount: "13.31"
+                      currency: "EUR"
+                  circumstance:
+                    actionDateTime: "2022-07-28T13:19:57+02:00"
+                    channel: "ECommerce"
+                  acceptor:
+                    merchantCategoryCode: "5712"
+                    name: "De groothandel online (LtV-IG)"
+                    address: "Eendrachtslaan 315"
+                    postalCode: "3526LB"
+                    city: "Utrecht"
+                    state: "NL"
+                    countryCode: "NLD"
+                  card:
+                    cardNumber: "4405010000000002"
+                    expiryDate: "2212"
+                  3DSecure:
+                    result: "Full"
+                    cavvData: "69A6DB71C75D79E7DF8208618A28E3A6DB71C75D"
+                    xid: "69A6DB71C75D79E7DF8208618A28E3A6DB71C75D"
+                    transactionId: "1575f50d-ff68-4b95-afb1-f10f775d5912"
+                    version: "V2"
+              Refund Authorization (Mastercard):
+                value:
+                  actionType: "AUTH"
+                  service: "Refund"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "464d12ce-dc70-4894-8b3c-e32e04e1c35f"
+                    originalTransactionId: "ACQ_EU2-20220728110613-000000000003458165"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                  financial: 
+                    requestAmount: 
+                      amount: "23.32"
+                      currency: "EUR"
+                  circumstance:
+                    actionDateTime: "2022-07-28T13:13:28+02:00"
+                    channel: "ECommerce"
+                  acceptor:
+                    merchantCategoryCode: "5712"
+                    name: "De groothandel online (LtV-IG)"
+                    address: "Eendrachtslaan 315"
+                    postalCode: "3526LB"
+                    city: "Utrecht"
+                    state: "NL"
+                    countryCode: "NLD"
+                  card:
+                    cardNumber: "5413330089600010"
+                    expiryDate: "2512"
+                  3DSecure:
+                    result: "Full"
+                    ucaf: "900E82430319CE57E33F419D1A2454002A1E1D87"
+                    transactionId: "8b3d5668-cdc5-4580-a9a3-6bf8ea9bcd18"
+                    version: "V2"
+              Refund Authorization (VISA):
+                value:
+                  actionType: "AUTH"
+                  service: "Refund"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "c9388301-5716-4b99-9694-449c03e49479"
+                    originalTransactionId: "ACQ_EU2-20220728111958-000000000003458169"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                  financial: 
+                    requestAmount: 
+                      amount: "13.31"
+                      currency: "EUR"
+                  circumstance:
+                    actionDateTime: "2022-07-28T13:33:37+02:00"
+                    channel: "ECommerce"
+                  acceptor:
+                    merchantCategoryCode: "5712"
+                    name: "De groothandel online (LtV-IG)"
+                    address: "Eendrachtslaan 315"
+                    postalCode: "3526LB"
+                    city: "Utrecht"
+                    state: "NL"
+                    countryCode: "NLD"
+                  card:
+                    cardNumber: "4405010000000002"
+                    expiryDate: "2212"
+                  3DSecure:
+                    result: "Full"
+                    cavvData: "69A6DB71C75D79E7DF8208618A28E3A6DB71C75D"
+                    xid: "69A6DB71C75D79E7DF8208618A28E3A6DB71C75D"
+                    transactionId: "20acf1aa-e195-4d14-a11d-09d68c8c1f28"
+                    version: "V2"
+              Capture (Mastercard):
+                value:
+                  actionType: "CAPTURE"
+                  service: "Purchase"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "a0d03674-df91-4696-b633-390bdfc917a5"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                    transactionId: "ACQ_EU2-20220728110613-000000000003458165"
+                  financial:
+                    requestAmount:
+                      amount: "23.32"
+                      currency: "EUR"
+                  circumstance:
+                    channel: "ECommerce"
+              Capture (VISA):
+                value:
+                  actionType: "CAPTURE"
+                  service: "Purchase"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "cf5f5258-86dc-4c01-ad49-a9b9ad0d86ea"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                    transactionId: "ACQ_EU2-20220728111958-000000000003458169"
+                  financial:
+                    requestAmount:
+                      amount: "13.31"
+                      currency: "EUR"
+                  circumstance:
+                    channel: "ECommerce"
+              Refund Capture (Mastercard):
+                value:
+                  actionType: "CAPTURE"
+                  service: "Refund"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "78d8789e-05ba-4a6a-9f11-2bd8bb8ba3fa"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                    transactionId: "ACQ_EU2-20220728111338-000000000003458167"
+                  financial:
+                    requestAmount:
+                      amount: "23.32"
+                      currency: "EUR"
+                  circumstance:
+                    channel: "ECommerce"
+              Refund Capture (VISA):
+                value:
+                  actionType: "CAPTURE"
+                  service: "Refund"
+                  identification: 
+                    requestorId: "1157"
+                    actionId: "a1c45db1-2952-4fc9-951d-e456e94a83df"
+                    acquirerId: "315111111"
+                    cardAcceptorId: "3037804"
+                    transactionId: "ACQ_EU2-20220728113337-000000000003458174"
+                  financial:
+                    requestAmount:
+                      amount: "13.31"
+                      currency: "EUR"
+                  circumstance:
+                    channel: "ECommerce"
+
+        required: true
+      responses:
+        200:
+          description: Successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostTransactionResponse'
+              examples:
+                Authorization (Mastercard):
+                  value:
+                    actionId: "e9bd7129-7377-4d1a-9c91-5abdfeaba145"
+                    transactionId: "ACQ_EU2-20220728110613-000000000003458165"
+                    declined: false
+                    responder: "Partner"
+                    responderDetails: "00"
+                    approvalCode: "656679"
+                    schemeTransactionId: "MCC3465210728  "
+                    financial:
+                      responseAmount:
+                        amount: "23.32"
+                        currency: "EUR"
+                    card: 
+                      brand: "MasterCard"
+                Authorization (VISA):
+                  value:
+                    actionId: "4b4e9894-e98c-434c-8737-3422c2edc61e"
+                    transactionId: "ACQ_EU2-20220728111958-000000000003458169"
+                    declined: false
+                    responder: "Partner"
+                    responderDetails: "00"
+                    approvalCode: "071612"
+                    schemeTransactionId: "752209407986532"
+                    financial:
+                      responseAmount:
+                        amount: "13.31"
+                        currency: "EUR"
+                    card: 
+                      brand: "Visa"
+                Refund Authorization (Mastercard):
+                  value:
+                    actionId: "464d12ce-dc70-4894-8b3c-e32e04e1c35f"
+                    transactionId: "ACQ_EU2-20220728111338-000000000003458167"
+                    declined: false
+                    responder: "Partner"
+                    responderDetails: "00"
+                    approvalCode: "403345"
+                    schemeTransactionId: "MCC3465210728  "
+                    financial:
+                      responseAmount:
+                        amount: "23.32"
+                        currency: "EUR"
+                    card:
+                      brand: "MasterCard"
+                Refund Authorization (VISA):
+                  value:
+                    actionId: "c9388301-5716-4b99-9694-449c03e49479"
+                    transactionId: "ACQ_EU2-20220728113337-000000000003458174"
+                    declined: false
+                    responder: "Partner"
+                    responderDetails: "00"
+                    approvalCode: "246776"
+                    schemeTransactionId: "752209407986532"
+                    financial:
+                      responseAmount:
+                        amount: "13.31"
+                        currency: "EUR"
+                    card:
+                      brand: "Visa"
+                Capture (Mastercard):
+                  value:
+                    actionId: "a0d03674-df91-4696-b633-390bdfc917a5"
+                    transactionId: "ACQ_EU2-20220728110613-000000000003458165"
+                    declined: false
+                    responder: "Recipient"
+                    responderDetails: "APP"
+                    financial:
+                      responseAmount:
+                      amount: "23.32"
+                      currency: "EUR"
+                    card:
+                      brand: "MasterCard"
+                Capture (VISA):
+                  value:
+                    actionId: "cf5f5258-86dc-4c01-ad49-a9b9ad0d86ea"
+                    transactionId: "ACQ_EU2-20220728111958-000000000003458169"
+                    declined: false
+                    responder: "Recipient"
+                    responderDetails: "APP"
+                    financial:
+                      responseAmount:
+                      amount: "13.31"
+                      currency: "EUR"
+                    card:
+                      brand: "Visa"
+                Refund Capture (Mastercard):
+                  value:
+                    actionId: "78d8789e-05ba-4a6a-9f11-2bd8bb8ba3fa"
+                    transactionId: "ACQ_EU2-20220728111338-000000000003458167"
+                    declined: false
+                    responder: "Recipient"
+                    responderDetails: "APP"
+                    financial:
+                    responseAmount:
+                      amount: "23.32"
+                      currency: "EUR"
+                    card:
+                      brand: "MasterCard"
+                Refund Capture (VISA):
+                  value:
+                    actionId: "a1c45db1-2952-4fc9-951d-e456e94a83df"
+                    transactionId: "ACQ_EU2-20220728113337-000000000003458174"
+                    declined: false
+                    responder: "Recipient"
+                    responderDetails: "APP"
+                    financial:
+                    responseAmount:
+                      amount: "13.31"
+                      currency: "EUR"
+                    card:
+                      brand: "Visa"
+        400:
+          description: Invalid input provided
+          content: {}
+        401:
+          description: Unauthorized
+          content: {}
+        403:
+          description: Forbidden
+          content: {}
+        404:
+          description: Resource not available
+          content: {}
+        500:
+          description: Unexpected error
+          content: {}
+        502:
+          description: Backend service not available
+          content: {}
+components:
+  schemas:
+    PostTransactionRequest:
+      title: PostTransactionRequest
+      required:
+      - actionType
+      - service
+      type: object
+      properties:
+        actionType:
+          type: string
+          description: action type
+          enum:
+          - AUTH
+          - AUTH_AND_CAPTURE
+          - AUTH_INCREMENTAL
+          - AUTH_REVERSAL
+          - AUTH_REVERSAL_PARTIAL
+          - CAPTURE
+          - CAPTURE_SPLIT
+          - PREAUTH
+        service:
+          type: string
+          description: Service requested. The follow-up actions must have the same
+            value as the initial action
+          enum:
+          - Purchase
+          - Refund
+          - AccountVerification
+        identification:
+          title: identification
+          required:
+          - requestorId
+          - acquirerId
+          - actionId
+          - cardAcceptorId
+          type: object
+          properties:
+            requestorId:
+              maxLength: 20
+              minLength: 1
+              type: string
+              description: Identifies the caller, determined by Worldline.
+            actionId:
+              maxLength: 36
+              minLength: 36
+              type: string
+              description: Unique identification of the action, determined by the
+                caller.  Mandatory UUID format.
+              example: "292acfe1-cdd1-4263-85b7-5cab0bfc08f4"
+            originalActionId:
+              maxLength: 36
+              minLength: 36
+              type: string
+              description: The unique identification of the former action to which the current action refers to.  Mandatory for reversals. In UUID format.
+              example: "292acfe1-cdd1-4263-85b7-5cab0bfc08f4"
+            transactionId:
+              maxLength: 50
+              minLength: 1
+              type: string
+              description: Identification of the transaction flow to which the transaction
+                belongs. The transactionId must be present in follow-up actions. Must
+                be the one returned in the response of the initial action, assigned
+                by Worldline.
+            originalTransactionId:
+              maxLength: 50
+              minLength: 1
+              type: string
+              description: Identification of the former transaction flow to which
+                this transaction refers to. For example, with a refund this would
+                refer to the transactionId of Purchase AUTH.
+            acquirerId:
+              maxLength: 11
+              minLength: 1
+              type: string
+              description: Unique identification of the acquirer, determined by Worldline
+              example: "671234567"
+            cardAcceptorId:
+              maxLength: 15
+              minLength: 1
+              type: string
+              description: Unique identification of the merchant, determined by the
+                acquirer. Also known as MID.
+              example: "1280300"
+            pspId:
+              maxLength: 20
+              minLength: 1
+              type: string
+              description: Unique identification of the PSP, determined by Worldline
+            pspReference:
+              maxLength: 36
+              minLength: 1
+              type: string
+              description: PSPs’ reference for the transaction.
+            merchantReference:
+              maxLength: 100
+              type: string
+              description: Merchants’ reference for the transaction
+              example: orderId merchant
+          description: Identification of the transaction and involved parties
+        financial:
+          title: financial
+          type: object
+          properties:
+            requestAmount:
+              $ref: '#/components/schemas/Amount'
+          description: Financial data
+        captureSplit:
+          title: captureSplit
+          type: object
+          properties:
+            captureSequenceNumber:
+              type: integer
+              description: Number of current CAPTURE in the sequence starting from 1. 
+                Increment for each split CAPTURE. To be used when a split of the
+                CAPTURE is needed (CAPTURE_SPLIT).
+            captureSequenceCount:
+              type: integer
+              description: Total number of captures for the transaction lifecycle
+                flow. Mandatory for final/last CAPTURE. When sequenceNumber = sequenceCount
+                it is assumed to be the last CAPTURE for the transaction lifecycle
+                flow and no more captures will be accepted. Note, the last capture requestAmount
+                is the sum of all the split capture amounts. This is to ensure any remaining
+                amount is reversed. 
+                To be used when a split of the CAPTURE is needed (CAPTURE_SPLIT).
+          description: If the merchant needs to split the shipment of goods, a split capture follow-up operation is used
+        circumstance:
+          title: circumstance
+          type: object
+          properties:
+            actionDateTime:
+              pattern: ^20[0-9]{2}-(0[1-9]|1[012])-(0[1-9]|[12][0-9]|3[01])T([01][0-9]|2[0-3]):[0-5][0-9]:[0-5][0-9][+-]([01][0-9]|2[0-3]):[0-5][0-9]$
+              type: string
+              description: Date and time when transaction is triggered by merchant
+                or cardholder in the merchant time zone. Date-time as yyyy-MM-ddThh:mm:ss
+                plus time offset to UTC as +hh:mm or -hh:mm.
+            channel:
+              type: string
+              description: Indicates the channel on which the action is triggered
+              enum:
+              - ECommerce
+              - MailOrder
+              - PhoneOrder
+              - Poi
+            scaExemptionCause:
+              type: string
+              description: Reason why no Strong Customer Authentication (SCA) has
+                been performed for the action
+              enum:
+              - LowValue
+              - LowFraud
+              - Delegation
+              - TrustedAcceptor
+              - SecureCorporate
+              - Recurring
+              - Mit
+              - AuthenticationOutage
+            cardholderVerificationMethod:
+              type: string
+              description: Cardholder verification method used in the transaction
+              enum:
+              - Cvv2
+              - 3DSecure
+              - OfflinePin
+              - OnlinePin
+              - Signature
+              - None
+            initiatorType:
+              type: string
+              description: Indicates who has triggered the action. This could either
+                be the cardholder or the merchant (acceptor). In the first case it
+                is a Cardholder Initiated Transaction (CIT) and in the second a Merchant
+                Initiated Transaction (MIT)
+              enum:
+              - Cardholder
+              - Acceptor
+            credentialStorage:
+              type: boolean
+              description: Indicates that a successful CIT will result in storing the card details for later card-on-file (COF) based CITs or MITs. Can only be present for CITs.             
+            schemeTransactionId:
+              maxLength: 20
+              minLength: 1
+              type: string
+              description: The Trace-ID/TID to be presented to the card scheme for
+                a Merchant Initiated Transaction (MIT). It must be the value returned
+                in the response of the initial Cardholder Initiated Transaction (CIT).
+            mitCause:
+              type: string
+              description: This field states why the merchant triggers or will (later) trigger a transaction without involvement of the cardholder. Must be present for Cardholder Initiated Transactions
+                (CIT) that start a series of recurring/installment/unscheduled non one-time transactions. 
+                Must be present for Merchant initiated Transactions (MIT) for specific usecases.
+              enum:
+              - Unscheduled
+              - Recurring
+              - FixedRecurring
+              - Installment
+              - Resubmission
+              - DelayedCharge
+              - Reauthorization
+              - NoShow
+              - Deferred
+              - Increment
+            retry:
+              type: boolean
+              description: Indicates an additional attempt to re-send a previous reversal. 
+          description: Transaction circumstance data
+        acceptor:
+          title: acceptor
+          type: object
+          properties:
+            merchantCategoryCode:
+              pattern: ^[0-9]{4}$
+              type: string
+              description: Merchant Category Code (MCC), retrieved from merchant configuration
+                if omitted
+            name:
+              maxLength: 50
+              minLength: 1
+              type: string
+              description: Merchant name, retrieved from merchant configuration if
+                omitted. Mandatory for payment facilitator transactions. Will be provided
+                to the issuer and can be visible on the cardholder statement. The
+                scheme rules apply, e.g. the maximum number of characters.
+            address:
+              maxLength: 50
+              minLength: 1
+              type: string
+              description: Merchant street address, retrieved from merchant configuration
+                if omitted. Mandatory for payment facilitator transactions.
+            postalCode:
+              maxLength: 10
+              minLength: 1
+              type: string
+              description: Merchant postal code, retrieved from merchant configuration
+                if omitted. Mandatory for payment facilitator transactions.
+            city:
+              maxLength: 60
+              minLength: 1
+              type: string
+              description: Merchant city, retrieved from merchant configuration if
+                omitted. Mandatory for payment facilitator transactions.
+            state:
+              pattern: ^[A-Z]{2}$
+              type: string
+              description: Merchant state code, retrieved from merchant configuration
+                if omitted. Can only be supplied if country is USA or CAN.
+            countryCode:
+              pattern: ^[A-Z]{3}$
+              type: string
+              description: Merchant ISO country code, retrieved from merchant configuration
+                if omitted
+            paymentFacilitatorId:
+              maxLength: 20
+              minLength: 1
+              type: string
+              description: Payment facilitator Id assigned by the card scheme
+            independentSalesOrgId:
+              maxLength: 20
+              minLength: 1
+              type: string
+              description: Independent sales organisation Id assigned by the card
+                scheme
+            subMerchantId:
+              maxLength: 20
+              minLength: 1
+              type: string
+              description: Id of sub-merchant assigned by payment facilitator. Mandatory
+                when payment facilitator Id is provided.
+            schemeMerchantId:
+              maxLength: 20
+              minLength: 1
+              type: string
+              description: Id for the merchant assigned by the card scheme. 
+          description: Acceptor (merchant) data
+        card:
+          title: card
+          type: object
+          properties:
+            cardNumber:
+              type: string
+              description: Card number (PAN)
+            expiryDate:
+              type: string
+              description: Card expiration date
+              example: 2111 (YYMM)
+            cvv2:
+              pattern: ^[0-9]{3,4}$
+              type: string
+              description: CVV2/CVC2/CVN2 code
+            tavv:
+              pattern: ^([0-9a-fA-F]{2}){19,20}$
+              type: string
+              description: Token Authentication Verification Value cryptogram data
+                in hex encoding (VISA TAVV or MasterCard DSRP cryptogram).
+            entryMode:
+              type: string
+              description: Method used to fetch the card data for the transaction.
+                File has to be used for Merchant Initiated Transactions (MIT).
+              enum:
+              - KeyEntry
+              - File
+          description: Recipient data
+        3DSecure:
+          title: 3DSecure
+          required:
+          - result
+          type: object
+          properties:
+            result:
+              type: string
+              description: Result of 3D Secure authentication process
+              enum:
+              - Full
+              - Attempt
+              - MerchantRisk
+              - IssuerRisk
+              - DataOnly
+            ucaf:
+              maxLength: 40
+              minLength: 40
+              type: string
+              description: MasterCard UCAF (AAV, SPA) in hex encoding
+            cavvData:
+              maxLength: 40
+              minLength: 40
+              type: string
+              description: Visa, Diners, UnionPay or JCB CAVV data in hex encoding
+            xid:
+              maxLength: 40
+              minLength: 40
+              type: string
+              description: Visa or JCB XID in hex encoding (3D Secure version 1)
+            transactionId:
+              maxLength: 36
+              minLength: 36
+              type: string
+              description: Transaction Id generated by the directory server (3D Secure
+                version 2.x)
+            version:
+              type: string
+              description: 3D Secure version.
+              enum:
+              - V1
+              - V2
+          description: 3D secure related data
+        reversal:
+          title: reversal
+          type: object
+          properties:
+            reversalCause:
+              type: string
+              description: Reason for reversal
+              enum:
+              - ResponseInvalid
+              - ResponseTimeout
+              - SubsequentlyDeclined
+              - ProcessingFailure
+              - CustomerCancellation
+          description: Reversal request data
+      description: Transaction request
+    PostTransactionResponse:
+      title: PostTransactionResponse
+      required:
+      - actionId
+      - declined
+      - responder
+      - responderDetails
+      type: object
+      properties:
+        actionId:
+          maxLength: 36
+          minLength: 36
+          type: string
+          description: actionId echoed from the request
+        transactionId:
+          maxLength: 50
+          minLength: 1
+          type: string
+          description: Identification of the transaction lifecycle flow to which the
+            transaction belongs, assigned by Worldline. The transactionId must be
+            present in follow-up actions.
+        declined:
+          type: boolean
+          description: Indicates whether the request has been declined completely
+        declineCause:
+          type: string
+          description: Indicates why the request has been declined completely
+        hints:
+          type: array
+          description: Additional information regarding transaction outcome and the
+            next step to be taken.  For example, DuplicateTransmission informs the
+            caller that the action has already been received previously and that additional
+            attempts are not needed
+          items:
+            type: string
+            example: DuplicateTransmission
+        tryAgainPeriod:
+          type: integer
+          minimum: 0
+          description: In case the hint TryAgainLater is returned this is the recommended time interval (in hours) after which at earliest an additional attempt should be performed. It is not guaranteed that this field is always present for TryAgainLater.
+        responder:
+          type: string
+          description: Indicates the entity which finally determined the outcome of
+            the transaction. Recipient means the Worldline acquirer host whereas Partner
+            is the external party involved (e.g. issuer or card scheme)
+          example: Recipient, Partner
+        responderDetails:
+          type: string
+          description: Response code provided by the entity which determined the final
+            outcome of the  transaction. In case this entity is Worldline it is the
+            internal result code of the Worldline host. This value is only provided
+            for information purpose since the content is subject to change. That is,
+            it must not be evaluated automatically. For decisions done by a partner
+            this field provides the response code delivered by him. That is, in case
+            Worldline directly interacts with the card scheme via ISO 8583 it is the
+            DE 39 field content from the returned response message.
+        approvalCode:
+          type: string
+          description: Authorization approval code provided by the issuer
+          example: AB90EF
+        schemeTransactionId:
+          maxLength: 20
+          minLength: 1
+          type: string
+          description: The Trace-ID/TID assigned by the scheme
+        cvv2Result:
+          type: string
+          description: The result of the CVV2/CVC2/CVN2 verification
+          enum:
+          - Correct
+          - Wrong
+          - Unable
+          - Omitted
+          - Missing
+          - Other
+          - Unknown
+        paymentAccountReference:
+          type: string
+          description: Links all tokens to a PAN (PAR)
+        financial:
+          type: object
+          properties:
+            responseAmount:
+              $ref: '#/components/schemas/Amount'
+        card:
+          type: object
+          properties:
+            brand:
+              type: string
+              enum:
+              - Visa
+              - MasterCard
+              - VPay
+              - Cirrus
+              - Maestro
+              - Electron
+              - Plus
+              - Diners
+              - Amex
+              - Jcb
+              - UnionPay
+      description: Transaction response
+    Amount:
+      required:
+      - amount
+      - currency
+      type: object
+      properties:
+        amount:
+          maxLength: 12
+          minLength: 1
+          pattern: ^\d{1,12}(\.\d{0,5})?$
+          type: string
+          description: |
+            Amount in the major units of the currency according to ISO 4217.
+            In case of euro, "3.25" (is 3.25 euro)
+          example: "3.25"
+        currency:
+          pattern: ^[A-Z]{3}$
+          type: string
+          description: Currency of the amount
+          example: EUR

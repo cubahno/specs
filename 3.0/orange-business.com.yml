@@ -1,0 +1,2481 @@
+openapi: 3.0.0
+info:
+  title: Cloud Avenue API
+  description: 'Cloud Avenue API allows you to create some ressources on vCloud Director.
+
+
+    ## Authentication
+
+    In order to authenticate to this API, you must first authenticate through vCloudDirector
+    API using
+
+    **POST https://{{api_host}}/cloudapi/1.0.0/sessions**. Then use _X-VMWARE-VCLOUD-ACCESS-TOKEN_
+    from
+
+    response header in your request.
+
+
+    If you need more information do not hesitate to read our dedicated
+
+    page on [our Wiki](https://wiki.cloudavenue.orange-business.com/w/index.php/API_Cloud_Avenue)
+
+    '
+  version: 2.0.0
+tags:
+- name: Authentication
+  description: Authentication method
+paths:
+  /cloudapi/1.0.0/sessions:
+    post:
+      x-compatibility:
+      - NGP_API_FOR_CUSTOMER
+      - NUP_API_FOR_CUSTOMER
+      security:
+      - vCloudDirector: []
+      tags:
+      - Authentication
+      summary: Login to your organization
+      description: 'This login method is available thanks to vCD API.
+
+        Login must be like username@organization (example : r.dupont@cav01ev01ocb0000000).
+
+        Once logged in, use use _X-VMWARE-VCLOUD-ACCESS-TOKEN_ from
+
+        response header and add it in X-VMWARE-VCLOUD-ACCESS-TOKEN security parameter.
+
+        '
+      operationId: getToken
+      responses:
+        '200':
+          description: Logged in successfully
+          headers:
+            X-VMWARE-VCLOUD-ACCESS-TOKEN:
+              description: JWT token to use with other requests
+              schema:
+                type: string
+          content:
+            application/json;version=35.2:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      parameters: []
+  /api/customers/v1.0/federate:
+    get:
+      x-compatibility:
+      - NUP_API_FOR_CUSTOMER
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      responses:
+        '200':
+          description: Successful response with the federation status of an organization
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/federation-status-type'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Return federation status of an organization
+      operationId: getFederation
+      tags:
+      - Users
+      parameters: []
+    post:
+      x-compatibility:
+      - NUP_API_FOR_CUSTOMER
+      - NGP_API_FOR_CUSTOMER
+      summary: Federate an existing organization
+      description: Federate an existing organization
+      operationId: createFederation
+      tags:
+      - Users
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      responses:
+        '201':
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      parameters: []
+    put:
+      x-compatibility:
+      - NUP_API_FOR_CUSTOMER
+      - NGP_API_FOR_CUSTOMER
+      summary: Regenerate SAML certificate
+      description: Regenerate SAML certificate of an organization and updates the
+        LemonLDAP entry with the new certificate.
+      operationId: updateFederation
+      tags:
+      - Users
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      responses:
+        '201':
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      parameters: []
+  /api/customers/v1.0/ip:
+    post:
+      x-compatibility:
+      - NUP
+      - NUP_API_FOR_CUSTOMER
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Request and configure a new public IP address
+      operationId: createPublicIP
+      tags:
+      - Public IP
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: header
+        name: X-Natted-IP
+        required: false
+        schema:
+          type: string
+        description: Target IP to configure NAT. If not provided, it configure [Double
+          NAT](https://wiki.flexible-computing-advanced.orange-business.com/wiki/Le_r%C3%A9seau#Double_NAT)
+          with a new IP on INET VDC Edge. If the IP or IP range provided is in 100.64.102.1-100.64.102.253
+          [Double NAT](https://wiki.flexible-computing-advanced.orange-business.com/wiki/Le_r%C3%A9seau#Double_NAT)
+          is configured. If the IP is a private IP [Direct NAT](https://wiki.flexible-computing-advanced.orange-business.com/wiki/Le_r%C3%A9seau#NAT_Direct)
+          is configured.
+      - in: header
+        name: X-VDC-Edge-Name
+        required: false
+        schema:
+          type: string
+        description: Public IP is natted toward the specified VDC Edge. This parameter
+          overrides X-VDC-Name.
+      - in: header
+        name: X-VDC-Name
+        required: false
+        schema:
+          type: string
+        description: Public IP is natted toward the INET VDC Edge in the specified
+          VDC Name. This parameter helps to find target VDC Edge in case of multiples
+          INET VDC Edges with same names.
+      responses:
+        '201':
+          description: New Public IP address request in progress
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/ip:
+    get:
+      x-compatibility:
+      - NUP
+      - NUP_API_FOR_CUSTOMER
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Get Organization's public IP addresses
+      operationId: getPublicIPs
+      tags:
+      - Public IP
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      responses:
+        '200':
+          description: List of public IPs
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/publicIps'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v1.0/ip/{public-ip}:
+    delete:
+      x-compatibility:
+      - NUP
+      - NUP_API_FOR_CUSTOMER
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Remove all configuration related to a public IP address and free IP
+      operationId: deletePublicIP
+      tags:
+      - Public IP
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: public-ip
+        required: true
+        description: Public IP address to free
+        schema:
+          type: string
+          format: ip
+      responses:
+        '200':
+          description: Public IP address is being deleted
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v1.0/jobs/{Job-Id}:
+    get:
+      x-compatibility:
+      - NUP
+      - NUP_API_FOR_CUSTOMER
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Returns a job status by ID.
+      operationId: getJobById
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      tags:
+      - Jobs
+      parameters:
+      - in: path
+        name: Job-Id
+        required: true
+        example: 8fe586e1-405e-4e7c-9a9a-bcebe9062659
+        schema:
+          type: string
+          format: uuid
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/parentJob'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/catalogs:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Get list of all catalogs
+      description: Get list of all catalogs.
+      operationId: getCatalogs
+      tags:
+      - Catalogs
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      responses:
+        '200':
+          description: catalogs list
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/catalog_list'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/catalogs/{catalog_id}:
+    put:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: UPDATE the catalog for an organization
+      description: UPDATE the catalog for an organization.
+      tags:
+      - Catalogs
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: catalog_id
+        required: true
+        description: catalog id.
+        schema:
+          type: string
+      requestBody:
+        description: catalog visibility detail
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/visibility'
+            example: '{"hidden": false}'
+      responses:
+        '200':
+          description: update catalog
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/catalog_update'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/vcda/ips:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Get on premise IP addresses
+      description: Get list of on premise IP addresses allowed for this organization's
+        draas offer
+      operationId: getVcdaIPs
+      tags:
+      - VCDA
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json;version=35.2:
+              schema:
+                type: array
+                items:
+                  type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/vcda/ips/{Ip-Address}:
+    post:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Add on premise IP address
+      description: Allow a new on premise IP address for this organization's draas
+        offer
+      operationId: createVcdaIP
+      tags:
+      - VCDA
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: Ip-Address
+        required: true
+        schema:
+          $ref: '#/components/schemas/ipAddress'
+      responses:
+        '204':
+          description: Successful response
+          content:
+            application/json;version=35.2:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    delete:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Remove on premise IP address
+      description: Remove an existing on premise IP address from this organization's
+        draas offer
+      operationId: deleteVcdaIP
+      tags:
+      - VCDA
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: Ip-Address
+        required: true
+        schema:
+          $ref: '#/components/schemas/ipAddress'
+      responses:
+        '204':
+          description: Successful response
+          content:
+            application/json;version=35.2:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/jobs:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      - NUP
+      - NUP_API_FOR_CUSTOMER
+      summary: Get current root job id of an organization
+      description: Get current root job id of an organization
+      operationId: getJobs
+      tags:
+      - Organizations
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      responses:
+        '200':
+          description: Current root job id of an organization.
+          content:
+            application/json;version=35.2:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/jobs'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/vdcs/{vdc-name}/edges:
+    post:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: vdc-name
+        required: true
+        example: VDC01
+        description: VDC name.
+        schema:
+          type: string
+      requestBody:
+        description: Edge Gateway creation body
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/edgeGatewayCreate'
+      responses:
+        '201':
+          description: Job to create new Edge Gateway successfully created and generated
+            name returned.
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Create one Edge gateway
+      description: When creating an Edge Gateway attached to a vDC, this vDC will
+        be isolated.
+      operationId: createVdcEdge
+      tags:
+      - Edge Gateways
+  /api/customers/v2.0/vdc-groups/{vdc-group-name}/edges:
+    post:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: vdc-group-name
+        required: true
+        example: myvDCGroup
+        description: VDC Group name.
+        schema:
+          type: string
+      requestBody:
+        description: Edge Gateway creation body
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/edgeGatewayCreate'
+      responses:
+        '201':
+          description: Job to create new Edge Gateway successfully created and generated
+            name returned.
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Create one Edge gateway in vDC group
+      description: When creating an Edge Gateway attached to a vDC group, this Edge
+        Gateway will be shared with other vDC inside the same vDC group
+      operationId: createVdcGroupEdge
+      tags:
+      - Edge Gateways
+  /api/customers/v2.0/edges:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      responses:
+        '200':
+          description: List of Edge gateways.
+          content:
+            application/json;version=35.2:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/edgeGateway'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: List edge gateway of an organization
+      operationId: getEdges
+      tags:
+      - Edge Gateways
+  /api/customers/v2.0/edges/{edge-id}:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: edge-id
+        required: true
+        schema:
+          type: string
+        example: cc1f35c2-90a2-48d1-9359-62794faf44ad
+      responses:
+        '200':
+          description: Edge gateway details.
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/edgeGateway'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Get Edge gateway details
+      operationId: getEdgeById
+      tags:
+      - Edge Gateways
+    delete:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: edge-id
+        required: true
+        schema:
+          type: string
+        example: cc1f35c2-90a2-48d1-9359-62794faf44ad
+      responses:
+        '202':
+          description: Edge gateway deleted.
+          headers:
+            X-Automation-Job-Id:
+              schema:
+                type: string
+                format: uuid
+              description: Job-Id used in jobs management requests.
+          content:
+            application/json;version=35.2:
+              schema:
+                type: string
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Remove Edge Gateway
+      operationId: deleteEdge
+      tags:
+      - Edge Gateways
+  /api/customers/v2.0/edges/{edge-id}/networks:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Get edge gateway network configuration
+      description: Retrieve the configuration of edge gateway network
+      operationId: getEdgeNetworks
+      tags:
+      - Edge Gateways
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: edge-id
+        required: true
+        schema:
+          type: string
+        example: cc1f35c2-90a2-48d1-9359-62794faf44ad
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/edgeGatewayNetworks'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/edges/{edge-id}/load_balancing:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Get Load Balancing Configuration on Edge Gateway
+      description: Retrieve the configuration of edge gateway network
+      operationId: getEdgeLoadBalancing
+      tags:
+      - Edge Gateways
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: edge-id
+        required: true
+        schema:
+          type: string
+        example: cc1f35c2-90a2-48d1-9359-62794faf44ad
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/edgeGatewayLoadBalancing'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    put:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Modify Edge Gateway Load Balancing Configuration
+      description: Modification of the configuration of edge gateway load balancing
+      operationId: updateEdgeLoadBalancing
+      tags:
+      - Edge Gateways
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: edge-id
+        required: true
+        schema:
+          type: string
+        example: cc1f35c2-90a2-48d1-9359-62794faf44ad
+      requestBody:
+        description: new edge gateway subnets configuration
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/edgeGatewayLoadBalancing'
+      responses:
+        '201':
+          description: Request for edge gateway subnets configuration created
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/tier-0-vrfs:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Get all Tier-0 Gateway
+      description: Get all Tier-0 gateway.
+      operationId: getTier0Vrfs
+      tags:
+      - Tier-0
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      responses:
+        '200':
+          description: List of Tier-0
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/tier0List'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/tier-0-vrfs/{tier0_name}:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Get Tier-0 Details
+      description: Get Tier-0 details.
+      operationId: getTier0VrfByName
+      tags:
+      - Tier-0
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: tier0_name
+        required: true
+        schema:
+          $ref: '#/components/schemas/tier0Name'
+      responses:
+        '200':
+          description: Details of Tier-0
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/tier0Details'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/tier-0-vrfs/{tier0_name}/service/{service}:
+    delete:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: remove service connection on Tier0-vrf
+      description: Will check that the service can be remove and if so it will create
+        a job.
+      operationId: deleteTier0VrfService
+      tags:
+      - Tier-0
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: tier0_name
+        required: true
+        schema:
+          $ref: '#/components/schemas/tier0Name'
+      - in: path
+        name: service
+        required: true
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Job successfully created.
+          headers:
+            X-Automation-Job-Id:
+              schema:
+                type: string
+                format: uuid
+              description: Job-Id used in jobs management requests.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/tier-0-vrfs/{tier0_name}/shared_storage:
+    post:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Create Shared storage connectivity
+      description: Create Shared storage connectivity on a given Tier-0 providing
+        VLAN ID and IP range.
+      tags:
+      - Tier-0
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: tier0_name
+        required: true
+        schema:
+          type: string
+      requestBody:
+        description: Shared storage creation body
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/sharedStorageCreate'
+      responses:
+        '201':
+          description: Job successfully created.
+          headers:
+            X-Automation-Job-Id:
+              schema:
+                type: string
+                format: uuid
+              description: Job-Id used in jobs management requests.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/services:
+    post:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      summary: Add network connectivity on a Tier-0
+      description: Add network connectivity on a Tier-0.
+      tags:
+      - Network-connectivity
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      requestBody:
+        description: network schema
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/network_schema'
+            examples:
+              EIN:
+                description: Add ein network
+                value: '{"network_type": "ein", "tier0_name": "prvrf01eocb1010311allsp02"}'
+              BVPN:
+                description: Add bvpn network
+                value: '{"network_type": "vp", "tier0_name": "prvrf01eocb1010311allsp02",
+                  "properties":{"vlanid": "2268"}}'
+      responses:
+        '201':
+          description: Job successfully created.
+          headers:
+            X-Automation-Job-Id:
+              schema:
+                type: string
+                format: uuid
+              description: Job-Id used in jobs management requests.
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /api/customers/v2.0/vdcs/batch:
+    post:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      requestBody:
+        description: 'Tenant technical details.
+
+          Use vDC schema to create ''One Room vDC'', ''Dual Room 1vDC'' or ''High
+          Availability Dual Room vDC''
+
+          Use DualRoom2vDC to create Dual Room 2vDC
+
+          '
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              type: array
+              items:
+                oneOf:
+                - $ref: '#/components/schemas/createOrgVdcV2'
+                - $ref: '#/components/schemas/createOrg2Vdcs'
+      responses:
+        '201':
+          description: Org VDC Created.
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Create multiple Org VDC
+      tags:
+      - vDC
+  /api/customers/v2.0/vdcs:
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      responses:
+        '200':
+          description: VDC Name list
+          content:
+            application/json;version=35.2:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/vDCList'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: List Org vDCs
+      description: List all VDC inside an Organization
+      operationId: getOrgVdcs
+      tags:
+      - vDC
+    post:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters: []
+      requestBody:
+        description: Tenant technical details
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/createOrgVdcV2'
+      responses:
+        '201':
+          description: Org VDC Created.
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Create a new Org VDC
+      operationId: createOrgVdc
+      tags:
+      - vDC
+  /api/customers/v2.0/vdcs/{vdc-name}:
+    delete:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: vdc-name
+        required: true
+        example: VDC01
+        description: VDC name.
+        schema:
+          type: string
+      responses:
+        '201':
+          description: Org VDC Deleted.
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Delete a vDC
+      description: Delete an empty vDC, will return an error if the vDC has Edges
+        or vApps (must remove before)
+      operationId: deleteOrgVdc
+      tags:
+      - vDC
+    get:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: vdc-name
+        required: true
+        schema:
+          $ref: '#/components/schemas/vdcName'
+      responses:
+        '200':
+          description: vDC details
+          content:
+            application/json;version=35.2:
+              schema:
+                $ref: '#/components/schemas/GetOrgVdcs2'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Get details about one vDC
+      operationId: getOrgVdcByName
+      tags:
+      - vDC
+    put:
+      x-compatibility:
+      - NGP
+      - NGP_API_FOR_CUSTOMER
+      x-api-for-customer: true
+      security:
+      - X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+      parameters:
+      - in: path
+        name: vdc-name
+        required: true
+        schema:
+          $ref: '#/components/schemas/vdcName'
+      requestBody:
+        description: shaping details
+        required: true
+        content:
+          application/json;version=35.2:
+            schema:
+              $ref: '#/components/schemas/UpdateOrgVdcV2'
+      responses:
+        '201':
+          description: Veeam tenant modify quota job created
+          $ref: '#/components/responses/JobCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '406':
+          $ref: '#/components/responses/NotAcceptable'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '500':
+          $ref: '#/components/responses/InternalError'
+      summary: Update a vDC
+      operationId: updateOrgVdc
+      tags:
+      - vDC
+servers:
+- url: https://console1.cloudavenue.orange-business.com
+- url: https://console2.cloudavenue.orange-business.com
+security:
+- vCloudDirector: []
+- X-VMWARE-VCLOUD-ACCESS-TOKEN: []
+components:
+  securitySchemes:
+    vCloudDirector:
+      type: http
+      scheme: basic
+    X-VMWARE-VCLOUD-ACCESS-TOKEN:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  responses:
+    JobCreated:
+      description: Job created
+      headers:
+        X-Automation-Job-Id:
+          schema:
+            type: string
+            format: uuid
+          description: Job-Id used in jobs management requests.
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/jobcreated'
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/apiError'
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/apiError'
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/apiError'
+    NotAcceptable:
+      description: Not Acceptable
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/apiError'
+    NotFound:
+      description: Not Found
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/apiError'
+    Conflict:
+      description: There is an other job pending for this organization
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/apiError'
+    InternalError:
+      description: Internal Server Error
+      content:
+        application/json;version=35.2:
+          schema:
+            $ref: '#/components/schemas/apiError'
+  schemas:
+    customerInformation:
+      required:
+      - customerType
+      - bssServiceId
+      - customerName
+      properties:
+        bssServiceId:
+          type: string
+          example: OCB1234567
+        customerName:
+          type: string
+          example: Example Name
+        customerType:
+          $ref: '#/components/schemas/customerType'
+    publicIps:
+      required:
+      - uplinkIp
+      properties:
+        internalIp:
+          type: string
+          example: 10.10.10.0/30
+        networkConfig:
+          type: array
+          items:
+            type: object
+            required:
+            - uplinkIp
+            - translatedIp
+            properties:
+              uplinkIp:
+                type: string
+                example: 196.26.50.90
+              translatedIp:
+                type: string
+                example: 10.10.10.0/30
+              edgeGatewayName:
+                type: string
+                description: The name of the edge gateway related to the public ip.
+                  This properties is only present for NGP.
+    customerType:
+      type: string
+      enum:
+      - internal
+      - external
+      - NGP_INTERNAL
+      - NGP_OFR
+      - NGP_EXTERNAL
+      - NGP_VDI
+      - NGP_B2GAAS
+      - NGP_B2G3MI
+      - NGP_MCC
+      example: NGP_EXTERNAL
+    identityProvider:
+      type: string
+      enum:
+      - local
+      - siu
+      - guardian
+      example: siu
+    siteCode:
+      type: string
+      enum:
+      - VDR
+      - RM
+      - FR4
+      - CHA
+      - SIN
+      - MUM
+      - ATL
+      example: VDR
+      description: Site where the resource is located
+    pesg:
+      type: object
+      required:
+      - type
+      properties:
+        id:
+          type: string
+          description: internal object identifier
+          example: 33445-332323-32323
+        name:
+          type: string
+          example: ABCDE_PESG_INET_S1
+          description: This action implies the creation of a Logical Switch and an
+            External Network.
+        type:
+          type: string
+          enum:
+          - ADMIN
+          - INET
+          - PFS
+          - RBCI
+          - EIN
+          - EXPL
+          - ST
+          - GINIS
+          - GINEFA
+          - GINCMZ
+          - NFS
+          - BACKUP
+          example: INET
+          description: For external customers `ADMIN`, `INET`. <br/> For internal
+            customers `PFS`, `RBCI`, `EIN`, `EXPL`, `ST`, `GINIS`, `GINEFA`, `GINCMZ`,
+            `NFS`, `BACKUP`.
+        intercoIp:
+          type: string
+          example: 100.64.55.14/28
+          description: Contains public-ip in case of INET PESG and the associated
+            network mask
+        vlanId:
+          type: integer
+          example: 11
+          description: Only and required for NFS PESG
+        internalIp:
+          type: string
+          example: 100.64.102.254/24
+          description: Internal Ip connected with associated network mmask (will be
+            the one belonging to the external network of the organization)
+        networkConfig:
+          $ref: '#/components/schemas/networkConfig'
+    networkConfig:
+      type: array
+      items:
+        type: object
+        required:
+        - uplinkIp
+        - translatedIp
+        properties:
+          uplinkIp:
+            type: string
+            example: 195.25.43.10
+            description: Contains public-ip in case of INET PESG
+          translatedIp:
+            type: string
+            example: 100.64.102.23
+            description: Contains vDC Edge IP in case of NAT configuration
+    edges:
+      description: list of provider edges.
+      type: array
+      items:
+        $ref: '#/components/schemas/pesg'
+    orgUsers:
+      type: array
+      items:
+        $ref: '#/components/schemas/orgUser'
+    orgUser:
+      type: object
+      required:
+      - login
+      - providerId
+      - providerType
+      properties:
+        login:
+          type: string
+          example: CVNN4456
+          description: User login in vCloud Director
+        providerId:
+          type: string
+          description: User identifier provided by the Identify Provider. ie. local
+            => uuid; siu => siu-id
+        providerType:
+          type: string
+          example: local
+          enum:
+          - local
+          - siu
+          - guardian
+        role:
+          type: string
+          enum:
+          - Organization Administrator
+          - Catalog Author
+          - vApp Author
+          - vApp User
+          - Console Access Only
+          default: Organization Administrator
+        emailAddress:
+          type: string
+          example: noreply@orange.com
+          default: ''
+        fullName:
+          type: string
+          example: ''
+          default: ''
+        isEnabled:
+          type: boolean
+          example: true
+          default: true
+        telephone:
+          type: string
+          example: ''
+          default: ''
+    orgUserRecord:
+      type: object
+      properties:
+        login:
+          type: string
+          example: CVNN4456
+          description: User login in vCloud Director
+        providerType:
+          type: string
+          example: local
+          enum:
+          - local
+          - siu
+          - guardian
+        fullName:
+          type: string
+          example: Full Name
+          default: ''
+        isEnabled:
+          type: boolean
+          example: true
+          default: true
+    storages:
+      type: array
+      items:
+        type: object
+        required:
+        - name
+        properties:
+          name:
+            type: string
+            example: SILVERZ_CUST1
+            description: Name of the storage policy usable in a storage profile.
+    orgVdcs:
+      type: array
+      items:
+        type: object
+        required:
+        - name
+        - vdcServiceClass
+        - vdcDisponibilityClass
+        - vdcBillingModel
+        - vdcStorageBillingModel
+        - vdcStorageProfiles
+        - cpuAllocated
+        - memoryAllocated
+        properties:
+          id:
+            type: string
+            example: a90baf04-7464-4631-98af-cd86077feb13
+            description: VMware unique ID. There is no ID in the body of the POST
+              request, as VMware which generates it. This ID must be present for GET
+              and PUT.
+          name:
+            type: string
+            example: VDC_BENCH_AP
+            description: Name of the new org vdc.
+            minLength: 2
+            maxLength: 27
+            pattern: ^\w{2,27}$
+          description:
+            type: string
+            example: Additionnal VDC for benchmarks
+            description: Description of the new org vdc.
+          isEnabled:
+            type: boolean
+            example: true
+            default: true
+          vdcServiceClass:
+            type: string
+            enum:
+            - ECO
+            - STD
+            - HP
+            - VOIP
+            description: SILVER, GOLD and PLATINUM_3K storage types are available
+              for all classes. PLATINUM_5K and PLATINUM_10K are available only for
+              STD (Standard), HP (High Performance) and VOIP (VoIP).
+          vdcDisponibilityClass:
+            type: string
+            example: ONE-ROOM
+            enum:
+            - ONE-ROOM
+            - DUAL-ROOM
+            description: Allocation model used by this vdc. DUAL-ROOM isn't available
+              for vdcServiceClass ECO.
+          vdcBillingModel:
+            type: string
+            description: Choose Billing model of storage resources. PAYG and DRAAS
+              only available for vdcServiceClass ECO and STD.
+            enum:
+            - PAYG
+            - DRAAS
+            - MIXED
+            - RESERVED
+            - DEDICATED
+          vdcStorageBillingModel:
+            type: string
+            enum:
+            - PAYG
+            - RESERVED
+            description: Available for all vdcServiceClass.
+          nicQuota:
+            type: number
+            example: 0
+            description: Maximum number of virtual NICs allowed in this vdc. Defaults
+              to 0, which specifies an unlimited number.
+            default: 0
+          networkQuota:
+            type: number
+            example: 1000
+            description: Maximum number of network objects that can be deployed in
+              this vdc. Defaults to 0, which means no networks can be deployed.
+            default: 0
+          vmQuota:
+            type: number
+            example: 0
+            default: 0
+            description: Maximum number of VMs that can be created in this vdc. Defaults
+              to 0, which specifies an unlimited number.
+          vcpuInMhz2:
+            type: number
+            example: 2300
+            default: 2300
+            minimum: 1000
+            description: Specifies the clock frequency, in Mhz, for any virtual CPU
+              that is allocated to a VM.
+          cpuAllocated:
+            type: number
+            example: 100000
+            minimum: 5000
+            maximum: 1000000
+            description: Capacity that is committed to be available or used as a limit
+              in PAYG mode. Unit for compute capacity allocated to this vdc is MHz.
+              Note. Reserved capacity is automatically set according to the service
+              class.
+          memoryAllocated:
+            type: number
+            example: 72
+            minimum: 10
+            maximum: 1000
+            description: Memory capacity that is committed to be available or used
+              as a limit in PAYG mode. Unit for memory capacity allocated to this
+              vdc is Gb.
+          vdcStorageProfiles:
+            $ref: '#/components/schemas/vdcStorageProfiles'
+          vdcEdges:
+            $ref: '#/components/schemas/vdcEdges'
+    storageProfile:
+      type: object
+      required:
+      - name
+      - limit
+      properties:
+        id:
+          type: string
+          example: a90baf04-7464-4631-98af-cd86077feb13
+          description: VMware unique ID. There is no ID in the body of the POST request,
+            as VMware which generates it. This ID must be present for GET and PUT.
+        name:
+          type: string
+          enum:
+          - SILVER
+          - GOLD
+          - PLATINUM_3K
+          - PLATINUM_5K
+          - PLATINUM_10K
+        limit:
+          description: Max number of units allocated for this storage profile. In
+            Gb
+          type: integer
+          example: 5000
+          minimum: 500
+          maximum: 50000
+          default: 2000
+        used:
+          description: Current usage of this StorageProfile in Gb. Deletion is allowed
+            only if there is no usage of the StorageProfile
+          type: integer
+          example: 5000
+          minimum: 0
+        default:
+          type: boolean
+          example: true
+          enum:
+          - true
+          - false
+    vdcStorageProfiles:
+      description: List of provider vdc storage profiles to add to this vdc.
+      type: array
+      items:
+        $ref: '#/components/schemas/storageProfile'
+    action:
+      required:
+      - name
+      - status
+      - details
+      properties:
+        name:
+          type: string
+          enum:
+          - CREATE_VORG
+          - DELETE_VORG
+          - MODIFY_VDC_RESOURCES
+          - CREATE_VDC
+        status:
+          type: string
+          enum:
+          - CREATED
+          - PENDING
+          - IN_PROGRESS
+          - FAILED
+          - DONE
+        details:
+          type: string
+          description: Human-readable action description
+      type: object
+    parentJob_metadata:
+      required:
+      - description
+      - name
+      - status
+      properties:
+        actions:
+          type: array
+          items:
+            $ref: '#/components/schemas/action'
+        description:
+          type: string
+          description: parent job containing a list of actions
+        name:
+          type: string
+          description: parent_job
+        status:
+          type: string
+          enum:
+          - CREATED
+          - PENDING
+          - IN_PROGRESS
+          - FAILED
+          - DONE
+      type: object
+    parentJob:
+      type: array
+      items:
+        $ref: '#/components/schemas/parentJob_metadata'
+    metadata:
+      required:
+      - key
+      - value
+      - scope
+      properties:
+        key:
+          type: string
+          example: BSS-Contract-Id
+        value:
+          type: string
+          example: 12-6124343
+        scope:
+          type: string
+          enum:
+          - rw
+          - ro
+          - hidden
+          default: hidden
+      type: object
+    vCDPlugin:
+      required:
+      - pluginName
+      - version
+      properties:
+        pluginName:
+          type: string
+          example: NSS
+        version:
+          type: string
+          example: '0.9'
+      type: object
+    federation-status-type:
+      type: string
+      enum:
+      - local
+      - siu
+    jobcreated:
+      properties:
+        message:
+          type: string
+          example: Job successfully created
+        jobId:
+          type: string
+          example: 16f61fe1-481c-4ec1-b62d-046af22b51ad
+    apiError:
+      required:
+      - code
+      - reason
+      - message
+      properties:
+        code:
+          type: string
+          example: err-0002
+        reason:
+          type: string
+          example: auth-0001
+        message:
+          type: string
+          example: The request you are trying to make does not have sufficient permissions
+      type: object
+    ipAddress:
+      description: IPv4 Ip Address
+      type: string
+      pattern: ^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?).(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+    serviceType:
+      type: string
+      enum:
+      - all
+      - ein
+      - eic
+      example: all
+      description: Service Type
+    tier0VRFClassOfService:
+      type: string
+      enum:
+      - SHARED_STANDARD
+      - SHARED_PREMIUM
+      - DEDICATED_MEDIUM
+      - DEDICATED_LARGE
+      example: SHARED_STANDARD
+      description: Class of service wanted on Tier-0 VRF Gateway
+    jobs:
+      description: Current root job id of an organization and get, post or delete
+        links
+      properties:
+        jobId:
+          $ref: '#/components/schemas/OrganizationJobOutput'
+        links:
+          description: get, post or delete links
+          type: object
+          example:
+            get:
+              href: /api/v1.0/jobs/d6661...ocb1270852
+              method: GET
+            post:
+              href: /api/v1.0/jobs/d6661...ocb1270852
+              method: POST
+            delete:
+              href: /api/v1.0/jobs/d6661...ocb1270852
+              method: DELETE
+    edgeGatewayCreate:
+      description: Edge Gateway (NSX-T Tier-1 Gateway)
+      type: object
+      required:
+      - tier0VrfId
+      properties:
+        tier0VrfId:
+          description: Identifier of Tier-0 VRF to connect the Edge Gateway
+          type: string
+          example: prvrf01iocb0000001allsp01
+        enableLoadBalancing:
+          description: Enable the Load Balancing NSX AVI Feature
+          type: boolean
+          default: true
+          example: 'false'
+    vdcGroup:
+      type: string
+      title: vDC Group
+      description: Name of an existing vDC group or a new one. This allows you to
+        isolate your vDC. VMs of vDCs which belong to the same vDC group can communicate
+        together.
+      example: myvDCGroup
+    organizationNameV2:
+      type: string
+      example: cav01iv02ocb0005676
+      description: Organization name
+    tier0Name:
+      type: string
+      example: prvrf01iocb1105414allsp02
+      description: Tier0-VRF name
+    vdcName:
+      type: string
+      example: myvdc
+      description: Virtual Datacenter Name
+    vdcEdges:
+      description: List of provider edges.
+      type: array
+      items:
+        $ref: '#/components/schemas/vdcEdge'
+    vdcEdge:
+      type: object
+      required:
+      - name
+      - uuid
+      - type
+      - highAvailability
+      properties:
+        id:
+          type: string
+          example: 1e23:3432:ab32:1223
+        name:
+          type: string
+          example: vDCName_vCDESG_PFS_S1_01
+        type:
+          type: string
+          enum:
+          - ADMIN
+          - INET
+          - BVPN
+          - CROSSCONNECT
+          - RBCI
+          - PFS
+          - EIN
+          - EXPL
+          - ST
+          - GINIS
+          - GINEFA
+          - GINCMZ
+          - NFS
+          - BACKUP
+          example: INET
+          description: For external customers `ADMIN`, `INET`, `BVPN`, `CROSSCONNECT`.
+            <br/> For internal customers `PFS`, `RBCI`, `EIN`, `EXPL`, `ST`, `GINIS`,
+            `GINEFA`, `GINCMZ`, `NFS`, `BACKUP`.
+        highAvailability:
+          type: boolean
+          default: true
+    vdcStorageProfilesV2:
+      required:
+      - class
+      - limit
+      - default
+      description: Storage policies description
+      type: object
+      properties:
+        class:
+          type: string
+          enum:
+          - silver
+          - silver_r1
+          - silver_r2
+          - gold
+          - gold_r1
+          - gold_r2
+          - gold_hm
+          - platinum3k
+          - platinum3k_r1
+          - platinum3k_r2
+          - platinum3k_hm
+          - platinum7k
+          - platinum7k_r1
+          - platinum7k_r2
+          - platinum7k_hm
+          default: gold
+        limit:
+          description: Max number of units allocated for this storage profile. In
+            Gb
+          type: integer
+          example: 500
+          minimum: 500
+          maximum: 10000
+          default: 500
+        used:
+          description: Current usage of this StorageProfile in Gb. Deletion is allowed
+            only if there is no usage of the StorageProfile
+          type: integer
+          example: 5000
+          minimum: 0
+        default:
+          description: True if the storage Profile is the default one. Only one default
+            per vdc is allowed.
+          type: boolean
+          example: true
+    orgVdcV2:
+      type: object
+      required:
+      - name
+      - vdcServiceClass
+      - vdcDisponibilityClass
+      - vdcBillingModel
+      - vdcStorageBillingModel
+      - vdcStorageProfiles
+      - cpuAllocated
+      - vcpuInMhz2
+      - memoryAllocated
+      properties:
+        name:
+          type: string
+          example: VDC_ECO_1
+          description: Name of the new org vdc.
+          minLength: 2
+          maxLength: 27
+          pattern: ^\w{2,27}$
+        description:
+          type: string
+          example: Additionnal VDC for benchmarks
+          description: Description of the new org vdc.
+        vdcServiceClass:
+          type: string
+          example: ECO
+          enum:
+          - ECO
+          - STD
+          - HP
+          - VOIP
+        vdcDisponibilityClass:
+          type: string
+          example: ONE-ROOM
+          enum:
+          - ONE-ROOM
+          - DUAL-ROOM
+          - HA-DUAL-ROOM
+        vdcBillingModel:
+          type: string
+          description: Choose Billing model of compute resources.
+          enum:
+          - PAYG
+          - DRAAS
+          - RESERVED
+        vcpuInMhz2:
+          type: number
+          example: 2200
+          default: 2200
+          minimum: 1200
+          description: Specifies the clock frequency, in Mhz, for any virtual CPU
+            that is allocated to a VM.
+        cpuAllocated:
+          type: number
+          example: 11000
+          minimum: 5
+          maximum: 2500000
+          description: Capacity that is committed to be available or used as a limit
+            in PAYG mode. Unit for compute capacity allocated to this vdc is MHz.
+            Note. Reserved capacity is automatically set according to the service
+            class.
+        memoryAllocated:
+          type: number
+          example: 4
+          minimum: 1
+          maximum: 5000
+          description: Memory capacity that is committed to be available or used as
+            a limit in PAYG mode. Unit for memory capacity allocated to this vdc is
+            Gb.
+        vdcStorageBillingModel:
+          title: Storage billing model
+          type: string
+          enum:
+          - PAYG
+          - RESERVED
+          description: Available for all vdcServiceClass.
+        vdcStorageProfiles:
+          type: array
+          items:
+            $ref: '#/components/schemas/vdcStorageProfilesV2'
+    createOrgVdcV2:
+      title: vDC
+      required:
+      - vdc
+      properties:
+        vdcGroup:
+          $ref: '#/components/schemas/vdcGroup'
+        vdc:
+          $ref: '#/components/schemas/orgVdcV2'
+    createOrg2Vdcs:
+      title: DualRoom 2vDC
+      required:
+      - vdcGroup
+      - dualVdcs
+      properties:
+        vdcGroup:
+          $ref: '#/components/schemas/vdcGroup'
+        dualVdcs:
+          type: object
+          required:
+          - vdc1
+          - vdc2
+          properties:
+            vdc1:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/orgVdcV2'
+            vdc2:
+              type: object
+              allOf:
+              - $ref: '#/components/schemas/orgVdcV2'
+    UpdateOrgVdcV2:
+      required:
+      - vdcGroup
+      - vdc
+      properties:
+        vdcGroup:
+          $ref: '#/components/schemas/vdcGroup'
+        vdc:
+          $ref: '#/components/schemas/orgVdcV2'
+    GetOrgVdcs2:
+      required:
+      - vdc
+      properties:
+        vdcGroup:
+          $ref: '#/components/schemas/vdcGroup'
+        vdc:
+          $ref: '#/components/schemas/orgVdcV2'
+    edgeGateway:
+      type: object
+      description: Edge Gateway (NSX-T Tier-1 Gateway)
+      properties:
+        tier0VrfId:
+          type: string
+          example: prvrf01iocb0000001allsp01
+          description: Identifier of Tier-0 VRF to connect the Edge Gateway
+        edgeId:
+          type: string
+          example: cc1f35c2-90a2-48d1-9359-62794faf44ad
+        edgeName:
+          type: string
+        ownerType:
+          type: string
+          enum:
+          - vdc
+          - vdc-group
+        ownerName:
+          type: string
+          example: myVDC01
+        description:
+          type: string
+    vDCList:
+      type: object
+      description: vDC list
+      properties:
+        vdc_name:
+          type: string
+          example: vdc01
+          description: vDC name
+        vdc_uuid:
+          type: string
+          example: 1bb33b06-8a3b-4a2c-a077-d4771794cf3c
+          description: vDC uuid
+    edgeGatewayNetworks:
+      description: List of edge gateway network configuration.
+      type: array
+      items:
+        $ref: '#/components/schemas/edgeGatewayNetworkGet'
+    edgeGatewayLoadBalancing:
+      description: Edge Gateway Load Balancing configuration.
+      type: object
+      properties:
+        enabled:
+          type: boolean
+          example: true
+      example:
+        enabled: true
+    edgeGatewayNetworkGet:
+      description: Edge Gateway network configuration.
+      type: object
+      required:
+      - networkType
+      - prefixLength
+      - startAddress
+      properties:
+        prefixLength:
+          type: integer
+          minimum: 27
+          maximum: 31
+          example: 27
+        startAddress:
+          type: string
+          minimum: 0
+          default: ''
+        networkType:
+          type: string
+          example: sv
+          enum:
+          - sv
+      example:
+        networkType: sv
+        prefixLength: 27
+        startAddress: 100.103.193.160
+    bvpnType:
+      type: string
+      enum:
+      - bvpn
+      - bvpnico
+      example: bvpn
+      description: Type of BVPN connectivity, bvpnico being to create interco with
+        FCA orgs
+    sharedStorageCreate:
+      description: Shared Storage Creation data
+      type: object
+      required:
+      - vIP
+      - edgeIps
+      - vlanId
+      properties:
+        vIP:
+          description: vIP range in CIDR format for this shared storage connection
+          type: string
+          format: IP network in CIDR format
+          example: 1.2.3.4/20
+        edgeIps:
+          description: edge (VRF node) IP
+          type: array
+          items:
+            type: string
+            format: IP address
+          example:
+          - 1.2.3.200
+          - 1.2.3.201
+        vlanId:
+          description: ID of VLAN configured for this shared storage connection
+          type: integer
+          example: 2010
+    tier0List:
+      description: List of all Tier-0 VRF of the organisation
+      type: array
+      items:
+        $ref: '#/components/schemas/tier0Name'
+      example:
+      - prvrf01iocb0000001allsp01
+      - prvrf01iocb0000001allsp02
+    service:
+      type: object
+      description: service list of the Tier0-VRF
+      properties:
+        service:
+          type: string
+          example: INTERNET
+        vlan_id:
+          type: string
+          example: '1234'
+    services:
+      description: services list of the Tier0-VRF
+      type: array
+      items:
+        $ref: '#/components/schemas/service'
+      example:
+      - service: OBJECT_STORAGE
+        vlan_id: null
+    sla_profiles:
+      type: array
+      items:
+        type: string
+      example:
+      - platinum
+      - gold
+      - silver
+    tagVRF:
+      type: string
+      enum:
+      - VRF_STANDARD
+      - VRF_PREMIUM
+      - VRF_DEDICATED_MEDIUM
+      - VRF_DEDICATED_LARGE
+      example: VRF_STANDARD
+    class_service:
+      description: List of tag of the Tier0 VRF
+      type: array
+      items:
+        $ref: '#/components/schemas/tagVRF'
+      example:
+      - VRF_STANDARD
+    tier0Details:
+      description: Details of Tier-0 VRF of the organisation
+      type: object
+      properties:
+        tier0_vrf:
+          $ref: '#/components/schemas/tier0Name'
+        tier0_provider:
+          description: Tier0 provider infos
+          type: string
+          example: pr01e02t0sp01
+        class_service:
+          $ref: '#/components/schemas/class_service'
+        services:
+          $ref: '#/components/schemas/services'
+    OrganizationJobOutput:
+      description: Job id
+      type: string
+      example: 640d02e6-44b5-4fa5-bfea-59aca5bef017
+    catalog_list:
+      description: catalog list
+      type: array
+      items:
+        type: string
+      example:
+      - id: 5937b73c-7a6c-4d13-85e8-1d7cb1133b01
+        name: Orange-Windows
+        hidden: true
+    visibility:
+      description: catalog visibility detail
+      type: object
+      required:
+      - hidden
+      properties:
+        hidden:
+          type: boolean
+          description: catalog visibility True or False
+          example: true
+    catalog_update:
+      description: update catalog
+      type: string
+      example: Sucessfully Updated
+    properties_bvpn:
+      description: BVPN properties
+      type: object
+      properties:
+        vlanid:
+          type: string
+          description: vlan ID
+          example: '2268'
+    network_schema:
+      description: network schema
+      type: object
+      required:
+      - network_type
+      - tier0_name
+      properties:
+        network_type:
+          type: string
+          description: network type
+          example: ein
+        tier0_name:
+          type: string
+          description: tier0 name
+          example: prvrf01eocb1010311allsp02
+        properties:
+          oneOf:
+          - $ref: '#/components/schemas/properties_bvpn'
+    network_hierarchy_item:
+      description: network heirarchy entry
+      type: object
+      required:
+      - type
+      - name
+      - display_name
+      - properties
+      - children
+      properties:
+        type:
+          type: string
+          description: object type
+          example: tier0-vrf
+        name:
+          type: string
+          description: object name
+          example: prvrf01iocb1010314allsp01
+        display_name:
+          type: string
+          description: object name
+          example: ''
+        properties:
+          type: object
+          description: object properties
+          example: prvrf01iocb1010314allsp01
+        service_id:
+          type: string
+          description: service id
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/network_hierarchy_item'

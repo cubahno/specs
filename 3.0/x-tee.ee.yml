@@ -1,0 +1,259 @@
+openapi: 3.0.0
+servers:
+  - description: X-tee EE instance data
+    url: https://x-tee.ee/catalogue-data/EE
+  - description: X-tee ee-test instance data
+    url: https://x-tee.ee/catalogue-data/ee-test
+  - description: X-tee ee-dev instance data
+    url: https://x-tee.ee/catalogue-data/ee-dev
+info:
+  description: X-tee service catalogue
+  version: "1.0.0"
+  title: X-tee service catalogue
+  contact:
+    email: vitali.stupin@ria.ee
+  license:
+    name: MIT License
+    url: 'https://opensource.org/licenses/MIT'
+tags:
+  - name: opendata
+    description: Operations available to everyone as opendata
+paths:
+  /index.json:
+    get:
+      tags:
+        - opendata
+      summary: latest catalogue version
+      operationId: index
+      description: returns list of all subsystems and services
+      responses:
+        '200':
+          description: list of all subsystems and services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subsystem'
+  /index_{time}.json:
+    get:
+      tags:
+        - opendata
+      summary: previous version of catalogue
+      operationId: indexVersion
+      description: returns list of all subsystems and services at the specified point of time
+      parameters:
+        - name: time
+          in: path
+          description: time of catalogue generation
+          required: true
+          schema:
+            type: string
+            example: 20200323114802
+      responses:
+        '200':
+          description: list of all subsystems and services
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subsystem'
+  /history.json:
+    get:
+      tags:
+        - opendata
+      summary: list of all catalogue versions
+      operationId: history
+      description: returns list of all catalogue versions
+      responses:
+        '200':
+          description: list of all catalogue versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CatalogueVersion'
+  /filtered_history.json:
+    get:
+      tags:
+        - opendata
+      summary: filtered list of catalogue versions
+      operationId: filteredHistory
+      description: returns filtered list of all catalogue versions (older versions get partially filtered out to have managable list of versions)
+      responses:
+        '200':
+          description: filtered list of catalogue versions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CatalogueVersion'
+components:
+  schemas:
+    Subsystem:
+      type: object
+      description: Subsystem information
+      required:
+        - xRoadInstance
+        - memberClass
+        - memberCode
+        - subsystemCode
+        - subsystemStatus
+        - servicesStatus
+        - methods
+        - services
+      properties:
+        xRoadInstance:
+          type: string
+          example: EE
+          description: X-tee instance code
+        memberClass:
+          type: string
+          example: GOV
+          description: X-tee member class code
+        memberCode:
+          type: string
+          example: 70006317
+          description: X-tee member code
+        subsystemCode:
+          type: string
+          example: aar
+          description: X-tee subsystem code
+        subsystemStatus:
+          type: string
+          enum:
+            - OK
+            - ERROR
+          example: OK
+          description: Subsystem responded successfully to SOAP listMethods query
+        servicesStatus:
+          type: string
+          enum:
+            - OK
+            - ERROR
+          example: OK
+          description: Subsystem responded successfully to REST listMethods query
+        methods:
+          type: array
+          items:
+            $ref: '#/components/schemas/Method'
+        services:
+          type: array
+          items:
+            $ref: '#/components/schemas/Service'
+    Method:
+      type: object
+      description: SOAP method information
+      required:
+        - serviceCode
+        - serviceVersion
+        - methodStatus
+        - wsdl
+      properties:
+        serviceCode:
+          type: string
+          example: oigused
+          description: X-tee SOAP service code
+        serviceVersion:
+          type: string
+          example: v1
+          description: X-tee SOAP service version
+        methodStatus:
+          type: string
+          enum:
+            - OK
+            - ERROR
+            - TIMEOUT
+            - SKIPPED
+          example: OK
+          description: |
+            Statuses of X-tee SOAP service description;
+            OK - WSDL query and parsing were successful;
+            ERROR - WSDL query of parsing failed;
+            TIMEOUT - WSDL query timed out;
+            SKIPPED - Query to the server where previous WSDL request timed out was not performed.
+        wsdl:
+          type: string
+          format: url
+          example: 'EE/GOV/70006317/aar/2.wsdl'
+          description: relative URL to X-tee SOAP service WSDL description file
+    Service:
+      type: object
+      description: REST service information
+      required:
+        - serviceCode
+        - serviceStatus
+        - openapi
+        - endpoints
+      properties:
+        serviceCode:
+          type: string
+          example: stats
+          description: X-tee REST service code
+        serviceStatus:
+          type: string
+          enum:
+            - OK
+            - ERROR
+            - TIMEOUT
+            - SKIPPED
+          example: OK
+          description: |
+            Statuses of X-tee REST service description;
+            OK - OpenAPI query and parsing were successful;
+            ERROR - OpenAPI query of parsing failed;
+            TIMEOUT - OpenAPI query timed out;
+            SKIPPED - Query to the server where previous OpenAPI request timed out was not performed.
+        openapi:
+          type: string
+          format: url
+          example: 'EE/GOV/70006317/aar/stats_0.yaml'
+          description: relative URL to X-tee REST service OpenAPI description file
+        endpoints:
+          type: array
+          items:
+            $ref: '#/components/schemas/Endpoint'
+    Endpoint:
+      type: object
+      description: REST service endpoint information
+      required:
+        - verb
+        - path
+        - summary
+        - description
+      properties:
+        verb:
+          type: string
+          example: get
+          description: HTTP verb
+        path:
+          type: string
+          example: /instances
+          description: endpoint path
+        summary:
+          type: string
+          example: Summary for the endpoint...
+          description: summary for the endpoint
+        description:
+          type: string
+          example: Description of the endpoint...
+          description: description for the endpoint
+    CatalogueVersion:
+      type: object
+      description: Catalogue version object
+      required:
+        - reportTime
+        - reportPath
+      properties:
+        reportTime:
+          type: string
+          example: '2020-03-23 11:25:26'
+          description: time of catalogue version generation
+        reportPath:
+          type: string
+          format: url
+          example: 'index_20200323112526.json'
+          description: relative path to X-tee catalogue version

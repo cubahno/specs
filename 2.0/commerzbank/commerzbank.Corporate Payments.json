@@ -1,0 +1,243 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Corporate Payments API",
+    "version": "1.3.5",
+    "description": "API Interface definition for Commerzbank Cash Services.  The file transfer definitions are based on the EBICS standard."
+  },
+  "host": "api.commerzbank.com",
+  "basePath": "/corporate-payments-api/1/v1/bulk-payments",
+  "schemes": [
+    "https"
+  ],
+  "paths": {
+    "/messages": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "ClientProduct",
+          "description": "Supplemental information about the API Client for knowing how many users use which client and version for accessing the API.",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "get": {
+        "summary": "list available customer messages",
+        "parameters": [
+          {
+            "name": "OrderType",
+            "in": "query",
+            "description": "optional, to query with filter criteria EBICS  /OrderType/",
+            "type": "string",
+            "required": false
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Operation successful.",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ccscMessage"
+              }
+            }
+          },
+          "204": {
+            "description": "No files available. The server successfully processed the request and is not returning any content.["
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      },
+      "post": {
+        "summary": "This takes new customer orders.",
+        "description": "This takes new customer order messages. currently just the EBICS order types for pain.008.001.02 and pain.001.001.03 are supported",
+        "consumes": [
+          "application/xml",
+          "application/gzip"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "pain files: pain.001.001.03 and pain.008.001.02",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "binary"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Created. The request has been fulfilled, resulting in the creation of a new resource."
+          },
+          "401": {
+            "description": "Unauthorized."
+          }
+        }
+      }
+    },
+    "/messages/{messageId}": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "ClientProduct",
+          "description": "Supplemental information about the API Client for knowing how many users use which client and version for accessing the API.",
+          "type": "string",
+          "required": false
+        }
+      ],
+      "get": {
+        "summary": "Get the requested instance of a message",
+        "produces": [
+          "application/xml",
+          "application/octet-stream"
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "description": "message ID of the requested object",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "Fragment",
+            "in": "query",
+            "description": "fragment id",
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK. Standard response for successful HTTP requests."
+          },
+          "206": {
+            "description": "Partial Content. The server is delivering only part of the resource."
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Not found. The requested resource could not be found"
+          },
+          "410": {
+            "description": "Gone. Indicates that the resource requested is no longer available and will not be available again."
+          },
+          "413": {
+            "description": "Payload Too Large. The request is larger than the server is willing or able to process."
+          },
+          "416": {
+            "description": "Range Not Satisfiable. The client has asked for a fragment of the file, but the server cannot supply that fragment."
+          }
+        }
+      },
+      "put": {
+        "summary": "This service confirms the transfer of the file",
+        "description": "This service set the delivery status to successful delivered",
+        "consumes": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "messageId",
+            "in": "path",
+            "description": "message ID of the requested object",
+            "type": "string",
+            "required": true
+          },
+          {
+            "name": "status",
+            "in": "body",
+            "description": "set received status to partial, complete.",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "received": {
+                  "type": "string",
+                  "enum": [
+                    "partial",
+                    "complete"
+                  ]
+                }
+              }
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "transfer confirmed"
+          },
+          "400": {
+            "description": "Bad Request. The server cannot or will not process the request due to an apparent client error"
+          },
+          "401": {
+            "description": "Unauthorized."
+          },
+          "404": {
+            "description": "Not Found. The requested resource could not be found"
+          }
+        }
+      }
+    },
+    "/heartbeat": {
+      "get": {
+        "summary": "Checks if the server is alive",
+        "description": "This service is used to check the availability of the service",
+        "responses": {
+          "200": {
+            "description": "OK. operation successful, service available"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "ccscMessage": {
+      "type": "object",
+      "properties": {
+        "MessageId": {
+          "type": "string",
+          "description": "uuid of the corresponding file that has to be fetched with separate request(s).",
+          "example": 4711
+        },
+        "OrderType": {
+          "type": "string",
+          "description": "| EBICS OrderTypes |||\n| ----| ------- | --------------- |\n| C52 | CAMT052 | camt.052.001.02 |\n| C53 | CAMT053 | camt.053.001.02 |\n| HAC | PAIN002 | pain.002.001.03 |\n",
+          "example": "C52"
+        },
+        "Fragments": {
+          "type": "number",
+          "description": "The amount of fragments needed for complete download of the file.",
+          "default": 1,
+          "example": 1
+        },
+        "Size": {
+          "type": "number",
+          "description": "The size of the message",
+          "example": 42
+        }
+      }
+    }
+  },
+  "securityDefinitions": {
+    "OAuth (External) Password": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for external services.",
+      "flow": "password",
+      "tokenUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/token",
+      "scopes": {}
+    },
+    "OAuth (External) AuthorizationCode": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for external services.",
+      "flow": "accessCode",
+      "authorizationUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/auth",
+      "tokenUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/token",
+      "scopes": {}
+    }
+  }
+}

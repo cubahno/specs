@@ -1,0 +1,1132 @@
+openapi: 3.0.3
+info:
+  title: AviationWeather.gov API v1
+  description: |-
+    New data API of AviationWeather.gov. This supercedes the ADDS Data Server and AviationWeather Web Services.
+  termsOfService: https://aviationweather.gov/data/api/
+  version: '1.0'
+tags:
+  - name: Data
+    description: Parsed data output for applications
+  - name: Dataserver
+    description: Dataserver API
+paths:
+  /cgi-bin/data/metar.php:
+    get:
+      tags:
+        - Data
+      summary: METAR reports
+      description: Return METAR data
+      operationId: dataMetars
+      parameters:
+        - name: ids
+          in: query
+          description: Station ID(s)
+          required: false
+          examples:
+            id:
+              summary: A single ICAO Id
+              value: KMCI
+            ids:
+              summary: A list of ICAO Ids separated by commas or spaces
+              value: KMCI,KORD,KBOS
+            states:
+              summary: A 2 letter state abbreviation preceded by a @
+              value: "@WA"
+          schema:
+            type: string
+
+        - name: format
+          in: query
+          description: Format
+          required: false
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+              - xml
+              - html
+
+        - name: taf
+          in: query
+          description: Include TAF
+          required: false
+          schema:
+            type: boolean
+
+        - name: hours
+          in: query
+          description: Hours back to search
+          required: false
+          explode: true
+          schema:
+            type: number
+
+        - name: date
+          in: query
+          description: Date (yyyymmdd_hhmm)
+          required: false
+          explode: true
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            datim:
+              summary: Date/tiime string
+              value: 20230331_074417Z
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/taf.php:
+    get:
+      tags:
+        - Data
+      summary: TAF data
+      description: Return TAF data
+      operationId: dataTaf
+      parameters:
+        - name: ids
+          in: query
+          description: Station ID(s)
+          required: false
+          examples:
+            id:
+              summary: A single ICAO Id
+              value: KMCI
+            ids:
+              summary: A list of ICAO Ids separated by commas or spaces
+              value: KMCI,KORD,KBOS
+            states:
+              summary: A 2 letter state abbreviation preceded by a @
+              value: "@WA"
+          schema:
+            type: string
+
+        - name: format
+          in: query
+          description: Format
+          required: false
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+              - xml
+              - html
+
+        - name: taf
+          in: query
+          description: Include TAF
+          required: false
+          schema:
+            type: boolean
+
+        - name: hours
+          in: query
+          description: Hours back to search
+          required: false
+          explode: true
+          schema:
+            type: number
+
+        - name: date
+          in: query
+          description: Date (yyyymmdd_hhmm)
+          required: false
+          explode: true
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            datim:
+              summary: Date/tiime string
+              value: 20230331_074417Z
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/pirep.php:
+    get:
+      tags:
+        - Data
+      summary: PIREP reports
+      description: Return PIREP data
+      operationId: dataPIREPPHP
+      parameters:
+        - name: id
+          in: query
+          description: Station ID
+          required: false
+          explode: true
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - raw
+        - name: age
+          in: query
+          description: Hours Back
+          required: false
+          explode: true
+          schema:
+            type: number
+        - name: distance
+          in: query
+          description: Distance
+          required: false
+          explode: true
+          schema:
+            type: number
+        - name: date
+          in: query
+          description: Date (yyyymmdd_hhmm)
+          required: false
+          explode: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/airsigmet.php:
+    get:
+      tags:
+        - Data
+      summary: AIRMETs/SIGMETs
+      description: Domestic SIGMETs and AIRMETs
+      operationId: dataSIGMET
+      parameters:
+        - name: format
+          in: query
+          description: Format
+          required: false
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - xml
+        - name: hazard
+          in: query
+          description: Hazard
+          required: false
+          schema:
+            type: string
+            enum:
+              - turb
+              - ice
+        - name: type
+          in: query
+          description: Product type
+          required: false
+          schema:
+            type: string
+            enum:
+              - sigmet
+              - airmet
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/isigmet.php:
+    get:
+      tags:
+        - Data
+      summary: International SIGMETs
+      description: Return SIGMETs
+      operationId: dataiSIGMET
+      parameters:
+        - name: format
+          in: query
+          description: Format
+          required: false
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - xml
+        - name: hazard
+          in: query
+          description: Hazard
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - turb
+              - ice
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/areafcst.php:
+    get:
+      tags:
+        - Data
+      summary: US Area Forecasts
+      description: US Area Forecast
+      operationId: dataAreaFcst
+      parameters:
+        - name: region
+          in: query
+          description: Region
+          required: false
+          schema:
+            type: string
+            enum:
+              - gulf
+              - hawaii
+              - aknorth
+              - akcentral
+              - akaleutian
+              - aksouth
+              - aksouthwest
+              - aksoutheast
+              - akpanhandle
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/stationinfo.php:
+    get:
+      tags:
+        - Data
+      summary: Station info
+      description: Return observation location data
+      operationId: dataStationInfo
+      parameters:
+        - name: ids
+          in: query
+          description: Station ID(s)
+          required: false
+          schema:
+            type: string
+        - name: bbox
+          in: query
+          description: Bounding box - minLat,minLon,maxLat,maxLon
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            box:
+              summary: A box around Chicago
+              value: 35,-90,45,-80
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+              - xml
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/airport.php:
+    get:
+      tags:
+        - Data
+      summary: Airport info
+      description: Return airport data
+      operationId: dataAirport
+      parameters:
+        - name: ids
+          in: query
+          description: Station ID(s)
+          required: false
+          examples:
+            id:
+              summary: A single ICAO Id
+              value: KMCI
+            ids:
+              summary: A list of ICAO Ids separated by commas or spaces
+              value: KMCI,KORD,KBOS
+            states:
+              summary: A 2 letter state abbreviation preceded by a @
+              value: "@WA"
+          schema:
+            type: string
+        - name: bbox
+          in: query
+          description: Bounding box - minLat,minLon,maxLat,maxLon
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            box:
+              summary: A small box around Chicago
+              value: 40,-90,45,-85
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/navaid.php:
+    get:
+      tags:
+        - Data
+      summary: Navigational aid info
+      description: Return navigational aid data
+      operationId: dataNavaid
+      parameters:
+        - name: ids
+          in: query
+          description: 5 letter Fix ID(s)
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            barbq:
+              summary: MCI
+              value: MCI
+          schema:
+            type: string
+        - name: bbox
+          in: query
+          description: Bounding box - minLat,minLon,maxLat,maxLon
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            box:
+              summary: A small box around Chicago
+              value: 40,-90,45,-85
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/fix.php:
+    get:
+      tags:
+        - Data
+      summary: Naviagtional fix info
+      description: Return naviagtional fix data
+      operationId: dataFix
+      parameters:
+        - name: ids
+          in: query
+          description: 5 letter Fix ID(s)
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            barbq:
+              summary: BARBQ
+              value: BARBQ
+          schema:
+            type: string
+        - name: bbox
+          in: query
+          description: Bounding box - minLat,minLon,maxLat,maxLon
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            box:
+              summary: A small box around Chicago
+              value: 40,-90,45,-85
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/feature.php:
+    get:
+      tags:
+        - Data
+      summary: Feature info
+      description: Return Feature data
+      operationId: dataFeature
+      parameters:
+        - name: bbox
+          in: query
+          description: Bounding box - minLat,minLon,maxLat,maxLon
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            box:
+              summary: A small box around Chicago
+              value: 40,-90,45,-85
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/obstacle.php:
+    get:
+      tags:
+        - Data
+      summary: Obstacle info
+      description: Return Obstacle data
+      operationId: dataObstacle
+      parameters:
+        - name: bbox
+          in: query
+          description: Bounding box - minLat,minLon,maxLat,maxLon
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            box:
+              summary: A small box around Chicago
+              value: 40,-90,45,-85
+          schema:
+            type: string
+        - name: format
+          in: query
+          description: Format
+          required: false
+          explode: true
+          schema:
+            type: string
+            enum:
+              - raw
+              - json
+              - geojson
+      responses:
+        '200':
+          description: successful operation
+  /cgi-bin/data/dataserver.php?requestType=retrieve&dataSource=metars:
+    get:
+      tags:
+        - Dataserver
+      summary: Dataserver for METARs
+      description: Return METAR data
+      operationId: dataserverMetars
+      parameters:
+        - name: stationString
+          in: query
+          description: "Station ID(s) Note: must specify stationString or bounding box (minLat, ...)"
+          required: false
+          examples:
+            nothing:
+              summary: "Not specified"
+            id:
+              summary: "A single ICAO Id"
+              value: KMCI
+            ids:
+              summary: "A list of ICAO Ids separated by commas or spaces"
+              value: KMCI,KORD,KBOS
+            states:
+              summary: "A 2 letter state abbreviation preceded by a @"
+              value: "@WA"
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          description: "Start time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680241457
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T05:44:17Z
+          schema:
+            type: string
+        - name: endTime
+          in: query
+          description: "End time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680248657
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T07:44:17Z
+          schema:
+            type: string
+        - name: hoursBeforeNow
+          in: query
+          description: "Number of hours before now to search"
+          required: false
+          explode: true
+          schema:
+            type: number
+        - name: format
+          in: query
+          description: Output format
+          explode: false
+          schema:
+            type: string
+            default: xml
+            enum:
+            - xml
+            - csv
+        - name: mostRecent
+          in: query
+          description: "Single most recent METAR"
+          required: false
+          explode: false
+          schema:
+            type: boolean
+        - name: mostRecentForEachStation
+          in: query
+          description: "Most recent METAR per station"
+          required: false
+          explode: false
+          schema:
+            type: string
+            enum:
+            - constraint
+            - postfilter
+        - name: minLat
+          in: query
+          description: "Minumum latitude of a bounding box in decimal degrees. Note: All four minLat, maxLat, minLon, maxLon, have to be specified"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: maxLat
+          in: query
+          description: "Maximum latitude of a bounding box"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: minLon
+          in: query
+          description: "Minumum longitude of a bounding box"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: maxLon
+          in: query
+          description: "Maximum longitude of a bounding box"
+          required: false
+          explode: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful operation
+  /cgi-bin/data/dataserver.php?requestType=retrieve&dataSource=tafs:
+    get:
+      tags:
+        - Dataserver
+      summary: Dataserver for TAFs
+      description: Return TAF data
+      operationId: dataserverTafs
+      parameters:
+        - name: stationString
+          in: query
+          description: "Station ID(s) Note: must specify stationString or bounding box (minLat, ...)"
+          required: false
+          examples:
+            nothing:
+              summary: "Not specified"
+            id:
+              summary: "A single ICAO Id"
+              value: KMCI
+            ids:
+              summary: "A list of ICAO Ids separated by commas or spaces"
+              value: KMCI,KORD,KBOS
+            states:
+              summary: "A 2 letter state abbreviation preceded by a @"
+              value: "@WA"
+          schema:
+            type: string
+        - name: startTime
+          in: query
+          description: "Start time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680241457
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T05:44:17Z
+          schema:
+            type: string
+        - name: endTime
+          in: query
+          description: "End time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680248657
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T07:44:17Z
+          schema:
+            type: string
+        - name: hoursBeforeNow
+          in: query
+          description: "Number of hours before now to search"
+          required: false
+          schema:
+            type: number
+        - name: format
+          in: query
+          description: Output format
+          required: false
+          schema:
+            type: string
+            default: xml
+            enum:
+            - xml
+            - csv
+        - name: mostRecent
+          in: query
+          description: "Single most recent TAF"
+          required: false
+          explode: false
+          schema:
+            type: boolean
+        - name: mostRecentForEachStation
+          in: query
+          description: "Most recent TAF per station"
+          required: false
+          schema:
+            type: string
+            enum:
+            - constraint
+            - postfilter
+        - name: minLat
+          in: query
+          description: "Minumum latitude of a bounding box in decimal degrees. Note: All four minLat, maxLat, minLon, maxLon, have to be specified"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: maxLat
+          in: query
+          description: "Maximum latitude of a bounding box"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: minLon
+          in: query
+          description: "Minumum longitude of a bounding box"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: maxLon
+          in: query
+          description: "Maximum longitude of a bounding box"
+          required: false
+          explode: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful operation
+  /cgi-bin/data/dataserver.php?requestType=retrieve&dataSource=aircraftreports:
+    get:
+      tags:
+        - Dataserver
+      summary: Dataserver for AIREPs and PIREPs
+      description: Return aircraft data
+      operationId: dataserverAirep
+      parameters:
+        - name: startTime
+          in: query
+          description: "Start time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680241457
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T05:44:17Z
+          schema:
+            type: string
+        - name: endTime
+          in: query
+          description: "End time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680248657
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T07:44:17Z
+          schema:
+            type: string
+        - name: hoursBeforeNow
+          in: query
+          description: "Number of hours before now to search"
+          required: false
+          schema:
+            type: number
+        - name: format
+          in: query
+          description: Output format
+          required: false
+          schema:
+            type: string
+            default: xml
+            enum:
+            - xml
+            - csv
+        - name: minLat
+          in: query
+          description: "Minumum latitude of a bounding box in decimal degrees. Note: All four minLat, maxLat, minLon, maxLon, have to be specified"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: maxLat
+          in: query
+          description: "Maximum latitude of a bounding box"
+          required: false
+          schema:
+            type: number
+        - name: minLon
+          in: query
+          description: "Minumum longitude of a bounding box"
+          required: false
+          schema:
+            type: number
+        - name: maxLon
+          in: query
+          description: "Maximum longitude of a bounding box"
+          required: false
+          schema:
+            type: number
+        - name: radialDistance
+          in: query
+          description: "Bounding circle based on latitude, longitude and radial distance in statute miles"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+            radial:
+              summary: A small area around Denver
+              value: 20;-105,39
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+  /cgi-bin/data/dataserver.php?requestType=retrieve&dataSource=airsigmets:
+    get:
+      tags:
+        - Dataserver
+      summary: Dataserver for AIRMETs and SIGMETs
+      description: Return AIRMETs and SIGMETs
+      operationId: dataserverSigmet
+      parameters:
+        - name: startTime
+          in: query
+          description: "Start time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680241457
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T05:44:17Z
+          schema:
+            type: string
+        - name: endTime
+          in: query
+          description: "End time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680248657
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T07:44:17Z
+          schema:
+            type: string
+        - name: hoursBeforeNow
+          in: query
+          description: "Number of hours before now to search"
+          required: false
+          schema:
+            type: number
+        - name: format
+          in: query
+          description: Output format
+          required: false
+          schema:
+            type: string
+            default: xml
+            enum:
+            - xml
+            - csv
+        - name: minLat
+          in: query
+          description: "Minumum latitude of a bounding box in decimal degrees. Note: All four minLat, maxLat, minLon, maxLon, have to be specified"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: maxLat
+          in: query
+          description: "Maximum latitude of a bounding box"
+          required: false
+          schema:
+            type: number
+        - name: minLon
+          in: query
+          description: "Minumum longitude of a bounding box"
+          required: false
+          schema:
+            type: number
+        - name: maxLon
+          in: query
+          description: "Maximum longitude of a bounding box"
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful operation
+  /cgi-bin/data/dataserver.php?requestType=retrieve&dataSource=gairmets:
+    get:
+      tags:
+        - Dataserver
+      summary: Dataserver for G-AIRMETs
+      description: Return G-AIRMETs
+      operationId: dataserverGairmet
+      parameters:
+        - name: startTime
+          in: query
+          description: "Start time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680237857
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T04:44:17Z
+          schema:
+            type: string
+        - name: endTime
+          in: query
+          description: "End time in Unix epoch seconds or ISO8601 data format"
+          required: false
+          examples:
+            nothing:
+              summary: No value
+              value: ""
+            epoch_secs:
+              summary: A Unix epoch time in seconds
+              value: 1680248657
+            iso_date:
+              summary: ISO8601 Date
+              value: 2023-03-31T07:44:17Z
+          schema:
+            type: string
+        - name: hoursBeforeNow
+          in: query
+          description: "Number of hours before now to search"
+          required: false
+          schema:
+            type: number
+        - name: format
+          in: query
+          description: Output format
+          required: false
+          schema:
+            type: string
+            default: xml
+            enum:
+            - xml
+            - csv
+        - name: minLat
+          in: query
+          description: "Minumum latitude of a bounding box in decimal degrees. Note: All four minLat, maxLat, minLon, maxLon, have to be specified"
+          required: false
+          explode: false
+          schema:
+            type: number
+        - name: maxLat
+          in: query
+          description: "Maximum latitude of a bounding box"
+          required: false
+          schema:
+            type: number
+        - name: minLon
+          in: query
+          description: "Minumum longitude of a bounding box"
+          required: false
+          schema:
+            type: number
+        - name: maxLon
+          in: query
+          description: "Maximum longitude of a bounding box"
+          required: false
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Successful operation
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        name:
+          type: string
+          example: Routine
+      xml:
+        name: category
+    Ob:
+      type: object
+      properties:
+        metar_id:
+          type: integer
+          format: int64
+        icaoId:
+          type: string
+        temp:
+          type: integer
+        dewp:
+          type: integer
+      xml:
+        name: ob
+    metar:
+      required:
+        - name
+        - photoUrls
+      type: object
+      properties:
+        icaoId:
+          type: string
+          description: ICAO four letter abbreviation
+          example: KSFO
+        name:
+          type: string
+          example: San Francisco Intl, CA, US
+        category:
+          $ref: '#/components/schemas/Category'
+        obs:
+          type: array
+          xml:
+            wrapped: true
+          items:
+            $ref: '#/components/schemas/Ob'
+      xml:
+        name: metar
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+      xml:
+        name: '##default'
+  requestBodies:
+    metar:
+      description: METAR observation
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/metar'
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/metar'

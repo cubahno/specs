@@ -1,0 +1,217 @@
+openapi: '3.0.2'
+info:
+  title: ArU-code 管理システム
+  version: '1.0.0'
+servers:
+  - url: https://aru-code.womnet.com
+  - url: http://localhost
+components:
+  schemas:
+    PairKey:
+      type: string
+      example: '0987654321'
+      description: '認証鍵のペアになる鍵'
+    Information:
+      description: 'ArU-code番号と紐づく情報(登録する情報の詳細は別途詰める必要あり)'
+      type: object
+      properties:
+        uuid:
+          type: string
+          example: "aaaa-aaaa-aaaa-aaaa"
+          description: '情報のUUID'
+        label:
+          type: string
+          example: 'アイテム'
+          description: 'アイテムの表示名'
+        datas:
+          type: object
+          example: {'type':1, 'parameter': 100}
+  securitySchemes:
+    Bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT 
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: API-KEY
+paths:
+  /api/jbat/user/store_id:
+    post:
+      summary: JBATユーザー本登録API(ID)
+      security:
+        - ApiKeyAuth: []
+      tags:
+        - "USER"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                pairkey:
+                  $ref:  "#/components/schemas/PairKey"
+                login_id:
+                  type: string
+                  example: 'wom@example.com'
+                  description: 'ログインID'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    example: true
+                    description: 'ユーザー本登録の結果'
+  /api/jbat/user/store_password:
+    post:
+      summary: JBATユーザー本登録API(パスワード)
+      security: []
+      tags:
+        - "USER"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                onetime_passcord:
+                  type: string
+                  example: '1122334455667788'
+                  description: 'ワンタイムパスワード'
+                login_id:
+                  type: string
+                  example: 'wom@example.com'
+                  description: 'ログインID'
+                password:
+                  type: string
+                  example: 'password1234'
+                  description: パスワード'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    example: true
+                    description: 'ユーザー本登録の結果'
+  /api/login:
+    post:
+      summary: ログインAPI
+      tags:
+        - "LOGIN"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login_id:
+                  type: string
+                  example: 'wom@example.com'
+                password:
+                  type: string
+                  example: 'password1234'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    example: 'token'
+  /api/ios/jbat/init:
+    post:
+      summary: iOS初期化API
+      security:
+        - Bearer: []
+      tags:
+        - "iOS"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  user:
+                    type: object
+                    properties:
+                      name:
+                        type: string
+                        example: "username"
+                  datas:
+                    type: array
+                    items:
+                      type: object
+                    example: [
+                      {'id':10101,'label':'A'},
+                      {'id':10102,'label':'B'},
+                      {'id':10103,'label':'C'},
+                    ]
+  /api/ios/jbat/post:
+    post:
+      summary: iOSデータ渡し
+      security:
+        - Bearer: []
+      tags:
+        - "iOS"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                ids : 
+                  type: array
+                  items:
+                    type: number
+                  example: [
+                    1,2,3,4,5
+                  ]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: boolean
+                    example: true
+                    description: 'ユーザー本登録の結果'
+                  message:
+                    type: string
+                    example: '成功しました'
+  /api/cache/images:
+    post:
+      summary: 画像キャッシュAPI
+      tags:
+        - "CACHE"
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+security:
+  - ApiKeyAuth: []
+  - Bearer: []

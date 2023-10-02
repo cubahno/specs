@@ -1,0 +1,863 @@
+openapi: 3.0.0
+info:
+  version: 1.0.0
+  title: Hamburg Süd Track & Trace API
+  description: |
+    Retrieve Track & Trace Events based on DCSA Interface standard v.2.2
+
+    This service provides shippers and consignees visibility to Shipment, Equipment and Transport events for shipments booked with Hamburg Süd
+    using standards set by the Digital Container Shipping Association.\
+    <https://dcsa.org/>
+servers:
+  - url: 'https://api-cdt.hamburgsud-line.com/track-and-trace'
+    description: TEST API Server
+  - url: 'https://api-stage.hamburgsud-line.com/track-and-trace'
+    description: STAGE API Server
+  - url: 'https://api.hamburgsud-line.com/track-and-trace'
+    description: PRODUCTION API Server
+tags:
+  - name: Events
+    description: Event operations
+paths:
+  /public-events:
+    get:
+      tags:
+        - Events
+      summary: Find events.
+      description: |
+        Returns all events filtered by the queryParameters.  This endpoint requires **at least one** of the following input parameters:
+
+        * carrierBookingReference
+        * transportDocumentReference
+        * equipmentReference
+
+        Note:  It is possible to combine queryParameters. When combining queryParameters be aware that it is also possible to make combinations that are mutually contradicting.\
+        For example, shipmentEventTypeCode=DRFT and equipmentEventTypeCode=GTIN; since there is no event that can be a ShipmentEvent and an EquipmentEvent at the same time this will return an empty list.
+      parameters:
+        - name: carrierBookingReference
+          in: query
+          description: |
+            A set of unique characters provided by carrier to identify a booking.
+            Specifying this filter will only return events related to this particular carrierBookingReference.
+          required: false
+          schema:
+            type: string
+            pattern: '\d\w{9}'
+            example: 2ITJ021434
+        - name: transportDocumentReference
+          in: query
+          description: |
+            A unique number reference allocated by the shipping line to the transport document and the main number used for the tracking of the status of the shipment.
+            Specifying this filter will only return events related to this particular transportDocumentReference
+          required: false
+          schema:
+            type: string
+            pattern: '(?i)([a-zA-Z]{4})?[a-zA-Z0-9]{1}\d\w{9}[a-zA-Z0-9]{1}'
+            example: I2IZM002940A
+        - name: equipmentReference
+          in: query
+          description: |
+            Will filter by the unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible.
+            Specifying this filter will only return events related to this particular equipmentReference
+          required: false
+          schema:
+            type: string
+            pattern: '(?i)[a-zA-Z]{3}[U|J|Z]\d{7}'
+            maxLength: 11
+            example: HASU4528939
+        - name: eventType
+          in: query
+          description: |
+            The type of event(s) to filter by. Possible values are
+            - SHIPMENT (Shipment events)
+            - TRANSPORT (Transport events)
+            - EQUIPMENT (Equipment events)
+
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR operator is used. For example, [eventType=SHIPMENT,EQUIPMENT] matches both Shipment and Equipment events.\
+            Default value is all event types.
+          required: false
+          explode: false
+          style: form
+          example:
+            - SHIPMENT
+            - EQUIPMENT
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - SHIPMENT
+                - TRANSPORT
+                - EQUIPMENT
+            default:
+              - SHIPMENT
+              - TRANSPORT
+              - EQUIPMENT
+        - name: eventCreatedDateTime
+          in: query
+          description: |
+            Limit the result based on a UTC date. It is possible to use operators on this query parameter. This is done by adding an operator at the beginning of the value followed by a colon:\
+            eventCreatedDateTime = **gte**:2021-04-01T00:00:00Z\
+            would result in all events created >= 2021-04-01T00:00:00Z\
+            The following operators are supported
+            - gte: (>= Greater than or equal)
+            - gt: (> Greater than)
+            - lte: (<= Less than or equal)
+            - lt: (< Less than)
+            - eq: (= Equal to)
+
+            If no operator is provided, a **strictly equal** is used (this is equivalent to **eq:** operator).
+          required: false
+          schema:
+            type: string
+            example: 'gte:2021-04-01T00:00:00Z'
+        - name: shipmentEventTypeCode
+          in: query
+          explode: false
+          style: form
+          description: |
+            The status of the document in the process to filter by. Possible values are
+            - RECE (Received)
+            - DRFT (Drafted)
+            - PENA (Pending Approval)
+            - PENU (Pending Update)
+            - REJE (Rejected)
+            - APPR (Approved)
+            - ISSU (Issued)
+            - SURR (Surrendered)
+            - SUBM (Submitted)
+            - VOID (Void)
+            - CONF (Confirmed)
+            - REQS (Requested)
+            - CMPL (Completed)
+            - HOLD (On Hold)
+            - RELS (Released)
+
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR-operator is used. For example, [shipmentEventTypeCode=RECE,DRFT] matches **both** Received (RECE) and Drafted (DRFT) shipment events.\
+            Default is all shipmentEventTypeCodes.\
+            This filter is only relevant when filtering on ShipmentEvents\
+
+            **Note: Version 1.1 replaces CONF (Confirmed) for RELS (Released) for documentTypeCode SRM (Shipment Release Message).**
+          example:
+            - RECE
+            - DRFT
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - RECE
+                - DRFT
+                - PENA
+                - PENU
+                - REJE
+                - APPR
+                - ISSU
+                - SURR
+                - SUBM
+                - VOID
+                - CONF
+                - REQS
+                - CMPL
+                - HOLD
+                - RELS
+            default:
+              - RECE
+              - DRFT
+              - PENA
+              - PENU
+              - REJE
+              - APPR
+              - ISSU
+              - SURR
+              - SUBM
+              - VOID
+              - CONF
+              - REQS
+              - CMPL
+              - HOLD
+              - RELS
+        - name: transportEventTypeCode
+          in: query
+          explode: false
+          style: form
+          description: |
+            Identifier for type of Transport event to filter by
+            - ARRI (Arrived)
+            - DEPA (Departed)
+
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR operator is used. For example, [transportEventTypeCode=ARRI,DEPA} matches **both** Arrived (ARRI) and Departed (DEPA) transport events.\
+            Default is all transportEventTypeCodes.\
+            This filter is only relevant when filtering on TransportEvents
+          example:
+            - ARRI
+            - DEPA
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - ARRI
+                - DEPA
+            default:
+              - ARRI
+              - DEPA
+        - name: equipmentEventTypeCode
+          in: query
+          explode: false
+          style: form
+          description: |
+            Unique identifier for equipmentEventTypeCode.
+            * LOAD (Loaded)
+            * DISC (Discharged)
+            * GTIN (Gated in)
+            * GTOT (Gated out)
+            * STUF (Stuffed)
+            * STRP (Stripped)
+            * PICK (Pick-up)
+            * DROP (Drop-off)
+            * RSEA (Resealed)
+            * RMVD (Removed)
+            * INSP (Inspected)
+
+            It is possible to select multiple values by comma (,) separating them. For multiple values the OR operator is used. For example, [equipmentEventTypeCode=GTIN,GTOT] matches **both** Gated in (GTIN) and Gated out (GTOT) equipment events.\
+            Default is all equipmentEventTypeCodes.\
+            This filter is only relevant when filtering on EquipmentEvents
+          example:
+            - GTIN
+            - GTOT
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - LOAD
+                - DISC
+                - GTIN
+                - GTOT
+                - STUF
+                - STRP
+                - PICK
+                - DROP
+                - RSEA
+                - RMVD
+                - INSP
+            default:
+              - LOAD
+              - DISC
+              - GTIN
+              - GTOT
+              - STUF
+              - STRP
+              - PICK
+              - DROP
+              - RSEA
+              - RMVD
+              - INSP
+        - name: limit
+          in: query
+          description: Maximum number of items to return.
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 100
+          example: 100
+        - name: cursor
+          in: query
+          description: 'A server generated value to specify a specific point in a collection result, used for pagination.'
+          required: false
+          schema:
+            type: string
+          example: '11'
+        - name: API-Version
+          in: header
+          required: false
+          schema:
+            type: string
+            example: '1'
+          description: An API-Version header MAY be added to the request (optional); if added it MUST only contain MAJOR version. API-Version header MUST be aligned with the URI version.
+      responses:
+        '200':
+          description: Successful operation
+          headers:
+            API-Version:
+              $ref: '#/components/headers/API-Version'
+            Current-Page:
+              $ref: '#/components/headers/Current-Page'
+            Next-Page:
+              $ref: '#/components/headers/Next-Page'
+            Prev-Page:
+              $ref: '#/components/headers/Prev-Page'
+            Last-Page:
+              $ref: '#/components/headers/Last-Page'
+            First-Page:
+              $ref: '#/components/headers/First-Page'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Events'
+            application/stream+json:
+              schema:
+                $ref: '#/components/schemas/Events'
+            text/event-stream:
+              schema:
+                $ref: '#/components/schemas/Events'
+        '400':
+          description: Bad request; the request is unacceptable often due to a missing or invalid parameter.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '401':
+          description: The client cannot be authenticated by the system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '403':
+          description: The client does not have permissions to access this endpoint
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '404':
+          description: The requested resource cannot be found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiError'
+components:
+  schemas:
+    DocumentReferences:
+      type: array
+      description: An optional list of key-value (documentReferenceType-documentReferenceValue) pairs representing links to objects relevant to the event. The documentReferenceType-field is used to describe where the documentReferenceValue-field is pointing to.
+      items:
+        type: object
+        properties:
+          documentReferenceType:
+            type: string
+            description: |
+              Describes where the documentReferenceValue is pointing to
+              * BKG (Booking)
+              * TRD (Transport Document)
+            example: BKG
+            enum:
+              - BKG
+              - TRD
+          documentReferenceValue:
+            type: string
+            description: The value of the identifier the documentReferenceType is describing
+            example: 123e4567-e89b-12d3-a456-426614174000
+      example:
+        - documentReferenceType: BKG
+          documentReferenceValue: ABC123123123
+        - documentReferenceType: TRD
+          documentReferenceValue: 85943567-eedb-98d3-f4ed-aed697474ed4
+    Vessel:
+      type: object
+      required:
+        - vesselIMONumber
+      properties:
+        vesselIMONumber:
+          description: 'The unique reference for a registered Vessel. The reference is the International Maritime Organisation (IMO) number, also sometimes known as the Lloyd''s register code, which does not change during the lifetime of the vessel'
+          type: integer
+          maxLength: 7
+          example: 1801323
+        vesselName:
+          type: string
+          maxLength: 35
+          description: The name of the Vessel given by the Vessel Operator and registered with IMO.
+          example: King of the Seas
+        vesselFlag:
+          description: The flag of the nation whose laws the vessel is registered under. This is the ISO 3166 two-letter country code
+          type: string
+          maxLength: 2
+          example: DE
+        vesselCallSignNumber:
+          description: 'A unique alphanumeric identity that belongs to the vessel and is assigned by the International Telecommunication Union (ITU). It consists of a three letter alphanumeric prefix that indicates nationality, followed by one to four characters to identify the individual vessel. For instance, vessels registered under Denmark are assigned the prefix ranges 5PA-5QZ, OUAOZZ, and XPA-XPZ. The Call Sign changes whenever a vessel changes its flag.'
+          type: string
+          maxLength: 10
+          example: NCVV
+        vesselOperatorCarrierCode:
+          type: string
+          maxLength: 10
+          nullable: false
+          description: The carrier who is in charge of the vessel operation based on either the SMDG or SCAC code lists
+          example: MAEU
+        vesselOperatorCarrierCodeListProvider:
+          type: string
+          description: Identifies the code list provider used for the operator and partner carrierCodes.
+          nullable: false
+          enum:
+            - SMDG
+            - NMFTA
+          example: NMFTA
+    Event:
+      description: The event entity is described as a generalization of all the specific event categories. An event always takes place in relation to a shipment and can additionally be linked to a transport or an equipment
+      type: object
+      properties:
+        eventID:
+          type: string
+          description: The unique identifier for the Equipment Event ID/Transport Event ID/Shipment Event ID.
+          example: '6832920321'
+        eventType:
+          type: string
+          description: The Event Type of the object.
+          nullable: false
+          enum:
+            - EQUIPMENT
+            - SHIPMENT
+            - TRANSPORT
+        eventDateTime:
+          type: string
+          description: 'The local date and time, where the event took place or when the event will take place, in ISO 8601 format. For Shipment Event, it is the same as eventCreatedDateTime in UTC timezone.'
+          format: date-time
+          example: '2019-11-12T07:41:00+08:00'
+        eventCreatedDateTime:
+          type: string
+          format: date-time
+          description: The UTC timestamp of when the event was created.
+          example: '2021-01-09T14:12:56Z'
+        eventClassifierCode:
+          type: string
+          description: |
+            Code for the event classifier, either PLN, ACT or EST.
+            * PLN - Planned
+            * ACT - Actual
+            * EST - Estimated
+          example: ACT
+      required:
+        - eventType
+        - eventDateTime
+        - eventCreatedDateTime
+        - eventClassifierCode
+    Location:
+      type: object
+      description: Generally used to capture location-related data; also for locations without UN Location Codes.
+      properties:
+        locationName:
+          type: string
+          maxLength: 100
+          description: The name of the location.
+          example: Eiffel Tower
+        latitude:
+          type: string
+          maxLength: 10
+          description: Geographic coordinate that specifies the north–south position of a point on the Earth's surface.
+          example: '48.8585500'
+        longitude:
+          type: string
+          maxLength: 11
+          description: Geographic coordinate that specifies the east–west position of a point on the Earth's surface.
+          example: '2.294492036'
+        UNLocationCode:
+          type: string
+          maxLength: 5
+          description: The UN Location code specifying where the place is located.
+          example: USNYC
+        facilityCode:
+          type: string
+          example: ADT
+          description: The code used for identifying the specific facility. This code is not the UN Location Code.
+          nullable: false
+          maxLength: 6
+        facilityCodeListProvider:
+          type: string
+          description: The provider used for identifying the facility Code
+          enum:
+            - BIC
+            - SMDG
+          example: SMDG
+    TransportCall:
+      type: object
+      properties:
+        transportCallID:
+          type: string
+          maxLength: 100
+          description: The unique identifier for a transport call
+          example: 123e4567-e89b-12d3-a456-426614174000
+        carrierServiceCode:
+          description: The code of the service for which the schedule details are published.
+          type: string
+          maxLength: 5
+          example: FE1
+        carrierVoyageNumber:
+          type: string
+          maxLength: 50
+          example: 131W
+          description: |
+            \*\*\*DO NOT USE\*\*\* This field is replaced by `exportVoyageNumber` in Version 1.1 and will be removed from the API in the next major version.
+
+            The vessel operator-specific identifier of the Voyage.\
+            The export voyage is returned when there are multiple voyages.
+          deprecated: true
+        exportVoyageNumber:
+          maxLength: 50
+          type: string
+          description: The vessel operator-specific identifier of the export Voyage.
+          example: 2103S
+        importVoyageNumber:
+          maxLength: 50
+          type: string
+          description: The vessel operator-specific identifier of the import Voyage.
+          example: 2103N
+        transportCallSequenceNumber:
+          type: integer
+          description: Transport operator's key that uniquely identifies each individual call. This key is essential to distinguish between two separate calls at the same location within one voyage.
+          example: 2
+        UNLocationCode:
+          type: string
+          maxLength: 5
+          description: The UN Location code specifying where the place is located.
+          example: USNYC
+        facilityCode:
+          type: string
+          example: ADT
+          description: The code used for identifying the specific facility. This code is not the UN Location Code.
+          nullable: false
+          maxLength: 6
+        facilityCodeListProvider:
+          type: string
+          description: The provider used for identifying the facility Code
+          enum:
+            - BIC
+            - SMDG
+          example: SMDG
+        facilityTypeCode:
+          type: string
+          example: POTE
+          description: |
+            A specialized version of the facilityCode to be used in TransportCalls. The code to identify the specific type of facility.
+            * BOCR (Border crossing)
+            * CLOC (Customer location)
+            * COFS (Container freight station)
+            * COYA (Deprecated - use OFFD intead)
+            * OFFD (Off dock storage)
+            * DEPO (Depot)
+            * INTE (Inland terminal)
+            * POTE (Port terminal)
+            * RAMP (Ramp)
+          enum:
+            - BOCR
+            - CLOC
+            - COFS
+            - COYA
+            - OFFD
+            - DEPO
+            - INTE
+            - POTE
+            - RAMP
+        otherFacility:
+          type: string
+          example: 'Balboa Port Terminal Balboa Port, Avenida Arnulfo Arias M Balboa Panama'
+          description: An alternative way to capture the facility when no standardized DCSA facility code can be found.
+          maxLength: 50
+        modeOfTransport:
+          type: string
+          description: The code specifying the mode of transport.
+          enum:
+            - VESSEL
+            - RAIL
+            - TRUCK
+            - BARGE
+        location:
+          $ref: '#/components/schemas/Location'
+        vessel:
+          $ref: '#/components/schemas/Vessel'
+      required:
+        - modeOfTransport
+    ShipmentEvent:
+      description: The shipment event entity is a specialization of the event entity to support specification of data that only applies to a shipment event.
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              example: SHIPMENT
+              nullable: false
+              enum:
+                - SHIPMENT
+            shipmentEventTypeCode:
+              type: string
+              description: |
+                The status of the document in the process. Possible values are
+                - RECE (Received)
+                - DRFT (Drafted)
+                - PENA (Pending Approval)
+                - PENU (Pending Update)
+                - REJE (Rejected)
+                - APPR (Approved)
+                - ISSU (Issued)
+                - SURR (Surrendered)
+                - SUBM (Submitted)
+                - VOID (Void)
+                - CONF (Confirmed)
+                - REQS (Requested)
+                - CMPL (Completed)
+                - HOLD (On Hold)
+                - RELS (Released)
+
+                Note: Version 1.1 replaces CONF (Confirmed) for RELS (Released) for documentTypeCode SRM (Shipment Release Message).
+              enum:
+                - RECE
+                - DRFT
+                - PENA
+                - PENU
+                - REJE
+                - APPR
+                - ISSU
+                - SURR
+                - SUBM
+                - VOID
+                - CONF
+                - REQS
+                - CMPL
+                - HOLD
+                - RELS
+              example: DRFT
+            documentTypeCode:
+              type: string
+              description: |
+                The code to identify the type of information documentID points to. Can be one of the following values
+                * CBR (Carrier Booking Request Reference)
+                * BKG (Booking)
+                * SHI (Shipping Instruction)
+                * SRM (Shipment Release Message)
+                * TRD (Transport Document)
+                * ARN (Arrival Notice)
+                * VGM (Verified Gross Mass)
+                * CAS (Cargo Survey)
+                * CUS (Customs Inspection)
+                * DGD (Dangerous Goods Declaration)
+                * OOG (Out of Gauge)
+              maxLength: 3
+              example: SHI
+            documentID:
+              type: string
+              description: |
+                The ID of the object defined by the Shipment Information Type. In some cases this is a UUID; in other cases this is a string.
+              example: '205284917'
+          required:
+            - shipmentEventTypeCode
+            - documentID
+            - documentTypeCode
+    TransportEvent:
+      description: The transport event entity is a specialization of the event entity to support specification of data that only applies to a transport event.
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              example: TRANSPORT
+              nullable: false
+              enum:
+                - TRANSPORT
+            transportEventTypeCode:
+              type: string
+              description: |
+                Identifier for type of Transport event
+                - ARRI (Arrived)
+                - DEPA (Departed)
+              enum:
+                - ARRI
+                - DEPA
+              example: ARRI
+            documentReferences:
+              $ref: '#/components/schemas/DocumentReferences'
+          required:
+            - transportEventType
+        - type: object
+          properties:
+            transportCall:
+              $ref: '#/components/schemas/TransportCall'
+          required:
+            - transportCall
+    EquipmentEvent:
+      description: The equipment event entity is a specialization of the event entity to support specification of data that only applies to an equipment event.
+      allOf:
+        - $ref: '#/components/schemas/Event'
+        - type: object
+          properties:
+            eventType:
+              type: string
+              example: EQUIPMENT
+              nullable: false
+              enum:
+                - EQUIPMENT
+            equipmentEventTypeCode:
+              type: string
+              description: |
+                Unique identifier for equipmentEventTypeCode.
+                * LOAD (Loaded)
+                * DISC (Discharged)
+                * GTIN (Gated in)
+                * GTOT (Gated out)
+                * STUF (Stuffed)
+                * STRP (Stripped)
+                * PICK (Pick-up)
+                * DROP (Drop-off)
+                * RSEA (Resealed)
+                * RMVD (Removed)
+                * INSP (Inspected)
+              enum:
+                - LOAD
+                - DISC
+                - GTIN
+                - GTOT
+                - STUF
+                - STRP
+                - PICK
+                - DROP
+                - RSEA
+                - RMVD
+                - INSP
+              example: LOAD
+            equipmentReference:
+              type: string
+              maxLength: 15
+              description: |
+                The unique identifier for the equipment, which should follow the BIC ISO Container Identification Number where possible. According to ISO 6346, a container identification code consists of a 4-letter prefix and a 7-digit number (composed of a 3-letter owner code, a category identifier, a serial number, and a check-digit). If a container does not comply with ISO 6346, it is suggested to follow Recommendation #2 “Container with non-ISO identification” from SMDG.
+              example: APZU4812090
+            ISOEquipmentCode:
+              type: string
+              maxLength: 4
+              description: Unique code for the different equipment size/type used for transporting commodities. The code is a concatenation of ISO Equipment Size Code and ISO Equipment Type Code A and follows the ISO 6346 standard.
+              example: 42G1
+            emptyIndicatorCode:
+              type: string
+              description: Code to denote whether the equipment is empty or laden.
+              enum:
+                - EMPTY
+                - LADEN
+              example: EMPTY
+            documentReferences:
+              $ref: '#/components/schemas/DocumentReferences'
+            eventLocation:
+              $ref: '#/components/schemas/Location'
+            transportCall:
+              $ref: '#/components/schemas/TransportCall'
+          required:
+            - equipmentEventType
+            - emptyIndicatorCode
+    Events:
+      type: object
+      description: List of events for shipment journey.
+      properties:
+        events:
+          type: array
+          items:
+            anyOf:
+              - $ref: '#/components/schemas/ShipmentEvent'
+              - $ref: '#/components/schemas/TransportEvent'
+              - $ref: '#/components/schemas/EquipmentEvent'
+            discriminator:
+              propertyName: eventType
+      required:
+        - events
+    ApiValidationError:
+      type: object
+      required:
+        - field
+        - rejectedValue
+        - message
+      properties:
+        field:
+          type: string
+          description: The field that has failed validation.
+        rejectedValue:
+          type: string
+          description: The value that has failed validation.
+        message:
+          type: string
+          description: The reason and advice for failed validation.
+    ApiError:
+      type: object
+      required:
+        - method
+        - requestUri
+        - status
+        - timestamp
+        - message
+        - debugMessage
+      properties:
+        method:
+          type: string
+          description: 'The request method type e.g. GET, POST.'
+        requestUri:
+          type: string
+          description: The request URI.
+        status:
+          type: string
+          description: The textual representation of the response status.
+        timestamp:
+          type: string
+          description: 'The date and time (dd-MM-yyyy hh:mm:ss) the error occured.'
+        message:
+          type: string
+          description: High level error message.
+        debugMessage:
+          type: string
+          description: Detailed error message.
+        subErrors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ApiValidationError'
+          description: The list of invalid fields in the request.
+  headers:
+    API-Version:
+      description: Semantic Versioning Specification (SemVer) used to indicate the version of the contract (API version) returned.
+      schema:
+        type: string
+        example: 1.0.0
+    Current-Page:
+      description: A link to the current page.
+      required: true
+      schema:
+        type: string
+        example: '10'
+    Next-Page:
+      description: A link to the next page. Next-Page header link MAY be omitted if the current page is the last page.
+      required: false
+      schema:
+        type: string
+        example: '11'
+    Prev-Page:
+      description: A link to the previous page. Previous-Page header link MAY be omitted if the current page is the first page.
+      required: false
+      schema:
+        type: string
+        example: '9'
+    Last-Page:
+      description: A link to the last page. Last-Page header link MAY be omitted if the current page is the last page.
+      required: false
+      schema:
+        type: string
+        example: '66'
+    First-Page:
+      description: A link to the first page. First-Page header link MAY be omitted if current page is the first page.
+      required: false
+      schema:
+        type: string
+        example: '1'
+  securitySchemes:
+    jwtBearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+    apiKeyAuth:
+      type: apiKey
+      in: header
+      name: consumer-key
+security:
+  - jwtBearerAuth: []
+  - apiKeyAuth: []

@@ -1,0 +1,1034 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "version": "1.0.0",
+    "title": "comdirect REST-API",
+    "description": "comdirect REST-API"
+  },
+  "basePath": "/process-api/comdirect-onboarding/v1",
+  "tags": [
+    {
+      "name": "advertisingreferences",
+      "description": "Get advertising reference by id"
+    },
+    {
+      "name": "applications",
+      "description": "Save application form"
+    },
+    {
+      "name": "healthcheck",
+      "description": "Returns status of backend service"
+    }
+  ],
+  "schemes": [
+    "https"
+  ],
+  "host": "api.commerzbank.com",
+  "paths": {
+    "/healthcheck": {
+      "get": {
+        "tags": [
+          "healthcheck"
+        ],
+        "summary": "Returns status of backend service",
+        "description": "If backend service is working correctly, resource will respond with 200 - OK.",
+        "operationId": "getHealthcheck",
+        "produces": [
+          "application/json;charset=utf-8"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/authorization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation"
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/applications": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Save application form",
+        "description": "Save application form",
+        "operationId": "productsV1PostApplication",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          {
+            "$ref": "#/parameters/authorization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/StandardErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Find applications",
+        "description": "Find applications",
+        "operationId": "productsV1GetApplications",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "registrationId",
+            "in": "query",
+            "description": "Registration ID",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "$ref": "#/parameters/authorization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Bad Request",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/applications/prevalidation": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Pre validate application form",
+        "description": "Pre validate application form",
+        "operationId": "productsV1PostApplicationPrevalidation",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          {
+            "$ref": "#/parameters/authorization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/StandardErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/applications/validation": {
+      "post": {
+        "tags": [
+          "applications"
+        ],
+        "summary": "Validate application form",
+        "description": "Validate application form",
+        "operationId": "productsV1PostApplicationValidation",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "required": false,
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          {
+            "$ref": "#/parameters/authorization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "schema": {
+              "$ref": "#/definitions/Application"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "422": {
+            "description": "Unprocessable Entity",
+            "schema": {
+              "$ref": "#/definitions/StandardErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/advertisingreferences/{id}": {
+      "get": {
+        "tags": [
+          "advertisingreferences"
+        ],
+        "summary": "Get advertising reference by id",
+        "description": "Get advertising reference by id",
+        "operationId": "productsV3GetAdvertisingReference",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "advertising reference ID",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "with-attr",
+            "in": "query",
+            "description": "withAttr, fills fields for productmodules/bundles or cardimages",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "productModule",
+                "image"
+              ]
+            },
+            "collectionFormat": "multi",
+            "x-example": "productModule / image"
+          },
+          {
+            "$ref": "#/parameters/authorization"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Operation",
+            "schema": {
+              "$ref": "#/definitions/AdvertisingReference"
+            }
+          },
+          "400": {
+            "description": "Bad Request"
+          },
+          "401": {
+            "description": "Unauthorized"
+          },
+          "403": {
+            "description": "Forbidden"
+          },
+          "404": {
+            "description": "Not Found"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "parameters": [
+        {
+          "type": "string",
+          "name": "id",
+          "in": "path",
+          "required": true
+        }
+      ]
+    }
+  },
+  "definitions": {
+    "AdvertisingReference": {
+      "type": "object",
+      "properties": {
+        "advertisingReferenceId": {
+          "type": "integer",
+          "format": "int32",
+          "example": 123456,
+          "description": "Unique  ID of the advertising reference",
+          "readOnly": true
+        },
+        "baseProduct": {
+          "type": "string",
+          "example": "CHECKING_ACCOUNT",
+          "description": "Base product configured for the advertising reference",
+          "readOnly": true,
+          "enum": [
+            "DEPOT",
+            "CHECKING_ACCOUNT",
+            "CFD",
+            "CALL_MONEY",
+            "COMINVEST_VALIDATING",
+            "COMINVEST_DELEGATING",
+            "FIXED_TERM_SAVINGS",
+            "FOREIGN_CURRENCY_ACCOUNT",
+            "SAVINGSPLAN",
+            "JUNIOR_CHECKING_ACCOUNT",
+            "JUNIOR_DEPOT",
+            "STOCKIFY"
+          ]
+        },
+        "validFrom": {
+          "type": "string",
+          "format": "date",
+          "example": "2017-05-18",
+          "description": "Start date of the advertising reference's validity, format: yyyy-MM-dd"
+        },
+        "validTo": {
+          "type": "string",
+          "format": "date",
+          "example": "2017-05-18",
+          "description": "End date of the advertising reference's validity, format: yyyy-MM-dd"
+        },
+        "visaCardImages": {
+          "type": "array",
+          "description": "Visa card images allowed in an application using this advertising reference",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/definitions/VisaCardImage"
+          }
+        },
+        "availableContingent": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Number of remaining applications that may use this advertising reference",
+          "readOnly": true
+        },
+        "default": {
+          "type": "boolean",
+          "description": "Is this the default advertising reference for given baseProduct",
+          "readOnly": true,
+          "default": false
+        }
+      }
+    },
+    "AmountValue": {
+      "type": "object",
+      "properties": {
+        "unit": {
+          "type": "string",
+          "example": "EUR",
+          "description": "{XXX, XXC, XXM, XXP, XXU} or currencies according to ISO-4217 (EUR, USD, GBP,...)",
+          "readOnly": true,
+          "minLength": 3,
+          "maxLength": 3
+        },
+        "value": {
+          "type": "string",
+          "example": "999.99",
+          "description": "Nominal value in corresponding unit",
+          "readOnly": true
+        }
+      },
+      "description": "Represents the amount value with the currency."
+    },
+    "Applicant": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "contractRole": {
+          "type": "string",
+          "readOnly": true,
+          "enum": [
+            "OWNER1",
+            "OWNER2"
+          ]
+        },
+        "legitimationId": {
+          "type": "string"
+        },
+        "applicantName": {
+          "type": "string"
+        },
+        "identificationSubmitted": {
+          "type": "boolean",
+          "readOnly": true,
+          "default": false
+        },
+        "signatureSpecimenSubmitted": {
+          "type": "boolean",
+          "readOnly": true,
+          "default": false
+        },
+        "identificationResultToken": {
+          "type": "string"
+        },
+        "signatureSpecimen": {
+          "type": "string"
+        },
+        "identificationInfo": {
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/IdentificationInfo"
+            }
+          ]
+        },
+        "idDataUsageAgreement": {
+          "type": "boolean",
+          "default": false
+        },
+        "identificationMethods": {
+          "type": "array",
+          "readOnly": true,
+          "items": {
+            "$ref": "#/definitions/IdentificationMethod"
+          }
+        }
+      }
+    },
+    "Application": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "readOnly": true
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "OPEN",
+            "CONFLICT",
+            "READY",
+            "RELEASED",
+            "IN_PROGRESS",
+            "DONE",
+            "CANCELED",
+            "REJECTED"
+          ],
+          "readOnly": true
+        },
+        "baseProduct": {
+          "type": "string",
+          "enum": [
+            "DEPOT",
+            "CHECKING_ACCOUNT",
+            "CFD",
+            "CALL_MONEY",
+            "COMINVEST_VALIDATING",
+            "COMINVEST_DELEGATING",
+            "FIXED_TERM_SAVINGS",
+            "FOREIGN_CURRENCY_ACCOUNT",
+            "SAVINGSPLAN",
+            "JUNIOR_CHECKING_ACCOUNT",
+            "JUNIOR_DEPOT",
+            "STOCKIFY"
+          ],
+          "readOnly": true
+        },
+        "applicants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Applicant"
+          },
+          "readOnly": true
+        },
+        "links": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/Link"
+          },
+          "readOnly": true
+        },
+        "releaseConfirmation": {
+          "type": "boolean",
+          "default": false
+        },
+        "applicationForm": {
+          "$ref": "#/definitions/ApplicationForm"
+        },
+        "applicationFormResult": {
+          "allOf": [
+            {
+              "$ref": "#/definitions/ApplicationFormResult"
+            }
+          ],
+          "readOnly": true
+        },
+        "registrationId": {
+          "type": "string",
+          "readOnly": true
+        }
+      }
+    },
+    "ApplicationForm": {
+      "type": "object",
+      "properties": {
+        "baseProduct": {
+          "type": "string",
+          "example": "CHECKING_ACCOUNT",
+          "enum": [
+            "DEPOT",
+            "CHECKING_ACCOUNT",
+            "CFD",
+            "CALL_MONEY",
+            "COMINVEST_VALIDATING",
+            "COMINVEST_DELEGATING",
+            "FIXED_TERM_SAVINGS",
+            "FOREIGN_CURRENCY_ACCOUNT",
+            "SAVINGSPLAN",
+            "JUNIOR_CHECKING_ACCOUNT",
+            "JUNIOR_DEPOT",
+            "STOCKIFY"
+          ]
+        },
+        "accountType": {
+          "type": "string",
+          "example": " 'KPE' fuer Einzelkonto und 'KPG' fuer Gemeinschaftskonto"
+        },
+        "formFields": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FormField"
+          }
+        }
+      }
+    },
+    "ApplicationFormResult": {
+      "type": "object",
+      "properties": {
+        "resultcode": {
+          "type": "string",
+          "example": "'SUCCESS' / 'INVALID_FORMDATA'"
+        },
+        "dataMatrixCode": {
+          "type": "string",
+          "example": "D000148RGAJ537266704A000000000000000000000000000000000000000000000000000"
+        },
+        "formFieldValidationResults": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FormFieldValidationResult"
+          }
+        },
+        "pricing": {
+          "$ref": "#/definitions/Pricing"
+        }
+      }
+    },
+    "BusinessMessage": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string",
+          "description": "Identifier for the error",
+          "enum": [
+            "request.object.invalid",
+            "request.query.invalid"
+          ]
+        },
+        "severity": {
+          "type": "string",
+          "description": "Severity level of the error",
+          "enum": [
+            "ERROR",
+            "INFO",
+            "WARN"
+          ]
+        },
+        "message": {
+          "type": "string",
+          "description": "Default error message"
+        },
+        "origin": {
+          "type": "array",
+          "description": "List of properties causing validation errors",
+          "items": {
+            "type": "string"
+          }
+        },
+        "args": {
+          "type": "array",
+          "description": "Arguments for the error message",
+          "items": {
+            "type": "object"
+          }
+        }
+      },
+      "description": "Model for an error"
+    },
+    "IdentificationInfo": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "VALID",
+            "INVALID"
+          ]
+        },
+        "mismatches": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "FAMILYNAME",
+              "GIVENNAME",
+              "STREET",
+              "ZIPCODE",
+              "CITY",
+              "DATEOFBIRTH",
+              "PLACEOFBIRTH",
+              "DOCUMENTTYPE"
+            ]
+          }
+        }
+      }
+    },
+    "IdentificationMethod": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "readOnly": true,
+          "enum": [
+            "EID",
+            "VIDEO_IDENT",
+            "POST_IDENT"
+          ]
+        },
+        "identificationURL": {
+          "type": "string",
+          "readOnly": true
+        }
+      }
+    },
+    "FieldValidationResultCode": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string",
+          "example": " 'OK' / 'E2007'"
+        },
+        "message": {
+          "type": "string",
+          "example": "Nur Buchstaben"
+        }
+      }
+    },
+    "FormField": {
+      "type": "object",
+      "properties": {
+        "fieldname": {
+          "type": "string",
+          "example": "PERSON.NAME.I1"
+        },
+        "fieldvalue": {
+          "type": "string",
+          "example": "Meier"
+        }
+      }
+    },
+    "FormFieldValidationResult": {
+      "type": "object",
+      "properties": {
+        "fieldname": {
+          "type": "string",
+          "example": "PERSON.NAME.I1"
+        },
+        "fieldValidationResultCodes": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/FieldValidationResultCode"
+          }
+        }
+      }
+    },
+    "Link": {
+      "type": "object",
+      "properties": {
+        "rel": {
+          "type": "string"
+        },
+        "href": {
+          "type": "string"
+        }
+      }
+    },
+    "Pricing": {
+      "type": "object",
+      "required": [
+        "prices",
+        "productDescription"
+      ],
+      "properties": {
+        "advertisingReference": {
+          "type": "string",
+          "description": "ID of the advertising reference.",
+          "pattern": "[0-9]+"
+        },
+        "accountType": {
+          "type": "string",
+          "example": "STANDARD_ACCOUNT",
+          "description": "Corresponding account type.",
+          "enum": [
+            "JOINT_ACCOUNT",
+            "STANDARD_ACCOUNT"
+          ]
+        },
+        "productDescription": {
+          "description": "Description of the requested product and its modules.",
+          "allOf": [
+            {
+              "$ref": "#/definitions/ProductDescription"
+            }
+          ]
+        },
+        "prices": {
+          "type": "array",
+          "description": "List of price objects.",
+          "items": {
+            "$ref": "#/definitions/ProductPrice"
+          }
+        },
+        "totalPrice": {
+          "description": "Total price.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/AmountValue"
+            }
+          ]
+        },
+        "totalCurrentPrice": {
+          "description": "Total current price.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/AmountValue"
+            }
+          ]
+        },
+        "totalPriceDifference": {
+          "description": "Total price.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/AmountValue"
+            }
+          ]
+        }
+      },
+      "description": "Model for module/bundle pricing."
+    },
+    "StandardErrorResponse": {
+      "type": "object",
+      "properties": {
+        "code": {
+          "type": "string"
+        },
+        "messages": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/BusinessMessage"
+          }
+        }
+      }
+    },
+    "PriceItem": {
+      "type": "object",
+      "properties": {
+        "price": {
+          "description": "Price for this priceItem.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/AmountValue"
+            }
+          ]
+        },
+        "quantity": {
+          "type": "integer",
+          "format": "int32",
+          "description": "Quantity for this priceItem.",
+          "readOnly": true
+        }
+      },
+      "description": "Model for a price item."
+    },
+    "ProductDescription": {
+      "type": "object",
+      "properties": {
+        "title": {
+          "type": "string",
+          "description": "The title of the description",
+          "readOnly": true
+        },
+        "description": {
+          "type": "array",
+          "description": "The details of the description",
+          "readOnly": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "description": "Model for module/bundle pricing."
+    },
+    "ProductPrice": {
+      "type": "object",
+      "required": [
+        "quantity",
+        "type",
+        "uuid"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "The product name.",
+          "readOnly": true
+        },
+        "type": {
+          "type": "string",
+          "example": "productmodule",
+          "description": "The product type.",
+          "enum": [
+            "productmodule",
+            "productbundle"
+          ]
+        },
+        "uuid": {
+          "type": "string",
+          "description": "ID of module/product."
+        },
+        "quantity": {
+          "type": "string",
+          "description": "The desired quantity.",
+          "pattern": "^[+-]?[\\d]+$"
+        },
+        "basePrice": {
+          "description": "Price for a single application.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/AmountValue"
+            }
+          ]
+        },
+        "additionalPrice": {
+          "description": "Price for additional applications.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/AmountValue"
+            }
+          ]
+        },
+        "subtotal": {
+          "description": "Subtotal for this product.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/PriceItem"
+            }
+          ]
+        },
+        "currentPrice": {
+          "description": "Current price for this product.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/PriceItem"
+            }
+          ]
+        },
+        "priceDifference": {
+          "description": "Price difference for this product.",
+          "readOnly": true,
+          "allOf": [
+            {
+              "$ref": "#/definitions/PriceItem"
+            }
+          ]
+        }
+      },
+      "description": "Model for module/bundle price."
+    },
+    "VisaCardImage": {
+      "type": "object",
+      "properties": {
+        "visaCardImageId": {
+          "type": "string",
+          "example": "0002",
+          "description": "Visa card image ID to be used in the application",
+          "readOnly": true
+        },
+        "imageDescription": {
+          "type": "string",
+          "example": "Butterfly",
+          "description": "Description of the image",
+          "readOnly": true
+        },
+        "imageBaseFilename": {
+          "type": "string",
+          "example": "visual_visamotiv_karte0002",
+          "description": "Base filename for the files representing the image. The name has to be extended with a postfix indicating the resolution and file type, e.g. -1x.jpg. The resulting filename can be used to retrieve the image from the comdirect CMS",
+          "readOnly": true
+        },
+        "baseCardImageId": {
+          "type": "string",
+          "example": "0001",
+          "description": "Card image ID to be used in the application",
+          "readOnly": true
+        },
+        "wearableName": {
+          "type": "string",
+          "example": "HSV",
+          "description": "Name of the wearable included with the card image",
+          "readOnly": true
+        },
+        "textColour": {
+          "type": "string",
+          "example": "#FFFFFF",
+          "description": "Colour of the text printed on the card",
+          "readOnly": true
+        }
+      }
+    }
+  },
+  "parameters": {
+    "authorization": {
+      "name": "Authorization",
+      "in": "header",
+      "required": true,
+      "pattern": "^Bearer [A-Za-z0-9-_=]+\\.[A-Za-z0-9-_=]+\\.?[A-Za-z0-9-_.+\\/=]*$",
+      "type": "string"
+    }
+  },
+  "securityDefinitions": {
+    "OAuth (External) Password": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for external services.",
+      "flow": "password",
+      "tokenUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/token",
+      "scopes": {}
+    },
+    "OAuth (External) AuthorizationCode": {
+      "type": "oauth2",
+      "description": "The tokenmanager used for external services.",
+      "flow": "accessCode",
+      "authorizationUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/auth",
+      "tokenUrl": "https://api.commerzbank.com/auth/realms/external/protocol/openid-connect/token",
+      "scopes": {}
+    }
+  }
+}

@@ -1,0 +1,1746 @@
+openapi: 3.0.2
+info:
+  version: '4.0'
+  title: CodeServer REST API
+  description: CodeServer REST API v4.0
+  termsOfService: 'https://elisa.fi/kayttoehdot'
+  contact:
+    name: Elisa Oyj
+    url: 'https://yrityksille.elisa.fi/codeserver-master-data'
+    email: codeserver-support@elisa.fi
+  license:
+    name: CodeServer käyttöoikeuslisenssi
+    url: 'https://elisa.fi/sopimusehdot'
+servers:
+  - url: /codeserver/csapi
+    description: Localhost CodeServer
+tags:
+  - name: Authentication
+    description: Authentication related services
+  - name: Classification
+    description: Classification and version related services
+  - name: Concept code
+    description: Concept code related services
+  - name: Price list
+    description: Price list related services
+  - name: Price
+    description: Price related services
+paths:
+  /v4/classifications:
+    get:
+      summary: Get collection of classifications available as REST API resources
+      tags:
+        - Classification
+      description: >-
+        Get classification metadata with default version info
+        and links to classification versions.
+      operationId: getClassifications
+      parameters:
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Classifications'
+          links:
+            first:
+              description: Get first page of classifications if not the current page
+              operationId: getClassifications
+              parameters:
+                pageSize: '$response.body#/pageSize'
+                page: 1
+            next:
+              description: Get next page of classifications if available
+              operationId: getClassifications
+              parameters:
+                pageSize: '$response.body#/pageSize'
+                page: '$response.body#/page + 1'
+            prev:
+              description: Get previous page of classifications if available
+              operationId: getClassifications
+              parameters:
+                pageSize: '$response.body#/pageSize'
+                page: '$response.body#/page - 1'
+            last:
+              description: Get last page of classifications if not the current page
+              operationId: getClassifications
+              parameters:
+                pageSize: '$response.body#/pageSize'
+                page: '$response.body#/totalPages'
+        '204':
+          $ref: '#/components/responses/NoContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/versions:
+    get:
+      summary: Get collection of classification versions
+      tags:
+        - Classification
+      description: >-
+        Get short details of all versions of specific classification. Each version has HATEOAS link to full version metadata and field information.
+      operationId: getClassificationVersions
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ClassificationVersions'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/conceptcodes:
+    parameters:
+      - $ref: '#/components/parameters/ClassificationIdParam'
+    get:
+      summary: Get concept codes by classification id.
+      tags:
+        - Concept code
+      operationId: getConceptCodesFromDefaultVersion
+      description: >-
+        Get collection of concept codes of specified classification and it's
+        default version
+      parameters:
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/ValidOnParam'
+        - $ref: '#/components/parameters/QvalueParam'
+        - $ref: '#/components/parameters/QfieldParam'
+        - $ref: '#/components/parameters/ModifiedAfterParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptCodes'
+          links:
+            first:
+              description: Get first page of concept codes if not the current page
+              operationId: getConceptCodesFromDefaultVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: 1
+            next:
+              description: Get next page of concept codes if available
+              operationId: getConceptCodesFromDefaultVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/page + 1'
+            prev:
+              description: Get previous page of concept codes if available
+              operationId: getConceptCodesFromDefaultVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/page - 1'
+            last:
+              description: Get last page of concept codes if not the current page
+              operationId: getConceptCodesFromDefaultVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/totalPages'
+        '204':
+          $ref: '#/components/responses/NoContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    post:
+      summary: >-
+        Create new active concept code to the default version of specified
+        classification.
+      tags:
+        - Concept code
+      operationId: postConceptCodeToDefaultVersion
+      description: >-
+        Create new active concept code to the default version of specified
+        classification. Status of the created concept code will be active. Use
+        of this sevice requires authentication.
+      security:
+        - BearerAuthScheme: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConceptCode'
+      responses:
+        '201':
+          $ref: '#/components/responses/ConceptCodeCreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/conceptcodes/{conceptCodeId}:
+    get:
+      summary: Get concept code by classification id and concept code id.
+      tags:
+        - Concept code
+      operationId: getConceptCodeFromDefaultVersion
+      description: >-
+        Get all data of single active concept code of specified classification
+        and it's default version.
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/ConceptCodeIdParam'
+        - $ref: '#/components/parameters/ValidOnParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptCode'
+          links:
+            self:
+              description: Direct HATEOAS link to this same concept code
+              operationId: getConceptCodeFromDefaultVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                conceptCodeId: '$response.body#/conceptCodeId'
+                validOn: $request.query.validOn
+            parent-conceptcode:
+              description: Direct HATEOAS link to parent concept code if available
+              operationId: getConceptCodeFromDefaultVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                conceptCodeId: '$response.body#/conceptCodeId'
+                validOn: $request.query.validOn
+        '204':
+          $ref: '#/components/responses/NoContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    put:
+      summary: >-
+        Update existing concept code in the default version of specified
+        classification.
+      tags:
+        - Concept code
+      operationId: putConceptCodeInDefaultVersion
+      description: >-
+        Update existing concept code in specified classification/default
+        version. Use of this sevice requires authentication.
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/ConceptCodeIdParam'
+        - $ref: '#/components/parameters/ValidOnUpdateParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConceptCode'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContentUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    patch:
+      summary: >-
+        Partial update of existing concept code in the default version of
+        specified classification.
+      tags:
+        - Concept code
+      operationId: patchConceptCodeInDefaultVersion
+      description: >-
+        Partial update of existing concept code in specified
+        classification/default version. Use of this sevice requires
+        authentication.
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/ConceptCodeIdParam'
+        - $ref: '#/components/parameters/ValidOnUpdateParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConceptCode'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContentUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/versions/{versionId}/conceptcodes:
+    parameters:
+      - $ref: '#/components/parameters/ClassificationIdParam'
+      - $ref: '#/components/parameters/VersionIdParam'
+    get:
+      summary: Get concept codes by classification id and classification version id.
+      tags:
+        - Concept code
+      operationId: getConceptCodesFromSpecifiedVersion
+      description: Get collection of concept codes of specified classification and version
+      parameters:
+        - $ref: '#/components/parameters/StatusParam'
+        - $ref: '#/components/parameters/ValidOnParam'
+        - $ref: '#/components/parameters/QvalueParam'
+        - $ref: '#/components/parameters/QfieldParam'
+        - $ref: '#/components/parameters/ModifiedAfterParam'
+        - $ref: '#/components/parameters/SortByParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptCodes'
+          links:
+            first:
+              description: Get first page of concept codes if not the current page
+              operationId: getConceptCodesFromSpecifiedVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                versionId: '$response.body#/versionId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: 1
+            next:
+              description: Get next page of concept codes if available
+              operationId: getConceptCodesFromSpecifiedVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                versionId: '$response.body#/versionId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/page + 1'
+            prev:
+              description: Get previous page of concept codes if available
+              operationId: getConceptCodesFromSpecifiedVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                versionId: '$response.body#/versionId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/page - 1'
+            last:
+              description: Get last page of concept codes if not the current page
+              operationId: getConceptCodesFromSpecifiedVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                versionId: '$response.body#/versionId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/totalPages'
+        '204':
+          $ref: '#/components/responses/NoContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    post:
+      summary: >-
+        Create new active concept code to the specified version of specified
+        classification.
+      tags:
+        - Concept code
+      operationId: postConceptCodeToSpecifiedVersion
+      description: >-
+        Create new active concept code resource to the specified version of
+        specified classification. Use of this sevice requires authentication.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConceptCode'
+      responses:
+        '201':
+          $ref: '#/components/responses/ConceptCodeCreatedResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/versions/{versionId}/conceptcodes/{conceptCodeId}:
+    get:
+      summary: >-
+        Get concept code by classification id, classification version id and
+        concept code id.
+      tags:
+        - Concept code
+      operationId: getConceptCodeFromSpecifiedVersion
+      description: >-
+        Get all data of single active concept code of specified classification
+        and specified classification version
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/VersionIdParam'
+        - $ref: '#/components/parameters/ConceptCodeIdParam'
+        - $ref: '#/components/parameters/ValidOnParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ConceptCode'
+          links:
+            self:
+              description: Direct HATEOAS link to this same concept code
+              operationId: getConceptCodeFromSpecifiedVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                versionId: '$response.body#/versionId'
+                conceptCodeId: '$response.body#/conceptCodeId'
+                validOn: $request.query.validOn
+            parent-conceptcode:
+              description: Direct HATEOAS link to parent concept code if available
+              operationId: getConceptCodeFromSpecifiedVersion
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                versionId: '$response.body#/versionId'
+                conceptCodeId: '$response.body#/conceptCodeId'
+                validOn: $request.query.validOn
+        '204':
+          $ref: '#/components/responses/NoContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    put:
+      summary: >-
+        Update existing concept code in the specified version of specified
+        classification.
+      tags:
+        - Concept code
+      operationId: putConceptCodeInSpecifiedVersion
+      description: >-
+        Update existing concept code in the specified classification and
+        specified version. Use of this sevice requires authentication.
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/VersionIdParam'
+        - $ref: '#/components/parameters/ConceptCodeIdParam'
+        - $ref: '#/components/parameters/ValidOnUpdateParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConceptCode'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContentUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+    patch:
+      summary: >-
+        Partial update of existing concept code in specified classification and
+        version.
+      tags:
+        - Concept code
+      operationId: patchConceptCodeInSpecifiedVersion
+      description: >-
+        Partial update of existing concept code in specified classification and
+        version. Use of this sevice requires authentication.
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/VersionIdParam'
+        - $ref: '#/components/parameters/ConceptCodeIdParam'
+        - $ref: '#/components/parameters/ValidOnUpdateParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConceptCode'
+      responses:
+        '204':
+          $ref: '#/components/responses/NoContentUpdateResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/versions/{versionId}:
+    get:
+      summary: >-
+        Get description of classification version by classification id and
+        version id.
+      tags:
+        - Classification
+      operationId: getSpecifiedVersion
+      description: >-
+        Get description (metadata) of specified version of specified
+        classification resource.
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/VersionIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Version'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/pricelists/{pricelistId}/prices:
+    parameters:
+      - $ref: '#/components/parameters/ClassificationIdParam'
+      - $ref: '#/components/parameters/PricelistIdParam'
+    get:
+      summary: Get prices from price list.
+      tags:
+        - Price
+      operationId: getPricesFromPriceList
+      description: Get collection of prices of specified classification and price list
+      parameters:
+        - $ref: '#/components/parameters/PriceStatusParam'
+        - $ref: '#/components/parameters/ValidOnParam'
+        - $ref: '#/components/parameters/QvalueParam'
+        - $ref: '#/components/parameters/PriceQfieldParam'
+        - $ref: '#/components/parameters/ModifiedAfterParam'
+        - $ref: '#/components/parameters/PriceSortByParam'
+        - $ref: '#/components/parameters/PageSizeParam'
+        - $ref: '#/components/parameters/PageParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Prices'
+          links:
+            first:
+              description: Get first page of prices if not the current page
+              operationId: getPricesFromPriceList
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pricelistId: '$response.body#/pricelistId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: 1
+            next:
+              description: Get next page of prices if available
+              operationId: getPricesFromPriceList
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pricelistId: '$response.body#/pricelistId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/page + 1'
+            prev:
+              description: Get previous page of prices if available
+              operationId: getPricesFromPriceList
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pricelistId: '$response.body#/pricelistId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/page - 1'
+            last:
+              description: Get last page of prices if not the current page
+              operationId: getPricesFromPriceList
+              parameters:
+                classificationId: '$response.body#/classificationId'
+                pricelistId: '$response.body#/pricelistId'
+                pageSize: '$response.body#/pageSize'
+                status: $request.query.status
+                validOn: $request.query.validOn
+                qvalue: $request.query.qvalue
+                qfield: $request.query.qfield
+                modifiedAfter: $request.query.modifiedAfter
+                sortBy: $request.query.sortBy
+                page: '$response.body#/totalPages'
+        '204':
+          $ref: '#/components/responses/NoContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/pricelists/{pricelistId}/prices/{priceId}:
+    parameters:
+      - $ref: '#/components/parameters/ClassificationIdParam'
+      - $ref: '#/components/parameters/PricelistIdParam'
+      - $ref: '#/components/parameters/PriceIdParam'
+    get:
+      summary: 'Get price by classification id, price list id and price id.'
+      tags:
+        - Price
+      operationId: getPriceFromPriceList
+      description: >-
+        Get all data of single active price of specified classification and
+        specified pricelist.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Price'
+          links:
+            self:
+              description: Direct HATEOAS link to this same price
+              operationId: getPriceFromPriceList
+              parameters:
+                classificationId: $request.path.classificationId
+                pricelistId: $request.path.pricelistId
+                priceId: $request.path.priceId
+        '204':
+          $ref: '#/components/responses/NoContentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /v4/classifications/{classificationId}/pricelists/{pricelistId}:
+    get:
+      summary: Get description of specified price list
+      tags:
+        - Price list
+      operationId: getPriceList
+      description: Get description (metadata) of specified price list resource.
+      parameters:
+        - $ref: '#/components/parameters/ClassificationIdParam'
+        - $ref: '#/components/parameters/PricelistIdParam'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PriceList'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '403':
+          $ref: '#/components/responses/ForbiddenResponse'
+        '404':
+          $ref: '#/components/responses/NotFoundResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+  /auth/api-login:
+    post:
+      summary: Authenticate and get authentication token.
+      tags:
+        - Authentication
+      operationId: authenticate
+      description: >-
+        Authenticate with given user/password information and, after successfull
+        authentication, get reply with access token to be used in Authorization
+        header with other CS REST API requests. With GET request the
+        authentication is optional (guest user is the default) and with POST,
+        PUT and PATCH requests the authentication is mandatory.
+      security: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticationRequest'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+        '400':
+          $ref: '#/components/responses/BadRequestResponse'
+        '401':
+          $ref: '#/components/responses/UnauthorizedResponse'
+        '415':
+          $ref: '#/components/responses/UnsupportedMediaTypeResponse'
+        '500':
+          $ref: '#/components/responses/InternalServerErrorResponse'
+components:
+  securitySchemes:
+    BearerAuthScheme:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    ClassificationIdParam:
+      name: classificationId
+      in: path
+      required: true
+      description: Classification identifier
+      schema:
+        type: string
+    ConceptCodeIdParam:
+      name: conceptCodeId
+      in: path
+      required: true
+      description: Concept Code identifier
+      schema:
+        type: string
+    PricelistIdParam:
+      name: pricelistId
+      in: path
+      required: true
+      description: >-
+        Price list identifier, same as version identifier of the price list
+        product classification version.
+      schema:
+        type: string
+    PriceIdParam:
+      name: priceId
+      in: path
+      required: true
+      description: Price identifier (OID)
+      schema:
+        type: string
+    ModifiedAfterParam:
+      name: modifiedAfter
+      in: query
+      description: >-
+        Filter the results by timestamp indicating date value of last
+        modification of concept code.Results contain those concept codes codes
+        which have been changed during and after given date. Date in the
+        'YYYY-MM-DD' format.
+      schema:
+        type: string
+        format: date
+    PageParam:
+      name: page
+      in: query
+      description: Refers to the page of the result list.
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+    PageSizeParam:
+      name: pageSize
+      in: query
+      description: Maximum number of results per page
+      schema:
+        type: integer
+        minimum: 10
+        maximum: 500
+        default: 100
+    QfieldParam:
+      name: qfield
+      in: query
+      description: Fixed field name(s) to be used as search criteria targets.
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/Qfield'
+    PriceQfieldParam:
+      name: qfield
+      in: query
+      description: Fixed price field name(s) to be used as search criteria targets.
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/PriceQfield'
+    QvalueParam:
+      name: qvalue
+      in: query
+      description: >-
+        Search criteria value which is used againts fields defined in 'qfields'
+        parameter. Supported wild card is '*' (asterisk)
+      schema:
+        type: string
+    SortByParam:
+      name: sortBy
+      in: query
+      description: >-
+        A field name by which concept codes should be sorted in ascending order.
+        Empty values may be sorted first or last depending on the database
+        engine.
+      schema:
+        $ref: '#/components/schemas/SortBy'
+    PriceSortByParam:
+      name: sortBy
+      in: query
+      description: >-
+        A field name by which pricess should be sorted in ascending order. Empty
+        values may be sorted first or last depending on the database engine.
+      schema:
+        $ref: '#/components/schemas/PriceSortBy'
+    StatusParam:
+      name: status
+      in: query
+      description: >-
+        Filter the results by concept code status. If not specified, results
+        contain only active concept codes.
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/Status'
+    PriceStatusParam:
+      name: status
+      in: query
+      description: >-
+        Filter the results by price status. If not specified, results contain
+        only active prices.
+      schema:
+        type: array
+        items:
+          $ref: '#/components/schemas/PriceStatus'
+    ValidOnParam:
+      name: validOn
+      in: query
+      description: >-
+        Filter the results by timestamp indicating date value when concept code
+        must be valid. Date in the 'YYYY-MM-DD' format.
+      schema:
+        type: string
+        format: date
+    ValidOnUpdateParam:
+      name: validOn
+      in: query
+      description: >-
+        Helps to select the right concept code, if there are several concept
+        codes with the same id but with different validity periods. Date in the
+        'YYYY-MM-DD' format.
+      schema:
+        type: string
+        format: date
+    VersionIdParam:
+      name: versionId
+      in: path
+      required: true
+      description: Version identifier
+      schema:
+        type: string
+  responses:
+    ConceptCodeCreatedResponse:
+      description: Created - New concept code resource has been created
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ConceptCodeCreated'
+      links:
+        self:
+          description: Direct HATEOAS link to created concept code
+          operationId: getConceptCodeFromDefaultVersion
+          parameters:
+            classificationId: $request.path.classificationId
+            conceptCodeId: '$response.body#/conceptCodeId'
+            validOn: '$request.body#/beginDate'
+    NoContentResponse:
+      description: No Content - There are no concept codes or prices to list
+    NoContentUpdateResponse:
+      description: No Content - Update was successful.
+    BadRequestResponse:
+      description: Bad Request - Request parameter value validation error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnauthorizedResponse:
+      description: Unauthorized - Authentication failure.
+      headers:
+        WWW-Authenticate:
+          schema:
+            type: string
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    ForbiddenResponse:
+      description: Forbidden - Client is not authorized to access or update the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFoundResponse:
+      description: Not Found - Resource not found with given identifier
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+    UnsupportedMediaTypeResponse:
+      description: Unsupported Media Type
+    InternalServerErrorResponse:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    AuthenticationRequest:
+      type: object
+      description: Authentication information ie. username and password.
+      properties:
+        username:
+          type: string
+          description: name of authenticating user
+          maxLength: 40
+        password:
+          type: string
+          description: password for authenticating user
+          maxLength: 50
+      required:
+        - username
+        - password
+    AuthenticationResponse:
+      type: object
+      description: Response to successful authentication.
+      properties:
+        authenticationToken:
+          type: string
+          description: Authentication token to be used in Authorization header.
+      required:
+        - authenticationToken
+    Status:
+      type: string
+      description: Concept code status
+      default: ACTIVE
+      enum:
+        - PROPOSAL
+        - ACTIVE
+        - DELETED
+      readOnly: true
+    PriceStatus:
+      type: string
+      description: Price status
+      default: ACTIVE
+      enum:
+        - ACTIVE
+        - DELETED
+    Qfield:
+      type: string
+      description: Fixed field name(s) to be used as search criteria targets
+      enum:
+        - CONCEPTCODEID
+        - ABBREVIATION
+        - NAME
+        - PARENTID
+    PriceQfield:
+      type: string
+      description: Fixed price field name(s) to be used as search criteria targets
+      enum:
+        - PRICEID
+        - PRODUCTID
+        - PRODUCERID
+        - CUSTOMERID
+    SortBy:
+      type: string
+      description: A field name by which concept codes should be sorted in ascending order
+      default: CONCEPTCODEID
+      enum:
+        - CONCEPTCODEID
+        - ABBREVIATION
+        - NAME
+        - PARENTID
+        - BEGINDATE
+        - EXPIRATIONDATE
+        - OID
+        - LASTMODIFIEDBY
+        - LASTMODIFIEDDATE
+        - CREATEDATE
+    PriceSortBy:
+      type: string
+      description: A field name by which prices should be sorted in ascending order
+      default: PRICEID
+      enum:
+        - PRICEID
+        - PRODUCTID
+        - PRODUCERID
+        - CUSTOMERID
+        - PRICE1
+        - BEGINDATE
+        - EXPIRATIONDATE
+        - LASTMODIFIEDBY
+        - LASTMODIFIEDDATE
+        - CREATEDATE
+    Error:
+      type: object
+      description: Error/warning description
+      properties:
+        name:
+          type: string
+          description: 'Human readable, unique name of the error.'
+        debug_id:
+          type: string
+          description: Internal identifier used for correlation purposes.
+        message:
+          type: string
+          description: Message describing the error.
+        details:
+          type: array
+          description: >-
+            Additional details for the error. Mandatory for client side 4xx
+            errors.
+          additionalProperties: false
+          items:
+            $ref: '#/components/schemas/ErrorDetail'
+      required:
+        - name
+        - message
+    ErrorDetail:
+      type: object
+      description: >-
+        Additional details for the error. Mandatory element for status code 4xx
+        responses.
+      properties:
+        field:
+          type: string
+          description: >-
+            Field in error if in body, else name of the path parameter or query
+            parameter.
+        value:
+          type: string
+          description: Value of the field in error.
+        issue:
+          type: string
+          description: Reason for error.
+        location:
+          type: string
+          description: >-
+            The location of the field in the error, either query, path, or body.
+            If this field is not present, the default value is body.
+    Attribute:
+      type: object
+      description: >-
+        Concept code or price attribute. For concept codes an attribute with
+        name "Abbreviation" is mandatory in POST and PUT requests.
+      properties:
+        attributeName:
+          type: string
+          description: Name of attribute.
+        attributeValue:
+          type: array
+          description: Attribute value(s).
+          items:
+            type: string
+    ConceptCode:
+      type: object
+      properties:
+        classificationId:
+          type: string
+          description: Classification identifier.
+          readOnly: true
+        classificationName:
+          type: string
+          description: Classification name.
+          readOnly: true
+        versionId:
+          type: string
+          description: Version identifier.
+          readOnly: true
+        versionName:
+          type: string
+          description: Version name.
+          readOnly: true
+        conceptCodeId:
+          type: string
+          description: Concept code identifier. Cannot be updated after insert.
+        status:
+          $ref: '#/components/schemas/Status'
+        beginDate:
+          type: string
+          format: date
+          description: Validity beginning date without time part.
+        expirationDate:
+          type: string
+          format: date
+          description: Validity expiration date without time part.
+        lastModifiedDate:
+          type: string
+          format: date-time
+          description: Last modified date and time.
+          readOnly: true
+        lastModifiedBy:
+          type: string
+          description: Name of last modifier.
+          readOnly: true
+        createDate:
+          type: string
+          format: date-time
+          description: Creation date and time.
+          readOnly: true
+        attributes:
+          type: array
+          description: Concept code attributes
+          items:
+            $ref: '#/components/schemas/Attribute'
+    ConceptCodes:
+      type: object
+      properties:
+        conceptCodes:
+          type: array
+          description: Array of concept codes.
+          items:
+            $ref: '#/components/schemas/ConceptCode'
+        pageSize:
+          type: integer
+          description: >-
+            Maximum number of concept codes in one page. If the value is same as
+            the value of totalPages then further pages are not available.
+          readOnly: true
+        page:
+          type: integer
+          description: Current page number
+          readOnly: true
+        totalItems:
+          type: integer
+          description: Total number of concept codes.
+          readOnly: true
+        totalPages:
+          type: integer
+          description: Total number of pages.
+          readOnly: true
+    Price:
+      type: object
+      properties:
+        pricelistName:
+          type: string
+          description: Price list name.
+        priceId:
+          type: string
+          description: Price identifier = OID.
+        price1:
+          type: string
+          format: '^(([0-9]{1,10})|([0-9]{1,10}.[0-9]{2}))$'
+          description: Price of product
+        status:
+          $ref: '#/components/schemas/PriceStatus'
+        beginDate:
+          type: string
+          format: date
+          description: Validity beginning date without time part.
+        expirationDate:
+          type: string
+          format: date
+          description: Validity expiration date without time part.
+        lastModifiedDate:
+          type: string
+          format: date-time
+          description: Last modified date and time.
+        lastModifiedBy:
+          type: string
+          description: Name of last modifier.
+        createDate:
+          type: string
+          format: date-time
+          description: Creation date and time.
+        attributes:
+          type: array
+          description: Price attributes
+          items:
+            $ref: '#/components/schemas/Attribute'
+    Prices:
+      type: object
+      properties:
+        prices:
+          type: array
+          description: Array of prices.
+          items:
+            $ref: '#/components/schemas/Price'
+        pageSize:
+          type: integer
+          description: >-
+            Maximum number of prices in one page. If the value is same as the
+            value of totalPages then further pages are not available.
+          readOnly: true
+        page:
+          type: integer
+          description: Current page number
+          readOnly: true
+        totalItems:
+          type: integer
+          description: Total number of pricess.
+          readOnly: true
+        totalPages:
+          type: integer
+          description: Total number of pages.
+          readOnly: true
+    Field:
+      type: object
+      description: >-
+        Version and price list field, field type, reference identification and
+        field value qualifications
+      properties:
+        fieldName:
+          type: string
+          description: Name of the field
+        fieldType:
+          type: string
+          description: Type of the field
+          enum:
+            - BASE
+            - FIXED
+            - ATTRIBUTE
+            - REFERENCE
+        fieldSubType:
+          type: string
+          description: Sub-type of attribute field. Used when fieldType is ATTRIBUTE.
+          nullable: true
+          enum:
+            - NUMERIC
+            - SHORTTEXT
+            - LONGTEXT
+            - FORMATTEDTEXT
+            - VALUESET
+            - DATE
+            - LINK
+        fieldDescription:
+          type: string
+          description: Description of the field
+        restrictedAccess:
+          type: boolean
+          description: 'If true, the field access is restricted.'
+        referencedCodeSystem:
+          type: object
+          description: >-
+            Referenced classification and version. Used when fieldType is
+            REFERENCE.
+          properties:
+            classificationId:
+              type: string
+            versionId:
+              type: string
+            links:
+              type: array
+              items:
+                type: object
+                properties:
+                  href:
+                    type: string
+                    format: uri
+                    description: URL of the version of the referenced concept code
+                  rel:
+                    type: string
+                    description: Type of the URL
+                  method:
+                    type: string
+                    description: HTTP method of the URL
+        multipleValues:
+          type: boolean
+          description: >-
+            Used when fieldType is REFERENCE. Can field have multiple values
+            (aka one-to-may reference)?
+        backwardReference:
+          type: boolean
+          description: >-
+            Used when fieldType is REFERENCE. Value 'true' means that this field
+            is 'backward reference' of a two-way-reference, value 'false' means
+            that this field is normal reference or 'forward reference' of a
+            two-way-reference. 'Backward reference' fields can not be written to
+            in POST, PUT and PATCH requests.
+        activeTargetsOnly:
+          type: boolean
+          description: >-
+            Used when fieldType is REFERENCE. Value 'true' means that the target
+            concept code of a forward reference must have ACTIVE status. If the value
+            is 'false', a target with PROPOSAL status is also accepted.
+        fieldQualifications:
+          type: object
+          description: Field qualifications
+          properties:
+            minLength:
+              type: integer
+              description: Minimum length for field value
+            maxLength:
+              type: integer
+              description: Maximum length for field value
+            mandatory:
+              type: boolean
+              description: Is value mandatory
+            mandatoryCondition:
+              type: string
+              description: Condition for being mandatory
+              nullable: true
+            valueCondition:
+              type: string
+              description: Value is allowed if this condition is fullfilled
+              nullable: true
+            unique:
+              type: boolean
+              description: Should value be unique
+            valueRangeMin:
+              type: number
+              description: Minimum value for numeric attribute value
+              nullable: true
+            valueRangeMax:
+              type: number
+              description: Maximum value for numeric attribute value
+              nullable: true
+            format:
+              type: string
+              description: Regular expression for value format
+              nullable: true
+            formatCondition:
+              type: string
+              description: Condition for regular expression
+              nullable: true
+            formatDescription:
+              type: string
+              description: Description for regular expression
+              nullable: true
+            valueSetValues:
+              type: array
+              description: Allowed values for value set attributes
+              items:
+                type: string
+    Version:
+      type: object
+      description: CodeServer classification version
+      properties:
+        definitions:
+          type: array
+          description: Classification version concept code fields
+          items:
+            $ref: '#/components/schemas/Field'
+        classificationId:
+          type: string
+          description: Classification identifier
+        classificationName:
+          type: string
+          description: Classification name
+        versionId:
+          type: string
+          description: Version identifier
+        versionName:
+          type: string
+          description: Version name
+        status:
+          $ref: '#/components/schemas/Status'
+        beginDate:
+          type: string
+          format: date
+          description: Validity beginning date without time part.
+        expirationDate:
+          type: string
+          format: date
+          description: Validity expiration date without time part.
+        oidRoot:
+          type: string
+          description: Version OID root
+        nextOid:
+          type: integer
+          description: Next OID. Only relevant if oidRoot is not empty.
+        oid2id:
+          type: boolean
+          description: >-
+            Is OID used as concept code id or not. Only relevant if oidRoot is
+            not empty.
+        hierarchyIntegrity:
+          type: string
+          description: >-
+            Type of hierarchy validation. Only relevant for versions in
+            hierarchical classifications.
+          enum:
+            - STRICT
+            - LOOSE
+        hierarchyLevelNames:
+          type: array
+          items:
+            type: string
+          maxItems: 25
+          description: >-
+            Optional names for hierarchy levels. Only relevant for versions in
+            hierarchical classifications.
+        lastModifiedDate:
+          type: string
+          format: date-time
+          description: Last modified date and time.
+        lastModifiedBy:
+          type: string
+          description: Name of last modifier.
+    PriceList:
+      type: object
+      description: CodeServer price list metadata
+      properties:
+        pricelistName:
+          type: string
+          description: Price list friendly name
+        productClassificationId:
+          type: string
+          description: Product classification id
+        productClassificationName:
+          type: string
+          description: Product classification name
+        productVersionId:
+          type: string
+          description: Product version id
+        productVersionName:
+          type: string
+          description: Product version name
+        producersName:
+          type: string
+          description: Producers friendly name
+        producerClassificationId:
+          type: string
+          description: Producer classification id
+        producerClassificationName:
+          type: string
+          description: Producer classification name
+        producerVersionId:
+          type: string
+          description: Producer version id
+        producerVersionName:
+          type: string
+          description: Producer version name
+        customersName:
+          type: string
+          description: Customers friendly name
+        customerClassificationId:
+          type: string
+          description: Customer classification id
+        customerClassificationName:
+          type: string
+          description: Customer classification name
+        customerVersionId:
+          type: string
+          description: Customer version id
+        customerVersionName:
+          type: string
+          description: Customer version name
+        definitions:
+          type: array
+          description: Fields of price
+          items:
+            $ref: '#/components/schemas/Field'
+    ConceptCodeCreated:
+      type: object
+      description: Concept code creation response
+      required:
+        - conceptCodeId
+        - createDate
+      properties:
+        conceptCodeId:
+          type: string
+          description: Concept code identifier.
+        createDate:
+          type: string
+          format: date-time
+          description: Creation date and time.
+    Classification:
+      type: object
+      description: CodeServer classification
+      properties:
+        classificationId:
+          type: string
+          description: Classification identifier
+        classificationName:
+          type: string
+          description: Classification name
+        classificationType:
+          type: string
+          description: Classification type
+          enum:
+            - CODES
+            - ORGANIZATIONS
+        hierarchical:
+          type: boolean
+          description: Is Classification hierarchical or not
+        category:
+          type: array
+          description: Classification belongs to these categories
+          items:
+            type: string
+        restrictedAccess:
+          type: boolean
+          description: Whether a restricted access is assigned to the classification
+        publicationsBlocked:
+          type: boolean
+          description: Whether a publications are prevented from this classification
+        formattedDescriptionFields:
+          type: boolean
+          description: Whether concept codes of this classification has description fields with text formatting
+        description:
+          type: string
+          description: Additional information of classification
+        attributes:
+          type: array
+          description: Classification attributes
+          items:
+            $ref: '#/components/schemas/Attribute'
+        defaultVersion:
+          type: object
+          description: Classifications default version
+          properties:
+            versionId:
+              type: string
+              description: Default version identifier
+            versionName:
+              type: string
+              description: Default version name
+            lastModifiedDate:
+              type: string
+              format: date-time
+              description: Date and time of last modification on default version
+        links:
+          type: array
+          description: HATEOAS links to default version and to all versions of this classification
+          items:
+            $ref: '#/components/schemas/Link'
+    Classifications:
+      type: object
+      properties:
+        classifications:
+          type: array
+          description: Collection of classifications
+          items:
+            $ref: '#/components/schemas/Classification'
+        pageSize:
+          type: integer
+          description: >-
+            Maximum number of classifications in one page. If the value is same as
+            the value of totalPages then further pages are not available.
+          readOnly: true
+        page:
+          type: integer
+          description: Current page number
+          readOnly: true
+        totalItems:
+          type: integer
+          description: Total number of classifications
+          readOnly: true
+        totalPages:
+          type: integer
+          description: Total number of pages.
+          readOnly: true
+    ClassificationVersions:
+      type: object
+      description: Collection of specified classification's versions
+      properties:
+        classificationId:
+          type: string
+          description: Classification identifier
+        classificationName:
+          type: string
+          description: Classification name
+        versions:
+          type: array
+          description: Classification versions with limited version details
+          items:
+            $ref: '#/components/schemas/ClassificationVersion'
+    ClassificationVersion:
+      type: object
+      properties:
+        versionId:
+          type: string
+          description: Version identifier
+        versionName:
+          type: string
+          description: Version name
+        status:
+          $ref: '#/components/schemas/Status'
+        beginDate:
+          type: string
+          format: date
+          description: Validity beginning date without time part.
+        expirationDate:
+          type: string
+          format: date
+          description: Validity expiration date without time part.
+        lastModifiedDate:
+          type: string
+          format: date-time
+          description: Date and time of last modification on this version
+        defaultVersion:
+          type: boolean
+          description: Whether this is classifications default version
+        links:
+          type: array
+          description: HATEOAS link to full version details
+          items:
+             $ref: '#/components/schemas/Link'
+    Link:
+      type: object
+      description: HATEOAS link
+      properties:
+        href:
+          type: string
+          format: uri
+          description: URL to specified resource(s)
+        rel:
+          type: string
+          description: Type of the URL
+        method:
+          type: string
+          description: HTTP method of the URL
+security:
+  - BearerAuthScheme: []

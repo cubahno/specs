@@ -1,0 +1,393 @@
+swagger: "2.0"
+info:
+  description: "This API provides access to data points such as KPIs, Response rates and Result summaries for  questions asked in &frankly, as well as supporting information that may be required (such as groups that exists, when questions have been scheduled, basic question information etc). Authentication to access this endpoint is handle by API tokens that can be generated from your &frankly account as an Administrator under <i>Account</i> and <i>API tokens</i> and should be passed as a value to the header \"Authorization\".<br><br>The OpenAPI/Swagger definition of this API is avalable <a href='../swagger.yml'>here</a>."
+  version: "0.6"
+  title: "&frankly data API"
+  contact:
+    email: "help@andfrankly.com"
+host: "data.api.andfrankly.com"
+basePath: "/v1"
+tags:
+- name: "Groups"
+- name: "KPIs and KPI values"
+- name: "Response rates"
+- name: "Questions and results"
+schemes:
+- "https"
+paths:
+  /responserates/values:
+    get:
+      tags:
+      - "Response rates"
+      description: "This method can be used to fetch response rate data points for a given group and/or org-tree. Provide a group id as well as an optional time range (if omitted, the latest response rate values will be returned) and a structure of group/response rate values will be returned, either for the group selected or the group and all groups that reside beneath it in the &frankly group tree. To identify the groups returned, use the /group endpoint to also fetch group object definitions. Response rate values represent the response rate for questions asked to everyone in the group, i.e. questions asked to specific individuals by virtue of other group memberships are not included in the group data point."
+      produces:
+      - "application/json"
+      parameters:
+      - name: "groupId"
+        in: "query"
+        description: "Id of the group whos response rate values we should fetch"
+        required: true
+        type: "string"    
+      - name: "includeSubgroups"
+        in: "query"
+        description: "Wether to return response rate values for all subgroups to this group together with the group itself (i.e. the full org-tree of results)"
+        type: "boolean"                 
+      - name: "fromDate"
+        in: "query"
+        description: "Date range we should fetch response rates from, must be used with to_date if provided. Should be of form 2021-04-09. If omitted will fetch latest values."
+        type: "string"
+        format: "date"
+      - name: "toDate"
+        in: "query"
+        description: "Date range we should fetch response rates to, must be used with from_date if provided. Should be of form 2021-04-15. If omitted will fetch latest values."
+        type: "string"
+        format: "date"        
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+               $ref: "#/definitions/ResponseRate-values"
+        404:
+          description: "No such group found"      
+  /kpis:
+    get:
+      tags:
+      - "KPIs and KPI values"
+      description: "This method fetches the definition of KPIs for which there ever has been a value created for in the account, their ID and description. The ID may later be used to fetch values for a given group and/or set of groups. Note that KPIs are generated for many &frankly standard packages, but can also be created for specific packages and/or a combination of packages."
+      produces:
+      - "application/json"
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+               $ref: "#/definitions/KPI"
+        404:
+          description: "No such KPI and/or group found"
+  /kpis/{kpiId}/values:
+    get:
+      tags:
+      - "KPIs and KPI values"
+      description: "This method can be used to fetch KPI data points for a given group and/or org-tree. Provide a KPI identifier in the path, and group id as well as an optional time range (if omitted, the latest KPI values will be returned) and a structure of group/KPI values will be returned, either for the group selected or the group and all groups that reside beneath it in the &frankly group tree. To identify the groups returned, use the /group endpoint to also fetch group object definitions."
+      produces:
+      - "application/json"
+      parameters:
+      - name: "kpiId"
+        in: "path"
+        description: "Id of KPI whos values should be returned"
+        required: true
+        type: "string"
+      - name: "groupId"
+        in: "query"
+        description: "Id of the group whos KPI values we should fetch"
+        required: true
+        type: "string"    
+      - name: "includeSubgroups"
+        in: "query"
+        description: "Wether to return KPI values for all subgroups to this group together with the group itself (i.e. the full org-tree of results)"
+        type: "boolean"          
+      - name: "fromDate"
+        in: "query"
+        description: "Date range we should fetch KPIs from, must be used with to_date if provided. Should be of form 2021-04-09. If omitted will fetch latest values."
+        type: "string"
+        format: "date"
+      - name: "toDate"
+        in: "query"
+        description: "Date range we should fetch KPIs to, must be used with from_date if provided. Should be of form 2021-04-15. If omitted will fetch latest values."
+        type: "string"
+        format: "date"        
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            $ref: "#/definitions/KPI-values"
+        404:
+          description: "No such KPI and/or group found"
+  /groups:
+      get:
+        tags:
+        - "Groups"
+        description: "This method will retun a list of all currently active groups that exists in the &frankly account. Use this information to get more descriptive information about the groups returned in other requests, or to identify a specific group that you want to fetch data points for by finding its unique ID."
+        produces:
+        - "application/json"
+        responses:
+          200:
+            description: "Successful operation"
+            schema:
+              type: "array"
+              items:
+                 $ref: "#/definitions/Group"
+  /results:
+    get:
+      tags:
+      - "Questions and results"
+      description: "This method can be used to fetch result data for a given group and/or org-tree. Provide a group id, a set of question ids as well as an optional time range (if omitted, results values from the last 5 weeks will be returned) and a structure of group/result data will be returned, either for the group selected or the group and all groups that reside beneath it in the &frankly group tree. To understand which questions have been asked to which groups, used the /askedquestions endpoint. To identify the groups returned, use the /group endpoint to also fetch group object definitions. Result data is structured differently depending on the question <i>type</i>, more details about the data structure per question type will be provided here shortly."
+      produces:
+      - "application/json"
+      parameters:
+      - name: "groupId"
+        in: "query"
+        description: "Id of the group whos result data  we should fetch"
+        required: true
+        type: "string"    
+      - name: "includeSubgroups"
+        in: "query"
+        description: "Wether to return result data for all subgroups to this group together with the group itself (i.e. the full org-tree of results)"
+        type: "boolean"   
+      - name: "includeComments"
+        in: "query"
+        description: "Wether to include comment provided to questions in the response"
+        type: "boolean"           
+      - name: "granularData"
+        in: "query"
+        description: "Wether to return granular data (i.e. individual answers) where it is possible. Note that not all question types supports providing individual data points, for such questions this setting will fall back to non-granular data i.e. averages/summaries instead."
+        type: "boolean"         
+      - name: "questionIds"
+        in: "query"
+        description: "Comma separated list of question ids for which result data should be fetched. If omitted will fetch all questions asked for the chosen period."
+        type: "string"            
+      - name: "fromDate"
+        in: "query"
+        description: "Date range we should fetch results data from, must be used with to_date if provided. Should be of form 2021-04-09. If omitted will fetch results from the last 5 weeks."
+        type: "string"
+        format: "date"
+      - name: "toDate"
+        in: "query"
+        description: "Date range we should fetch result data to, must be used with from_date if provided. Should be of form 2021-04-15. If omitted will fetch results from the last 5 weeks."
+        type: "string"
+        format: "date"   
+      - name: "language"
+        in: "query"
+        description: "Language that the results should be returned in. Must be a two letter <a href='https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes'>ISO-639-1</a> code, for example 'en'. If the question is defined with the given language, results will be returned in this language - else it will fall back to the base definition of the question."
+        type: "string"         
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+               $ref: "#/definitions/Results-values"
+        404:
+          description: "No such group found"                    
+  /askedquestions:
+    get:
+      tags:
+      - "Questions and results"
+      description: "This method can be used to fetch the set of questions asked to a given group and/or org-tree. Provide a group id and an optional time range (if omitted, all questions asked the last 5 weekswill be returned) and a structure of group/question/time data will be returned, either for the group selected or the group and all groups that reside beneath it in the &frankly group tree. Based on this information, you may use the /results endpoint to query the actual result data using group/question ids."
+      produces:
+      - "application/json"
+      parameters:
+      - name: "groupId"
+        in: "query"
+        description: "Id of the group whos result data  we should fetch"
+        required: true
+        type: "string"    
+      - name: "includeSubgroups"
+        in: "query"
+        description: "Wether to return result data for all subgroups to this group together with the group itself (i.e. the full org-tree of results)"
+        type: "boolean"   
+      - name: "fromDate"
+        in: "query"
+        description: "Date range we should fetch results data from, must be used with to_date if provided. Should be of form 2021-04-09. If omitted will fetch questions asked the last 5 weeks."
+        type: "string"
+        format: "date"
+      - name: "toDate"
+        in: "query"
+        description: "Date range we should fetch result data to, must be used with from_date if provided. Should be of form 2021-04-15. If omitted will fetch questions asked the last 5 weeks."
+        type: "string"
+        format: "date"   
+      - name: "language"
+        in: "query"
+        description: "Language that the question definitions should be returned in. Must be a two letter <a href='https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes'>ISO-639-1</a> code, for example 'en'. If the question is defined with the given language, results will be returned in this language - else it will fall back to the base definition of the question."
+        type: "string"         
+      responses:
+        200:
+          description: "Successful operation"
+          schema:
+            type: "array"
+            items:
+               $ref: "#/definitions/Askedquestions-values"
+        404:
+          description: "No such group found"                 
+                 
+securityDefinitions:
+  api_key:
+    type: "apiKey"
+    name: "Authorization"
+    in: "header"
+definitions:
+  KPI:
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    properties:
+      id:
+        type: "string"
+        example: "P-102"
+      name:
+        type: "string"
+        example: "1. Motivation Pulsing"
+      imageURL:
+        type: "string"
+        example: "https://app.andfrankly.com/assets/packages/motivation.png"        
+  KPI-value:
+    type: "object"
+    properties:
+      groupId:
+        type: "integer"
+        example: 3939
+        description: "ID of the group for which this KPI value is for"
+      value:
+        type: "number"
+        format: "double"
+        example: "0.67"
+        description: "KPI value between 0.0 and 1.0, or null if no value could be calculated (e.g. too few answers)"
+      yearWeek:
+        type: "string"
+        example: "202115"
+        description: "Year and week that this value is for on format YYYY-WW"
+      date:
+        type: "string"
+        format: "date"
+        example: "2021-04-09"
+        description: "Date of the monday of the week that this value is for on format YYYY-MM-DD"
+  KPI-values:
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    properties:
+      kpi:
+        $ref: "#/definitions/KPI"
+      values:
+        type: "array"
+        items:
+          $ref: "#/definitions/KPI-value"   
+  ResponseRate-value:
+    type: "object"
+    properties:
+      groupId:
+        type: "integer"
+        example: 3939
+        description: "ID of the group for which this response rate value is for"
+      value:
+        type: "number"
+        format: "double"
+        example: "0.67"
+        description: "Response rate value between 0.0 and 1.0, or null if no value could be calculated (e.g. too few answers)"
+      yearWeek:
+        type: "string"
+        example: "202115"
+        description: "Year and week that this value is for on format YYYY-WW"
+      date:
+        type: "string"
+        format: "date"
+        example: "2021-04-09"
+        description: "Date of the monday of the week that this value is for on format YYYY-MM-DD"
+  ResponseRate-values:
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    properties:
+      values:
+        type: "array"
+        items:
+          $ref: "#/definitions/ResponseRate-value"    
+  Results-values:
+    type: "object"
+    properties:
+      questions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Question"    
+      values:
+        type: "array"
+        items:
+          $ref: "#/definitions/Result-value"     
+      comments:
+        type: "array"
+        items:
+          $ref: "#/definitions/Comments-value"             
+  Result-value:
+    type: "object"
+    example:
+      { 98: { 3939: { 1842: { "value": 0.882589 } } } }
+    additionalProperties:
+      description: "An associative array with a set of question ids, for each question id a set of group ids,for each group a set of yearweeks and for each year week a JSON data structure that contains answer data (different depending on question type, see above) for this question/group/point in time"
+      type: "object"
+  Comments-value:
+    type: "object"
+    example:
+      { 98: { 3939: { 1842: [ "This is a comment" ] } } }
+    additionalProperties:
+      description: "An associative array with a set of question ids, for each question id a set of group ids,for each group a set of yearweeks and for each year week a list of the comments provided for this question/group/week. Note that comments 'aggregate' upwards, so comments shown for a Group A that is above Group B includes all comments from Group B also."
+      type: "object"      
+  Askedquestions-values:
+    type: "object"
+    properties:
+      questions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Question"    
+      askedquestions:
+        type: "array"
+        items:
+          $ref: "#/definitions/Askedquestion-value"     
+  Askedquestion-value:
+    type: "object"
+    example:
+      3939: { 1842: [ 13,97,98,144,155 ] }
+    additionalProperties:
+      description: "An associative array with a set of group ids, for each group id a set of yearweeks (YYWW) that questions have been asked, and for each yearweek a list of question ids that were asked this week."
+      type: "object"      
+  Question:
+    type: "object"
+    required:
+    - "id"
+    - "question"
+    - "type"    
+    properties:
+      id:
+        type: "integer"
+        example: 98
+        description: "Unique identifier for question"
+      question:
+        type: "string"
+        example: "How do you feel about coming to work?"
+        description: "The question title"
+      type:
+        type: "integer"
+        example: 15
+        description: "Enum identifier for the type of question, from the following list: TBD"
+  Group:
+    type: "object"
+    required:
+    - "id"
+    - "name"
+    properties:
+      id:
+        type: "integer"
+        example: 3939
+        description: "&frankly unique identifier for the group"
+      externalId:
+        type: "string"
+        example: "0006784"       
+        description: "Customer chosen unique identifier for the group (if set)"
+      name:
+        type: "string"
+        example: "&frankly core team"
+      description:
+        type: "string"
+        example: "Everyone in the &frankly team"
+      subgroups:
+        type: "array"
+        description: "List of all child groups that reside beneath this group in the hierarchy"
+        items: 
+          type: "integer"
+          example: 3938
+          

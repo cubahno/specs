@@ -1,0 +1,110 @@
+openapi: 3.0.0
+info:
+  title: Unified preprocessing Server
+  description: An API for providing clarified and simplified access to a variety of preprocessing related servers.
+  version: 1.0.0
+servers:
+  - url: https://nlp.artificialresearcher.com
+    description: Unified preprocessing Server
+
+paths:
+  /preprocessors:
+    post:
+      summary: Returns a list of available preprocessing methods and instructions needed to access the them.
+      tags:
+        - Overview
+      requestBody:
+        content:
+          application/json:
+            schema: 
+              type: object
+              required:
+                - "api_key"
+              properties:
+                api_key:
+                  type: string
+                  description: An authentification key provided by Artificial Researcher GmbH.
+              example:
+                api_key: "insertAPIkey"
+      responses:
+          200:
+            description: A JSON object
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Response'
+      
+
+
+  /pdf2text/convert:
+    post:
+      summary: Returns the text of a given .pdf file.
+      tags:
+        - convert
+      consumes:
+        - application/json
+        - multipart/form-data
+      parameters:
+        - name: api_key
+          in: body
+          description: An authentification key provided by Artificial Researcher GmbH.
+          required: true
+          schema:
+            type: object
+            properties:
+              api_key:
+                type: string
+        - name: file
+          in: formData
+          description: The PDF file to upload
+          required: true
+          type: file
+          format: binary
+      responses:
+        200:
+          description: A JSON object the patent summary as well as segmentation information.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+
+
+  /doc2text/convert:
+    post:
+      summary: Returns the text of a given doc or docx.
+      tags:
+        - convert
+      consumes:
+        - application/json
+        - multipart/form-data
+      parameters:
+        - name: api_key
+          in: body
+          description: An authentification key provided by Artificial Researcher GmbH.
+          required: true
+          schema:
+            type: object
+            properties:
+              api_key:
+                type: string
+        - name: file
+          in: formData
+          description: The PDF file to upload
+          required: true
+          type: file
+          format: binary
+      responses:
+        200:
+          description: A JSON object containing a ready to use query for solr.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+
+components:
+  schemas:
+    Response:
+      type: object
+      description: A json
+        

@@ -1,0 +1,490 @@
+openapi: 3.0.2
+info:
+  version: 1.1.0
+  title: Hamburg Sud Schedules API
+  description: |
+    Returns schedule information based on a specific Port/City combination or a specific Vessel/Voyage.<br>
+    This API offers not only Port to Port schedules, but also schedules for Door to Door shipments. The response it also including cutoff and availabiliy information of the locations. 
+  contact:
+    name: Hamburg Sud API Support
+    email: ham-its-ecommerce@hamburgsud.com
+  x-proxy-name: '201-schedule-p2p, 201-schedule-voyage-details'
+  x-availability-status: General Availabiliy
+  x-oas-href: null
+  x-docs-href: null
+  x-business-owner-email: HAM-COM-E <HAM-COM-E@hamburgsud.com>
+  x-product-owner-email: ECOMMERCE-INTEGRATION-SERVICES@hamburgsud.com
+  x-technical-owner-email: ECOMMERCE-INTEGRATION-SERVICES@hamburgsud.com
+  x-platform: null
+  x-published-for: customer
+  x-supply-chain-area: Export - Ocean Carrier
+  x-support-l1: HAM-ITS-ECOMMERCE
+  x-support-l2: HAM-ITS-ECOMMERCE
+  x-support-l3: HAM-ITS-ECOMMERCE
+  x-category: operational
+  x-avg-data-currency-mins: 0
+  x-back-end-systems: GLOBE
+  x-api-platform: apigee
+  x-visibility: public
+  x-deprecated-by: null
+  x-brand: hambursud
+  x-layer: experience
+servers:
+  - url: 'https://api-stage.hamburgsud-line.com/'
+    description: STAGE API server
+  - url: 'https://api.hamburgsud-line.com/'
+    description: PRODUCTION API server
+tags:
+  - name: Live
+    description: APIs that are available on the production server.
+  - name: Planned
+    description: APIs that are not jet productive.
+paths:
+  /v1/schedules/point-to-point/:
+    get:
+      summary: Search for available point-to-point connections.
+      description: Retrieve schedules for a specific point to point connection at a certain point in time. The API supports Port to Port as well as Door to Door and any combination of those. The result set will contain up to five schedules matching the query and represent the best and timely arrivals / departures.
+      tags:
+        - Live
+      parameters:
+        - name: x-api-key
+          in: header
+          description: The API key assigned to your organization has to be provided with every request.
+          required: true
+          schema:
+            type: string
+        - name: from
+          in: query
+          description: 'Departure point as UN/LOCODE see http://www.unece.org/cefact/locode/service/location'
+          required: true
+          schema:
+            type: string
+            pattern: '[a-zA-Z]{2}[a-zA-Z2-9]{3}'
+            minLength: 5
+            maxLength: 5
+        - name: to
+          in: query
+          description: 'Arrival point as UN/LOCODE see http://www.unece.org/cefact/locode/service/location'
+          required: true
+          schema:
+            type: string
+            pattern: '[a-zA-Z]{2}[a-zA-Z2-9]{3}'
+            minLength: 5
+            maxLength: 5
+        - name: searchDate
+          in: query
+          description: point in time of the arrival/departue
+          required: true
+          schema:
+            type: string
+            format: date-time
+        - name: dateQualifier
+          in: query
+          description: 'Defines the usage of the search date. "latestArrival" points to the destination arrival date. "earliestDeparture" points to the origin departure date. If omitted, the default is "earliestDeparture".'
+          required: false
+          schema:
+            type: string
+            enum:
+              - latestArrival
+              - earliestDeparture
+        - name: directOnly
+          in: query
+          description: 'Request only direct connections. If omitted, the default is "false".'
+          required: false
+          schema:
+            type: boolean
+        - name: scac
+          in: query
+          description: 'filter by supported brands. Supported brands are ''ANRM'' (Alianca), ''SUDU'' (HamburgSud) and ''CCNR'' (CCNI). If the value is not set, all available brands will be searched.'
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - ANRM
+                - SUDU
+      responses:
+        '200':
+          description: Array of routings (transport plans)
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  description: A list of valid products offered by Hamburg Sud including the transport plan and schedule.
+                  required:
+                    - routing
+                    - leg
+                    - products
+                  properties:
+                    routing:
+                      description: The routing is defining a valid product offered by Hamburg Sud including the transport plan and schedule.
+                      type: object
+                      properties:
+                        commercialTransitTime:
+                          description: The net transit days from the departure to the arrival location of the transport plan.
+                          type: number
+                          format: integer
+                        totalTransitTime:
+                          description: 'The total transit days from the departure to the arrival location of the transport plan, including expected cut-off and cargo availability times.'
+                          type: number
+                          format: integer
+                        idleTime:
+                          description: 'The total amount of days the cargo will be idling, e.g. due to waiting for a connecting vessel.'
+                          type: number
+                          format: integer
+                    leg:
+                      description: The complete transport plan including transhipment ports for this routing.
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          from:
+                            $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/200/content/application~1json/schema/items/properties/leg/items/properties/to'
+                          to:
+                            properties:
+                              unlocode:
+                                description: 'United Nations Code for Trade and Transport Locations (UN/LOCODE) as defined by the UNECE: [https://www.unece.org/cefact/locode/service/location.html](https://www.unece.org/cefact/locode/service/location.html)'
+                                type: string
+                                example: DEHAM
+                              facilityCode:
+                                description: Hamburg Sud facility code.
+                                type: string
+                                example: DEHAMEURO
+                              facilityName:
+                                description: The name of the facility.
+                                type: string
+                                example: EUROGATE CONTAINER TERMINAL HAMBURG
+                          transportMode:
+                            type: string
+                            enum:
+                              - Truck
+                              - Liner
+                              - Rail
+                              - Feeder
+                              - Barge
+                            example: Liner
+                          vessel:
+                            type: object
+                            properties:
+                              imo:
+                                description: IMO number of the vessel according to International Maritime Organization (IMO) format.
+                                type: string
+                                example: '9622227'
+                              name:
+                                description: Name of the vessel.
+                                type: string
+                                example: CAP SAN LORENZO
+                              voyage:
+                                description: Yoyage number
+                                type: string
+                                example: 021S
+                          isTransshipment:
+                            description: Determines if this leg is a transshipment leg. This element is only present if a transshipment evaluation is applicable (transportMode is LINER or FEEDER).
+                            type: boolean
+                          cargoCutOffLT:
+                            description: The cargo cut off is the last possible time when container/cargo may be delivered to a ship or designated location. The time is reported in `local time` of the location.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T22:00:00+02:00'
+                          cargoCutOffUTC:
+                            description: The cargo cut off is the last possible time when container/cargo may be delivered to a ship or designated location. The time is reported in `UTC (Coordinated Universal Time)`.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T20:00:00Z'
+                          expectedDepartureLT:
+                            description: The estimated time of departure at a specific facility/location. The time is reported in `local time` of the location.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T22:00:00+02:00'
+                          expectedDepartureUTC:
+                            description: The estimated time of departure at a specific facility/location. The time is reported in `UTC (Coordinated Universal Time)`.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T20:00:00Z'
+                          expectedArrivalLT:
+                            description: The estimated time of arrival at a specific facility/point in location local time.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T22:00:00+02:00'
+                          expectedArrivalUTC:
+                            description: The estimated time of arrival at a specific facility/point in UTC.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T20:00:00Z'
+                          cargoAvailabilityLT:
+                            description: The estimated availability time of containers/cargoes at a specific point in local time.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T22:00:00+02:00'
+                          cargoAvailabilityUTC:
+                            description: The estimated availability time of containers/cargoes at a specific point in UTC.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T20:00:00Z'
+                    products:
+                      type: object
+                      required:
+                        - equipmentSize
+                        - equipmentType
+                        - scac
+                      properties:
+                        equipmentSize:
+                          type: array
+                          items:
+                            type: string
+                            enum:
+                              - "20"
+                              - "40"
+                        equipmentType:
+                          type: array
+                          items:
+                            type: string
+                            x-extensible-enum:
+                              - BulkContainer
+                              - Chassis
+                              - Flatrack
+                              - FlatrackHighCube
+                              - GeneralPurpose
+                              - GeneralPurposeHighCube
+                              - GensetNoseMount
+                              - GensetUnderslung
+                              - Opentop
+                              - OpentopHighCube
+                              - Platform
+                              - Reefer
+                              - ReeferHighCube
+                              - Tank
+                              - Ventilated
+                        tariffCommodities:
+                          type: array
+                          items:
+                            type: string
+                        scac:
+                          description: ''
+                          type: array
+                          items:
+                            type: string
+                            enum:
+                              - ANRM
+                              - SUDU
+        '400':
+          description: '`Bad Request.` The request is unacceptable e.g. due to a missing or invalid parameter.'
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - method
+                  - requestUri
+                  - status
+                  - timestamp
+                  - message
+                properties:
+                  method:
+                    type: string
+                    description: 'The request method type e.g. GET, POST.'
+                  requestUri:
+                    type: string
+                    description: The request URI.
+                  status:
+                    type: string
+                    description: The textual representation of the response status.
+                  timestamp:
+                    type: string
+                    description: 'The date and time (dd-MM-yyyy hh:mm:ss) the error occured.'
+                  message:
+                    type: string
+                    description: High level error message.
+                  debugMessage:
+                    type: string
+                    description: Detailed error message.
+                  subErrors:
+                    type: array
+                    items:
+                      type: object
+                      required:
+                        - field
+                        - rejectedValue
+                        - message
+                      properties:
+                        field:
+                          type: string
+                          description: The field that has failed validation.
+                        rejectedValue:
+                          type: string
+                          description: The value that has failed validation.
+                        message:
+                          type: string
+                          description: The reason and advice for failed validation.
+                    description: The list of invalid fields in the request.
+        '401':
+          description: '`Unauthorized.` The client cannot be authenticated by the system.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+        '403':
+          description: '`Forbidden.` The client does not have permissions to access this endpoint.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+        '429':
+          description: '`To many requests.` The client exceeded the request rate limit.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+        '500':
+          description: '`Internal server error`'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+  /v3/schedules/voyage-details/:
+    get:
+      summary: Get details of single voyage / schedule.
+      description: Retrieves the voyage schedule by given voyage number and direction.
+      tags:
+        - Live
+      parameters:
+        - name: x-api-key
+          in: header
+          description: The API key assigned to your organization has to be provided with every request.
+          required: true
+          schema:
+            type: string
+        - name: imo
+          in: query
+          description: IMO number of the vessel.
+          required: true
+          schema:
+            type: integer
+            pattern: '[0-9]{1,9}'
+        - name: voyage
+          in: query
+          description: Voyage number.
+          required: true
+          schema:
+            type: string
+            pattern: '[0-9]{3}[N,E,W,S]'
+      responses:
+        '200':
+          description: Vessel schedule information
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  required:
+                    - voyage
+                    - portDetails
+                  properties:
+                    voyage:
+                      description: Yoyage number
+                      type: string
+                      example: 029S
+                    vesselName:
+                      type: string
+                      example: ACRUX N
+                    vesselCode:
+                      type: string
+                      example: ACRUX
+                    serviceCode:
+                      type: string
+                      example: ECX
+                    portDetails:
+                      type: array
+                      items:
+                        description: ''
+                        required:
+                          - operation
+                        properties:
+                          operation:
+                            description: ''
+                            type: string
+                            enum:
+                              - Load
+                              - Discharge
+                              - LoadDischarge
+                              - Transit
+                          unlocode:
+                            description: 'United Nations Code for Trade and Transport Locations (UN/LOCODE) as defined by the UNECE: [https://www.unece.org/cefact/locode/service/location.html](https://www.unece.org/cefact/locode/service/location.html)'
+                            type: string
+                            example: DEHAM
+                          facilityCode:
+                            description: 'United Nations Code for Trade and Transport Locations (UN/LOCODE) as defined by the UNECE: [https://www.unece.org/cefact/locode/service/location.html](https://www.unece.org/cefact/locode/service/location.html)'
+                            type: string
+                            example: NLRTMECTD
+                          facilityName:
+                            description: 'United Nations Code for Trade and Transport Locations (UN/LOCODE) as defined by the UNECE: [https://www.unece.org/cefact/locode/service/location.html](https://www.unece.org/cefact/locode/service/location.html)'
+                            type: string
+                            example: ECT DELTA TERMINALS
+                          cityName:
+                            description: Name of the city where the facility is located.
+                            type: string
+                            example: HAMBURG
+                          conditions:
+                            description: ''
+                            type: string
+                            enum:
+                              - Omit
+                              - DryDock
+                              - LayBy
+                              - PhaseInOut
+                              - SubjectToInducement
+                              - CutAndRun
+                              - ToBeConfirmed
+                          cargoCutOff:
+                            description: The cargo cut off is the last possible time when container/cargo may be delivered to a ship or designated location. The time is reported in `local time` of the location.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T22:00:00+02:00'
+                          facilityDeparture:
+                            description: The estimated time of departure at a specific facility/location. The time is reported in local time of the location.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T22:00:00+02:00'
+                          facilityArrival:
+                            description: The estimated time of departure at a specific facility/location. The time is reported in local time of the location.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T20:00:00Z'
+                          cargoAvailability:
+                            description: The estimated time of arrival at a specific facility/location. The time is reported in `local time` of the location.
+                            type: string
+                            format: date-time
+                            example: '2020-05-02T22:00:00+02:00'
+        '400':
+          description: '`Bad Request.` The request is unacceptable e.g. due to a missing or invalid parameter.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+        '401':
+          description: '`Unauthorized.` The client cannot be authenticated by the system.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+        '403':
+          description: '`Forbidden.` The client does not have permissions to access this endpoint.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+        '429':
+          description: '`To many requesst.` The client exceeded the request rate limit.'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'
+        '500':
+          description: '`Internal server error`'
+          content:
+            application/json:
+              schema:
+                $ref: '#/paths/~1v1~1schedules~1point-to-point~1/get/responses/400/content/application~1json/schema'

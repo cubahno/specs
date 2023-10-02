@@ -1,0 +1,2314 @@
+openapi: 3.0.1
+info:
+  title: Mitra API
+  description: Mitra API spec
+  version: 1.0.0
+
+paths:
+  /oauth/token:
+    post:
+      summary: Returns an access token, to be used during API calls that are not public.
+      description: EIP-4361 auth doesn't require blockchain integration.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                grant_type:
+                  type: string
+                  enum:
+                    - authorization_code
+                    - password
+                    - eip4361
+                    - caip122_monero
+                  example: eip4361
+                code:
+                  description: A user authorization code, obtained via GET /oauth/authorize (required if grant type is "authorization_code").
+                  type: string
+                  nullable: true
+                  example: null
+                username:
+                  description: User name (required if grant type is "password").
+                  type: string
+                message:
+                  description: EIP-4361 message (required if grant type is "eip4361").
+                  type: string
+                  example: "example.com wants you to sign in with your Ethereum account:"
+                signature:
+                  description: EIP-4361 signature (required if grant type is "eip4361").
+                  type: string
+                  example: 0x905...
+                password:
+                  description: Password (required if grant type is "password").
+                  type: string
+                  example: null
+              required:
+                - grant_type
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                  token_type:
+                    type: string
+                    example: Bearer
+                  scope:
+                    type: string
+                    example: read write follow
+                  created_at:
+                    type: integer
+                    example: 1639747526
+        400:
+          description: Invalid token request
+  /oauth/revoke:
+    post:
+      summary: Revoke an access token to make it no longer valid for use.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                token:
+                  description: The previously obtained token, to be invalidated.
+                  type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+        403:
+          description: Token doesn't belong to user.
+  /api/v1/accounts:
+    post:
+      summary: Creates a user and profile records.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                authentication_method:
+                  allOf:
+                    - $ref: '#/components/schemas/AuthenticationMethod'
+                    - nullable: true
+                    - default: password
+                username:
+                  description: The desired username for the account.
+                  type: string
+                password:
+                  description: The password to be used for login. Either password or EIP-4361 message must be provided.
+                  type: string
+                  example: null
+                message:
+                  description: EIP-4361 message
+                  type: string
+                  example: "example.com wants you to sign in with your Ethereum account:"
+                signature:
+                  description: EIP-4361 signature (required if message is present)
+                  type: string
+                  example: 0x905...
+                invite_code:
+                  description: Invite code
+                  type: string
+                  example: 9b288bfa7dc75fff53e98aa4d76e77d5
+              required:
+                - username
+      responses:
+        201:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialAccount'
+        400:
+          description: Invalid user data
+  /api/v1/accounts/verify_credentials:
+    get:
+      summary: Test to make sure that the user token works.
+      security:
+        - tokenAuth: []
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialAccount'
+  /api/v1/accounts/update_credentials:
+    patch:
+      summary: Update the user's display and preferences.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                display_name:
+                  description: The display name to use for the profile.
+                  type: string
+                  nullable: true
+                note:
+                  description: The account bio (markdown).
+                  type: string
+                  nullable: true
+                avatar:
+                  description: Avatar image encoded as base64.
+                  type: string
+                  nullable: true
+                avatar_media_type:
+                  description: The media type of avatar image.
+                  type: string
+                  nullable: true
+                header:
+                  description: Header image encoded as base64.
+                  type: string
+                  nullable: true
+                header_media_type:
+                  description: The media type of header image.
+                  type: string
+                  nullable: true
+                fields_attributes:
+                  description: The profile fields to be set.
+                  type: array
+                  nullable: true
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        description: Name of the field.
+                        type: string
+                      value:
+                        description: Value of the field (markdown).
+                        type: string
+      responses:
+        200:
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialAccount'
+        400:
+          description: Invalid user data.
+  /api/v1/accounts/signed_update:
+    get:
+      summary: Build Update(Person) activity for signing (experimental).
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  params:
+                    description: Activity parameters
+                    $ref: '#/components/schemas/ActivityParameters'
+                  value:
+                    description: Activity
+                    type: object
+                    example: {"type": "Update"}
+  /api/v1/accounts/send_activity:
+    post:
+      summary: Send signed activity (experimental).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                value:
+                  description: Activity
+                  type: object
+                  example: {"type": "Update"}
+                signer:
+                  description: Signer's identifier (DID)
+                  type: string
+                  example: 'did:pkh:eip155:1:0xb9c5714089478a327f09197987f16f9e5d936e8a'
+                signature:
+                  description: Signature value.
+                  type: string
+                  example: '3312dacd...'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        400:
+          description: Invalid signature data or unsupported activity type.
+  /api/v1/accounts/identity_proof:
+    get:
+      summary: Get unsigned data for identity proof.
+      parameters:
+        - name: proof_type
+          in: query
+          description: Type of identity proof.
+          required: true
+          schema:
+            type: string
+            enum:
+              - ethereum
+              - minisign
+              - minisign-unhashed
+        - name: signer
+          in: query
+          description: Information about the signer.
+          required: true
+          schema:
+            type: string
+            example: '0xb9c5714089478a327f09197987f16f9e5d936e8a'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  did:
+                    description: Signer ID (DID).
+                    type: string
+                    example: did:pkh:eip155:1:0xb9c5714089478a327f09197987f16f9e5d936e8a
+                  claim:
+                    description: Identity claim serialized as compact JSON.
+                    type: string
+                    example: '{"id":"https://example.com/users/1","ownerOf":"did:pkh:eip155:1:0xb9c5714089478a327f09197987f16f9e5d936e8a"}'
+                  created_at:
+                    description: Date and time when identity claim was created.
+                    type: string
+                    format: date-time
+                    example: 2023-07-07T23:52:12.370231609Z
+        400:
+          description: Invalid request parameters
+    post:
+      summary: Submit identity proof.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                proof_type:
+                  description: Type of identity proof.
+                  type: string
+                  enum:
+                    - ethereum
+                    - minisign
+                    - minisign-unhashed
+                did:
+                  description: Signer (DID).
+                  type: string
+                  example: 'did:pkh:eip155:1:0xb9c5714089478a327f09197987f16f9e5d936e8a'
+                signature:
+                  description: Signature value.
+                  type: string
+                  example: '3312dacd...'
+                created_at:
+                  description: Date and time when identity claim was created.
+                  type: string
+                  format: date-time
+                  example: 2023-07-07T23:52:12.370231609Z
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        400:
+          description: Invalid proof data.
+  /api/v1/accounts/relationships:
+    get:
+      summary: Find out whether a given actor is followed, blocked, muted, etc.
+      parameters:
+        - name: 'id[]'
+          in: query
+          description: Actor IDs to check
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Relationship list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Relationship'
+  /api/v1/accounts/lookup:
+    get:
+      summary: Lookup webfinger address.
+      parameters:
+        - name: acct
+          in: query
+          description: The username or Webfinger address to lookup.
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        404:
+          description: Profile not found
+  /api/v1/accounts/search:
+    get:
+      summary: Search for matching profiles by username.
+      parameters:
+        - name: q
+          in: query
+          description: What to search for
+          required: true
+          schema:
+            type: string
+        - name: resolve
+          in: query
+          description: Attempt WebFinger lookup.
+          required: false
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          description: Maximum number of results. Defaults to 40.
+          required: false
+          schema:
+            type: number
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Profile list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+  /api/v1/accounts/search_did:
+    get:
+      summary: Search profile by DID
+      parameters:
+        - name: did
+          in: query
+          description: Decentralized identifier (DID)
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Profile list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+        400:
+          description: Invalid DID
+  /api/v1/accounts/{account_id}:
+    get:
+      summary: View information about a profile.
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/statuses:
+    get:
+      summary: Posts created by the given actor.
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - name: only_media
+          in: query
+          description: Filter out posts without attachments.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: exclude_replies
+          in: query
+          description: Exclude replies from results.
+          required: false
+          schema:
+            type: boolean
+            default: true
+        - name: pinned
+          in: query
+          description: Filter for pinned posts only.
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: max_id
+          in: query
+          description: Return results older than this ID.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Post list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/accounts/017e8206-376e-9133-4c9b-cdcca92ed20c/statuses?limit=20&max_id=0187871e-5a09-c6d6-6570-5158ffdcc845>; rel="next"'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/followers:
+    get:
+      summary: Actors which follow the given actor.
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - name: max_id
+          in: query
+          description: Return results with relationship ID older than this value.
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 40
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Profile list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/accounts/1/followers?limit=40&max_id=7628164>; rel="next"'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/following:
+    get:
+      summary: Actors which the given actor is following.
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - name: max_id
+          in: query
+          description: Return results with relationship ID older than this value.
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 40
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Profile list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/accounts/1/following?limit=40&max_id=7628164>; rel="next"'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/subscribers:
+    get:
+      summary: Subscriptions to the given actor.
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+        - name: include_expired
+          in: query
+          description: Include expired subscriptions.
+          required: false
+          schema:
+            type: boolean
+        - name: max_id
+          in: query
+          description: Return results with subscription ID older than this value.
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 40
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Subscription list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subscription'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/follow:
+    post:
+      summary: Follow the given actor.
+      security:
+        - tokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                reblogs:
+                  description: Receive this actor's reposts in home timeline?
+                  type: boolean
+                  default: true
+                replies:
+                  description: Receive this actor's replies in home timeline?
+                  type: boolean
+                  default: true
+      responses:
+        200:
+          description: Successfully followed, or actor was already followed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relationship'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/unfollow:
+    post:
+      summary: Unfollow the given actor.
+      security:
+        - tokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+      responses:
+        200:
+          description: Successfully unfollowed, or actor was already not followed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relationship'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/mute:
+    post:
+      summary: Mute the given account.
+      security:
+        - tokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+      responses:
+        200:
+          description: Successfully muted, or account was already muted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relationship'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/unmute:
+    post:
+      summary: Unmute the given account.
+      security:
+        - tokenAuth: []
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+      responses:
+        200:
+          description: Successfully unmuted, or account was already unmuted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Relationship'
+        404:
+          description: Profile not found
+  /api/v1/accounts/{account_id}/aliases/all:
+    get:
+      summary: Get actor's aliases.
+      parameters:
+        - $ref: '#/components/parameters/account_id'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aliases'
+        404:
+          description: Profile not found
+  /api/v1/apps:
+    post:
+      summary: Create a new application to obtain OAuth2 credentials.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                client_name:
+                  description: A name for your application.
+                  type: string
+                redirect_uris:
+                  description: Where the user should be redirected after authorization.
+                  type: string
+                scopes:
+                  description: Space separated list of scopes.
+                  type: string
+                  example: 'read write'
+                website:
+                  description: An URL to the homepage of your app.
+                  type: string
+                  nullable: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Application'
+                  - type: object
+                    properties:
+                      client_id:
+                        description: Client ID key, to be used for obtaining OAuth tokens.
+                        type: string
+                      client_secret:
+                        description: Client secret key, to be used for obtaining OAuth tokens.
+                        type: string
+        400:
+          description: Invalid request data.
+  /api/v1/custom_emojis:
+    get:
+      summary: Returns custom emojis that are available on the server.
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Emoji list
+                type: array
+                items:
+                  $ref: '#/components/schemas/CustomEmoji'
+  /api/v1/directory:
+    get:
+      summary: List profiles visible in the directory.
+      parameters:
+        - name: offset
+          in: query
+          description: How many profiles to skip before returning results.
+          required: false
+          schema:
+            type: integer
+            default: 0
+        - name: limit
+          in: query
+          description: How many profiles to load.
+          required: false
+          schema:
+            type: integer
+            default: 40
+        - name: local
+          in: query
+          description: Only return local profiles.
+          required: false
+          schema:
+            type: boolean
+            default: true
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Profile list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Account'
+  /api/v1/instance:
+    get:
+      summary: Information about the instance.
+      security: []
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Instance'
+  /api/v1/media:
+    post:
+      summary: Create an attachment to be used with a new post.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                file:
+                  description: File encoded as base64.
+                  type: string
+                media_type:
+                  description: Media type.
+                  type: string
+                  example: image/jpeg
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Attachment'
+  /api/v1/notifications:
+    get:
+      summary: Notifications concerning the user.
+      parameters:
+        - name: max_id
+          in: query
+          description: Return results older than this ID.
+          required: false
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Notification list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/notification?limit=20&max_id=5339>; rel="next"'
+  /api/v1/settings/client_config:
+    post:
+      summary: Update client configuration.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: |
+                Client configuration.
+                Should contain a single key identifying type of client.
+              type: object
+              example: {"mitra-web":{"theme":"dark"}}
+      responses:
+        200:
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialAccount'
+        400:
+          description: Invalid request data.
+  /api/v1/settings/change_password:
+    post:
+      summary: Set or change user's password.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                new_password:
+                  description: New password.
+                  type: string
+      responses:
+        200:
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialAccount'
+        400:
+          description: Invalid request data.
+  /api/v1/settings/aliases:
+    post:
+      summary: Add alias (not verified).
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                acct:
+                  description: Actor address.
+                  type: string
+                  example: user@example.com
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aliases'
+        404:
+          description: Profile not found.
+  /api/v1/settings/aliases/remove:
+    post:
+      summary: Remove alias.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                actor_id:
+                  description: Actor ID.
+                  type: string
+                  example: https://domain.example/users/1
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Aliases'
+        404:
+          description: Alias not found.
+  /api/v1/settings/export_followers:
+    get:
+      summary: Export followers to CSV file
+      security:
+        - tokenAuth: []
+      responses:
+        200:
+          description: Successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+              example: |
+                user1@example.org
+                user2@example.org
+  /api/v1/settings/export_follows:
+    get:
+      summary: Export follows to CSV file
+      security:
+        - tokenAuth: []
+      responses:
+        200:
+          description: Successful operation
+          content:
+            text/csv:
+              schema:
+                type: string
+              example: |
+                user1@example.org
+                user2@example.org
+  /api/v1/settings/import_follows:
+    post:
+      summary: Import follows from CSV file.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                follows_csv:
+                  description: The list of followers in CSV format.
+                  type: string
+      responses:
+        204:
+          description: Successful operation
+        400:
+          description: Invalid data.
+  /api/v1/settings/move_followers:
+    post:
+      summary: Move followers from remote alias.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                from_actor_id:
+                  description: The actor ID to move from.
+                  type: string
+                  example: 'https://xyz.com/users/test'
+                followers_csv:
+                  description: The list of followers in CSV format.
+                  type: string
+                  example: |
+                    user1@example.org
+                    user2@test.com
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CredentialAccount'
+        400:
+          description: Invalid data.
+  /api/v1/statuses:
+    post:
+      summary: Create new post.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  description: Text content of the post.
+                  type: string
+                content_type:
+                  description: Media type of the post content.
+                  type: string
+                  default: text/html
+                  enum:
+                    - text/html
+                    - text/markdown
+                'media_ids[]':
+                  description: Array of Attachment ids to be attached as media.
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+                in_reply_to_id:
+                  description: ID of the post being replied to, if post is a reply.
+                  type: string
+                  format: uuid
+                visibility:
+                  allOf:
+                    - $ref: '#/components/schemas/Visibility'
+                    - description: |
+                        Visibility of the post.
+                        Default: "direct" when parent post is not public, otherwise "public".
+                sensitiive:
+                  description: Mark post and attached media as sensitive?
+                  type: boolean
+                  default: false
+                mentions:
+                  description: Array of profile IDs to be mentioned
+                  type: array
+                  items:
+                    type: string
+                    format: uuid
+              required:
+                - status
+      responses:
+        200:
+          description: Post created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        400:
+          description: Invalid post data
+  /api/v1/statuses/preview:
+    post:
+      summary: Preview new post.
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                status:
+                  description: Text content of the post.
+                  type: string
+                content_type:
+                  description: Media type of the post content.
+                  type: string
+                  default: text/html
+                  enum:
+                    - text/html
+                    - text/markdown
+              required:
+                - status
+      responses:
+        200:
+          description: Preview generated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  content:
+                    description: HTML-encoded post content.
+                    type: string
+        400:
+          description: Invalid post data.
+  /api/v1/statuses/{status_id}:
+    delete:
+      summary: Delete post
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        204:
+          description: Successful operation
+          content: {}
+        403:
+          description: Post does not belong to user
+        404:
+          description: Post not found
+  /api/v1/statuses/{status_id}/context:
+    get:
+      summary: View statuses above and below this status in the thread.
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  ancestors:
+                    description: Parents in the thread.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Status'
+                  descendants:
+                    description: Parents in the thread.
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Status'
+        404:
+          description: Post not found
+  /api/v1/statuses/{status_id}/thread:
+    get:
+      summary: Get thread that contains given post.
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+        404:
+          description: Post not found
+  /api/v1/statuses/{status_id}/favourite:
+    post:
+      summary: Add post to your favourites list
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          description: Post does not exist or is not public
+  /api/v1/statuses/{status_id}/reblog:
+    post:
+      summary: Repost a post
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Successful operation. Returns repost info.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          description: Post does not exist or is not public
+  /api/v1/statuses/{status_id}/unreblog:
+    post:
+      summary: Undo repost
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Post no longer resposted.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          description: Post does not exist or no repost exists
+  /api/v1/statuses/{status_id}/pin:
+    post:
+      summary: Pin post to profile.
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          description: Post does not exist
+        422:
+          description: Post is not public, or not owned by current user
+  /api/v1/statuses/{status_id}/unpin:
+    post:
+      summary: Unpin post from profile.
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Successful operation.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        404:
+          description: Post does not exist
+        422:
+          description: Post is not public, or not owned by current user
+  /api/v1/statuses/{status_id}/make_permanent:
+    post:
+      summary: Save post to IPFS
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        403:
+          description: Post does not belong to user or is not public
+        404:
+          description: Post not found
+        418:
+          description: IPFS integration is not enabled
+        422:
+          description: Post already saved to IPFS
+  /api/v1/statuses/{status_id}/signature:
+    get:
+      summary: Sign post data with instance key
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      responses:
+        200:
+          description: Signature created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
+        403:
+          description: Post does not belong to user, is not public or not saved to IPFS, or user's wallet address is not known or not verified
+        404:
+          description: Post not found
+        418:
+          description: Blockchain integration is not enabled
+  /api/v1/statuses/{status_id}/token_minted:
+    post:
+      summary: Register transaction that mints a token
+      parameters:
+        - $ref: '#/components/parameters/status_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              properties:
+                transaction_id:
+                  type: string
+                  description: Transaction ID
+                  example: '581186ab56765aed64a3e73172872a6454c604c6b4e08a8ed03eabad94e74d64'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Status'
+        403:
+          description: Post does not belong to user or is not public
+        404:
+          description: Post not found
+        422:
+          description: Transaction already registered
+  /api/v1/subscriptions/authorize:
+    get:
+      summary: Get authorization for setting up Ethereum subscription.
+      security:
+        - tokenAuth: []
+      parameters:
+        - name: price
+          in: query
+          description: Subscription price
+          required: true
+          schema:
+            type: number
+      responses:
+        200:
+          description: Signature created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Signature'
+        403:
+          description: User's wallet address is not known or not verified
+        418:
+          description: Blockchain integration is not enabled
+  /api/v1/subscriptions/options:
+    get:
+      summary: Get list of subscription options
+      security:
+        - tokenAuth: []
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/SubscriptionOption'
+    post:
+      summary: Enable subscriptions or update subscription settings
+      security:
+        - tokenAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubscriptionOption'
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Account'
+        400:
+          description: User hasn't enabled subscriptions or incorrect subscription parameters.
+        403:
+          description: User's wallet address is not known or not verified
+        418:
+          description: Blockchain integration is not enabled
+  /api/v1/subscriptions/find:
+    get:
+      summary: Find subscription by sender and recipient
+      parameters:
+        - name: sender_id
+          in: query
+          description: Sender ID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: recipient_id
+          in: query
+          description: Recipient ID.
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    description: Subscription ID.
+                    type: number
+                    example: 1
+                  expires_at:
+                    description: The date when subscription expires.
+                    type: string
+                    format: date-time
+        404:
+          description: Subscription not found
+  /api/v1/subscriptions/invoices:
+    post:
+      summary: Create invoice
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                sender_id:
+                  description: Sender ID.
+                  type: string
+                  format: uuid
+                recipient_id:
+                  description: Recipient ID.
+                  type: string
+                  format: uuid
+                chain_id:
+                  description: CAIP-2 chain ID.
+                  type: string
+                  example: monero:418015bb9ae982a1975da7d79277c270
+                amount:
+                  description: Requested payment amount (in atomic units).
+                  type: integer
+                  example: 100000000
+      responses:
+        200:
+          description: Invoice created.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        400:
+          description: Invalid request.
+        404:
+          description: Sender or recipient not found.
+        418:
+          description: Blockchain integration is not enabled.
+  /api/v1/subscriptions/invoices/{invoice_id}:
+    get:
+      summary: View information about an invoice.
+      parameters:
+        - name: invoice_id
+          in: path
+          description: Invoice ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Invoice'
+        404:
+          description: Invoice not found
+    delete:
+      summary: Cancel invoice.
+      parameters:
+        - name: invoice_id
+          in: path
+          description: Invoice ID
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/Invoice'
+                  - type: object
+                    properties:
+                      status:
+                        example: cancelled
+        404:
+          description: Invoice not found
+  /api/v1/timelines/home:
+    get:
+      summary: View posts from followed users.
+      security:
+        - tokenAuth: []
+      parameters:
+        - name: max_id
+          in: query
+          description: Return results older than this ID.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Post list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/timelines/home?limit=20&max_id=0187871e-5a09-c6d6-6570-5158ffdcc845>; rel="next"'
+  /api/v1/timelines/public:
+    get:
+      summary: View local public posts.
+      security:
+        - tokenAuth: []
+      parameters:
+        - name: local
+          in: query
+          description: Return only local posts?
+          required: false
+          schema:
+            type: boolean
+            default: false
+        - name: max_id
+          in: query
+          description: Return results older than this ID.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Post list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/timelines/public?limit=20&max_id=0187871e-5a09-c6d6-6570-5158ffdcc845>; rel="next"'
+  /api/v1/timelines/direct:
+    get:
+      summary: View statuses with a “direct” privacy.
+      security:
+        - tokenAuth: []
+      parameters:
+        - name: max_id
+          in: query
+          description: Return results older than this ID.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Post list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/timelines/direct?limit=20&max_id=0187871e-5a09-c6d6-6570-5158ffdcc845>; rel="next"'
+  /api/v1/timelines/tag/{hashtag}:
+    get:
+      summary: View public posts containing the given hashtag
+      parameters:
+        - name: hashtag
+          in: path
+          description: Hashtag name
+          required: true
+          schema:
+            type: string
+        - name: max_id
+          in: query
+          description: Return results older than this ID.
+          required: false
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          description: Maximum number of results to return.
+          required: false
+          schema:
+            type: integer
+            default: 20
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Post list
+                type: array
+                items:
+                  $ref: '#/components/schemas/Status'
+          headers:
+            Link:
+              description: Link to the next page
+              schema:
+                type: string
+                example: '<https://example.org/api/v1/timelines/tag/test?limit=20&max_id=0187871e-5a09-c6d6-6570-5158ffdcc845>; rel="next"'
+  /api/v2/search:
+    get:
+      summary: Search for profiles or posts
+      parameters:
+        - name: q
+          in: query
+          description: The search query
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                description: Search results
+                type: object
+                properties:
+                  accounts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Account'
+                  statuses:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Status'
+                  hashtags:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Tag'
+
+components:
+  securitySchemes:
+    tokenAuth:
+      type: http
+      scheme: bearer
+  parameters:
+    account_id:
+      name: account_id
+      in: path
+      description: Profile ID
+      required: true
+      schema:
+        type: string
+        format: uuid
+    status_id:
+      name: status_id
+      in: path
+      description: Post ID
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    Account:
+      type: object
+      properties:
+        id:
+          description: The account id.
+          type: string
+          format: uuid
+        username:
+          description: The username of the actor, not including domain.
+          type: string
+          example: user
+        acct:
+          description: The Webfinger account URI. Equal to username for local actors, or username@domain for remote actors.
+          type: string
+          example: user@example.com
+        url:
+          description: The location of the user's profile page.
+          type: string
+          example: https://example.com/@user
+        locked:
+          description: Whether the actor manually approves follow requests.
+          type: boolean
+          example: false
+        identity_proofs:
+          description: Identity proofs.
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+        payment_options:
+          description: Payment options.
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                description: Payment type.
+                type: string
+                enum:
+                  - link
+                  - ethereum-subscription
+                  - monero-subscription
+              name:
+                description: Link name (only for link type).
+                type: string
+                nullable: true
+              href:
+                description: Link URL (only for link type).
+                type: string
+                nullable: true
+              chain_id:
+                description: CAIP-2 chain ID  (only for ethereum-subscription and monero-subscription types).
+                type: string
+                example: null
+              price:
+                description: Subscription price (only for monero-subscription type).
+                type: number
+                nullable: true
+                example: null
+        fields:
+          description: Additional metadata attached to a profile as name-value pairs.
+          type: array
+          items:
+            $ref: '#/components/schemas/Field'
+        emojis:
+          description: Custom emoji entities to be used when rendering the profile.
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomEmoji'
+        followers_count:
+          description: The reported followers of this profile.
+          type: number
+        following_count:
+          description: The reported follows of this profile.
+          type: number
+        subscribers_count:
+          description: The reported subscribers of this profile.
+          type: number
+    CredentialAccount:
+      allOf:
+        - $ref: '#/components/schemas/Account'
+        - type: object
+          properties:
+            source:
+              description: Additional information about the user.
+              type: object
+              properties:
+                note:
+                  description: Profile bio.
+                  type: string
+            role:
+              description: The role assigned to the currently authorized user.
+              $ref: '#/components/schemas/Role'
+            authentication_methods:
+              description: The list of authentication methods.
+              type: array
+              items:
+                $ref: '#/components/schemas/AuthenticationMethod'
+            client_config:
+              description: Client configurations.
+              type: object
+              example: {"mitra-web":{"theme":"dark"}}
+    ActivityParameters:
+      type: object
+      properties:
+        type:
+          description: Activity type
+          type: string
+          enum:
+            - update
+    Aliases:
+      type: object
+      properties:
+        declared:
+          description: Aliases declared by user.
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+        declared_all:
+          description: Aliases declared by user (full list).
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                description: Actor ID.
+              account:
+                allOf:
+                  - $ref: '#/components/schemas/Account'
+                  - nullable: true
+        verified:
+          description: Cryptographically verified aliases.
+          type: array
+          items:
+            $ref: '#/components/schemas/Account'
+    Application:
+      type: object
+      properties:
+        name:
+          description: The name of your application.
+          type: string
+        website:
+          description: The website associated with your application.
+          type: string
+          nullable: true
+        redirect_uri:
+          description: Where the user should be redirected after authorization.
+          type: string
+    Attachment:
+      type: object
+      properties:
+        id:
+          description: The ID of the attachment in the database.
+          type: string
+          format: uuid
+        type:
+          description: The type of the attachment.
+          type: string
+          enum:
+            - unknown
+            - image
+            - video
+            - audio
+        url:
+          description: The location of the original full-size attachment.
+          type: string
+        preview_url:
+          description: The location of a scaled-down preview of the attachment.
+          type: string
+    AuthenticationMethod:
+      type: string
+      enum:
+        - password
+        - eip4361
+        - caip122_monero
+    CustomEmoji:
+      type: object
+      properties:
+        shortcode:
+          description: The name of the custom emoji.
+          type: string
+        url:
+          description: A link to the custom emoji.
+          type: string
+        static_url:
+          description: A link to a static copy of the custom emoji.
+          type: string
+        visible_in_picker:
+          description: Whether this Emoji should be visible in the picker or unlisted.
+          type: boolean
+    Field:
+      type: object
+      properties:
+        name:
+          description: The key of a given field's key-value pair.
+          type: string
+        value:
+          description: The value associated with the name key.
+          type: string
+        verified_at:
+          description: Timestamp of when the server verified the field value.
+          type: string
+          format: date-time
+    Instance:
+      type: object
+      properties:
+        uri:
+          description: The host name of the instance.
+          type: string
+        title:
+          description: The title of the website.
+          type: string
+        short_description:
+          description: A short description defined by the admin.
+          type: string
+        description:
+          description: Admin-defined description of the site (HTML).
+          type: string
+        description_source:
+          description: Admin-defined description of the site (Markdown source).
+          type: string
+        version:
+          description: Mastodon API compatibility version and the version of Mitra server.
+          type: string
+          example: '3.0.0 (compatible; Mitra 0.4.0)'
+        registrations:
+          description: Whether registrations are enabled.
+          type: boolean
+        approval_required:
+          description: Whether registrations require moderator approval.
+          type: boolean
+        invites_enabled:
+          description: Whether invites are enabled.
+          type: boolean
+        stats:
+          description: Statistics about how much information the instance contains.
+          type: object
+          properties:
+            user_count:
+              description: Users registered on this instance
+              type: integer
+            status_count:
+              description: Statuses authored by users on instance.
+              type: integer
+            domain_count:
+              description: Domains federated with this instance.
+              type: integer
+        configuration:
+          description: Configured values and limits for this instance.
+          type: object
+          properties:
+            statuses:
+              description: Limits related to authoring posts.
+              type: object
+              properties:
+                max_characters:
+                  description: The maximum number of allowed characters per post.
+                  type: integer
+                  example: 5000
+                max_media_attachments:
+                  description: The maximum number of media attachments that can be added to a post.
+                  type: integer
+                  example: 15
+            media_attachments:
+              description: Limits realted to uploading attachments.
+              type: object
+              properties:
+                supported_mime_types:
+                  description: Contains MIME types that can be uploaded.
+                  type: array
+                  items:
+                    type: string
+                    example: 'image/png'
+                image_size_limit:
+                  description: The maximum size of any uploaded image, in bytes.
+                  type: integer
+                  example: 5242880
+        contact_account:
+          allOf:
+            - description: A user who may be contacted for any inquiries.
+            - $ref: '#/components/schemas/Account'
+        authentication_methods:
+          description: List of supported authentication methods.
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationMethod'
+        login_message:
+          description: Login message for signer.
+          type: string
+        blockchains:
+          description: Information about blockchain integrations.
+          type: array
+          items:
+            type: object
+            properties:
+              chain_id:
+                description: CAIP-2 chain ID.
+                type: string
+                example: 'eip155:1'
+              chain_metadata:
+                description: Additional information about blockchain
+                type: object
+                nullable: true
+              contract_address:
+                description: Blockchain contract address.
+                type: string
+                nullable: true
+              features:
+                description: Blockchain features.
+                type: object
+                properties:
+                  gate:
+                    description: Token gate feature flag.
+                    type: boolean
+                    example: true
+                  minter:
+                    description: Minter feature flag.
+                    type: boolean
+                    example: true
+                  subscriptions:
+                    description: Subscriptions feature flag.
+                    type: boolean
+                    example: true
+        ipfs_gateway_url:
+          description: IPFS gateway URL.
+          type: string
+          nullable: true
+    Invoice:
+      type: object
+      properties:
+        id:
+          description: Invoice ID.
+          type: string
+          format: uuid
+        sender_id:
+          description: The profile ID of the sender.
+          type: string
+          format: uuid
+        recipient_id:
+          description: The profile ID of the recipient.
+          type: string
+          format: uuid
+        chain_id:
+          description: CAIP-2 chain ID.
+          type: string
+          example: monero:418015bb9ae982a1975da7d79277c270
+        payment_address:
+          description: Payment address.
+          type: string
+        amount:
+          description: Requested payment amount (in atomic units).
+          type: integer
+          example: 100000000
+        status:
+          description: Invoice status.
+          type: string
+          enum:
+            - open
+            - paid
+            - forwarded
+            - timeout
+            - cancelled
+            - underpaid
+            - completed
+            - failed
+        expires_at:
+          description: The date when invoice times out.
+          type: string
+          format: date-time
+    Mention:
+      type: object
+      properties:
+        id:
+          description: The profile ID of the mentioned user.
+          type: string
+          format: uuid
+        username:
+          description: The username of the mentioned user.
+          type: string
+        acct:
+          type: string
+        url:
+          description: The location of the mentioned user's profile.
+          type: string
+    Notification:
+      type: object
+      properties:
+        id:
+          description: The id of the notification in the database.
+          type: string
+        type:
+          description: The type of event that resulted in the notification.
+          type: string
+          enum:
+            - follow
+            - follow_request
+            - reply
+            - favourite
+            - mention
+            - reblog
+            - subscription
+            - subscription_expiration
+            - move
+          example: reply
+        created_at:
+          description: The timestamp of the notification.
+          type: string
+          format: date-time
+        account:
+          $ref: '#/components/schemas/Account'
+        status:
+          $ref: '#/components/schemas/Account'
+    Relationship:
+      type: object
+      properties:
+        id:
+          description: Target profile id.
+          type: string
+          format: uuid
+        following:
+          description: Are you following this user?
+          type: boolean
+          default: false
+        followed_by:
+          description: Are you followed by this user?
+          type: boolean
+          default: false
+        requested:
+          description: Do you have a pending follow request for this user?
+          type: boolean
+          default: false
+        subscription_to:
+          description: Are you sending subscription payments to this user?
+          type: boolean
+          default: false
+        subscription_from:
+          description: Are you receiving subscription payments from this user?
+          type: boolean
+          default: false
+        showing_reblogs:
+          description: Are you receiving this user's reposts in your home timeline?
+          type: boolean
+          default: true
+        showing_replies:
+          description: Are you receiving this user's replies in your home timeline?
+          type: boolean
+          default: true
+        muting:
+          description: Are you muting this user?
+          type: boolean
+          default: false
+    Role:
+      type: object
+      properties:
+        id:
+          description: The ID of the role in the database.
+          type: integer
+          example: 1
+        name:
+          description: The name of the role.
+          type: string
+          enum:
+            - user
+            - admin
+            - read_only_user
+        permissions:
+          description: A list of all permissions granted to the role.
+          type: array
+          items:
+            type: string
+            enum:
+              - create_follow_request
+              - create_post
+              - delete_any_post
+              - delete_any_profile
+              - manage_subscription_options
+    Signature:
+      type: object
+      properties:
+        v:
+          type: integer
+          format: int64
+          example: 27
+        r:
+          type: string
+          example: '6f61670e67bf72...'
+        s:
+          type: string
+          example: '6a5cb313907cd3...'
+    Status:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        uri:
+          description: URI of the post used for federation.
+          type: string
+        created_at:
+          description: The date when this post was created.
+          type: string
+          format: date-time
+        edited_at:
+          description: The date when this post was edited.
+          type: string
+          format: date-time
+          nullable: true
+        account:
+          description: The profile that authored this post.
+          $ref: '#/components/schemas/Account'
+        content:
+          description: HTML-encoded post content.
+          type: string
+        visibility:
+          description: Visibility of this post.
+          $ref: '#/components/schemas/Visibility'
+        sensitiive:
+          description: Is this post marked as sensitive content?
+          type: boolean
+          example: false
+        spoiler_text:
+          description: Subject or summary line, below which post content is collapsed until expanded.
+          type: string
+        pinned:
+          description: Have you pinned this post?
+          type: boolean
+          example: false
+        media_attachments:
+          description: Media that is attached to this post.
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+        mentions:
+          description: Mentions of users within the post.
+          type: array
+          items:
+            $ref: '#/components/schemas/Mention'
+        tags:
+          description: Hashtags used within the post content.
+          type: array
+          items:
+            $ref: '#/components/schemas/Tag'
+        emojis:
+          description: Custom emoji to be used when rendering post content.
+          type: array
+          items:
+            $ref: '#/components/schemas/CustomEmoji'
+        reblog:
+          description: The post being reposted.
+          type: object
+        ipfs_cid:
+          type: string
+          nullable: true
+          example: 'bafkr...'
+        token_tx_id:
+          type: string
+          nullable: true
+          example: '0x5fe80cdea7f...'
+        links:
+          description: Posts linked to this post.
+          type: array
+          items:
+            type: object
+    Subscription:
+      type: object
+      properties:
+        id:
+          description: Subscription ID.
+          type: number
+        sender:
+          $ref: '#/components/schemas/Account'
+        sender_address:
+          description: Sender address.
+          type: string
+          nullable: true
+          example: '0xd8da6bf...'
+        expires_at:
+          description: The date when subscription expires.
+          type: string
+          format: date-time
+    SubscriptionOption:
+      type: object
+      properties:
+        type:
+          description: Subscription type
+          type: string
+          enum:
+            - ethereum
+            - monero
+        chain_id:
+          description: CAIP-2 chain ID.
+          type: string
+        price:
+          description: Subscription price (only for Monero)
+          type: number
+        payout_address:
+          description: Payout address (only for Monero)
+          type: string
+      required:
+        - type
+    Tag:
+      type: object
+      properties:
+        name:
+          description: 'The value of the hashtag after the # sign.'
+          type: string
+        url:
+          description: A link to the hashtag on the instance.
+    Visibility:
+      type: string
+      enum:
+        - public
+        - private
+        - subscribers
+        - direct
