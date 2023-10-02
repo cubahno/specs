@@ -11,22 +11,19 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Copy specs
+        run: |
+          mkdir -p documents
+          cp -r $pwd documents
+
+      - name: Checkout Connexions
         uses: actions/checkout@v2
         with:
           repository: cubahno/connexions
           ref: master
-          path: /connexions
-
-      - name: Debug Directory Contents
-        run: |
-          ls -al
-          ls -al connexions
-
-      - name: Set up Environment Variable
-        run: echo "SPEC_DIR=$(pwd)" >> $GITHUB_ENV
+          path: connexions
 
       - name: Build and Test
-        working-directory: /connexions
+        working-directory: connexions
         run: |
-          make test-integration
+          SPEC_DIR=../documents make test-integration
