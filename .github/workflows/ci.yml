@@ -13,6 +13,7 @@ jobs:
     steps:
       - name: Copy specs
         run: |
+          ls -l
           mkdir documents
           cp -r ./2.0/* documents
           cp -r ./3.*/* documents
