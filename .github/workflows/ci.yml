@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: 'master'
+  pull_request:
+    branches: '**'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+        with:
+          repository: cubahno/connexions
+          ref: master
+
+      - name: Set up Environment Variable
+        run: echo "SPEC_DIR=$(pwd)" >> $GITHUB_ENV
+
+      - name: Build and Test
+        working-directory: ./connexions
+        run: |
+          make test-integration
