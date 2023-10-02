@@ -2881,7 +2881,7 @@ components:
           type: string
           description: Contains null until the status has reached CHARGED.
           maxLength: 36
-          pattern: '^\d{10+}$'
+          pattern: '^\d{10,}$'
           example: "5001419121"
         type:
           $ref: "#/components/schemas/ChargeType"
@@ -2993,7 +2993,7 @@ components:
           type: string
           description: Contains null until the status has reached CHARGED
           maxLength: 36
-          pattern: '^\d{10+}$'
+          pattern: '^\d{10,}$'
           example: "5001419121"
         type:
           $ref: "#/components/schemas/ChargeType"
