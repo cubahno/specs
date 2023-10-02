@@ -13,8 +13,9 @@ jobs:
     steps:
       - name: Copy specs
         run: |
-          mkdir -p /docs
-          cp -r ./* /docs
+          mkdir documents
+          cp -r 2.0/* documents
+          cp -r 3.*/* documents
           ls -l documents
 
       - name: Checkout Connexions
