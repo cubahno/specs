@@ -16,6 +16,7 @@ jobs:
         with:
           repository: cubahno/connexions
           ref: master
+          path: connexions
 
       - name: Debug Directory Contents
         run: |
