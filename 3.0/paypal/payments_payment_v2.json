@@ -2028,7 +2028,7 @@
             "type": "string",
             "minLength": 4,
             "maxLength": 4,
-            "pattern": "^[0-9]+$",
+            "pattern": "^[0-9]{4}$",
             "description": "The date that the transaction was authorized by the scheme. This field may not be returned for all networks. MasterCard refers to this field as \"BankNet reference date."
           },
           "network": {

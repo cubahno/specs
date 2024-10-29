@@ -795,7 +795,6 @@
           "price": {
             "type": "string",
             "description": "The item cost. Supports two decimal places.",
-            "maxLength": 10,
             "pattern": "^[0-9]{0,10}(\\.[0-9]{0,2})?$"
           },
           "currency": {

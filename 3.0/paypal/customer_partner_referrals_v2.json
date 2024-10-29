@@ -1015,9 +1015,6 @@
         "description": "The address type under which the provided address is tagged.",
         "title": "Person address type",
         "type": "string",
-        "pattern": "^[0-9A-Z_]+$",
-        "minLength": 1,
-        "maxLength": 255,
         "enum": [
           "HOME"
         ]
@@ -1136,9 +1133,6 @@
               }
             }
           }
-        ],
-        "required": [
-          "type"
         ]
       },
       "date_no_time": {
@@ -1621,7 +1615,6 @@
             "description": "The role of the email address.",
             "minLength": 1,
             "maxLength": 50,
-            "pattern": "^[0-9A-Z_]+$",
             "enum": [
               "CUSTOMER_SERVICE"
             ]
@@ -1680,7 +1673,6 @@
         "type": "string",
         "title": "Phone type",
         "description": "The type of phone number provided. For example, home, work, or mobile.",
-        "pattern": "^[0-9A-Z_]+$",
         "minLength": 1,
         "maxLength": 255,
         "enum": [
@@ -1737,7 +1729,6 @@
         "type": "string",
         "title": "Document type",
         "description": "The type of documents.",
-        "pattern": "^[0-9A-Z_]+$",
         "minLength": 1,
         "maxLength": 255,
         "enum": [
@@ -2130,7 +2121,6 @@
             "description": "The bank account ID type.",
             "minLength": 1,
             "maxLength": 125,
-            "pattern": "^[0-9A-Z_-]+$",
             "enum": [
               "BANK_CODE",
               "BI_CODE",
@@ -2597,7 +2587,6 @@
           "type": {
             "type": "string",
             "description": "The type of consent. `SHARE_DATA_CONSENT` gives consent to you to share your customer's data with PayPal.",
-            "pattern": "^[0-9A-Z_-]+$",
             "minLength": 1,
             "maxLength": 127,
             "enum": [
