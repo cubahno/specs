@@ -3299,7 +3299,6 @@ components:
           - MALE
           - FEMALE
           - UNKNOWN
-          maxLength: 1
           type: string
         infix:
           description: 'The name''s infix, if applicable.
