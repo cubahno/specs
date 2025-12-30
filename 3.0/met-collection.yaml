@@ -1,0 +1,418 @@
+openapi: 3.0.3
+info:
+  title: Met Collection API
+  version: 1.0.0
+  description: The Metropolitan Museum of Art provides select datasets of information on more than 470,000 artworks in its Collection for unrestricted commercial and noncommercial use.
+
+servers:
+  - url: https://collectionapi.metmuseum.org/public/collection
+
+paths:
+  /v1/objects:
+    get:
+      summary: All Met collection objects
+      description: Get a list of all objects in the collection. Optionally filter by date-updated or department
+      operationId: listObjects
+      parameters:
+        - name: metadataDate
+          in: query
+          description: Returns any objects with updated data after this date. Date format in 'YYYY-MM-DD'
+          schema:
+            type: string
+        - name: departmentIds
+          in: query
+          description: Returns any objects in a specific department(s). If multiple ids are provided, they are delimited by "|"
+          schema:
+            type: string
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: Total number of objects in result
+                  objectIDs:
+                    type: array
+                    description: A list of object ids
+                    items:
+                      type: integer
+  /v1/objects/{objectID}:
+    get:
+      summary: Object metadata
+      description: Returns all open access data about an object
+      operationId: getObjectById
+      parameters:
+        - name: objectID
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Object'
+  /v1/departments:
+    get:
+      summary: Department list
+      description: Get a list of all departments
+      operationId: listDepartments
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  departments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Department'
+  /v1/search:
+    get:
+      summary: Search objects
+      description: Returns a list of all Object IDs meeting the search criteria
+      operationId: searchObjects
+      parameters:
+        - name: q
+          in: query
+          description: search term
+          schema:
+            type: string
+        - name: isHighlight
+          in: query
+          description: return objects designated as highlights
+          schema:
+            type: boolean
+        - name: title
+          in: query
+          description: search specifically against `title` field
+          schema:
+            type: boolean
+        - name: tags
+          in: query
+          description: search specifically against `tags` field
+          schema:
+            type: boolean
+        - name: departmentId
+          in: query
+          description: search for objects belonging to certain department
+          schema:
+            type: integer
+        - name: isOnView
+          in: query
+          description: return objects that are on view in the museum.
+          schema:
+            type: boolean
+        - name: artistOrCulture
+          in: query
+          description: search specifically against artist name or `culture` fields
+          schema:
+            type: boolean
+        - name: medium
+          in: query
+          description: "returns objects that are of the specified medium or object type. Examples include: 'Ceramics', 'Furniture', 'Paintings', 'Sculpture', 'Textiles', etc (case sensitive). Multiple values to be separated by '|'"
+          schema:
+            type: string
+        - name: hasImages
+          in: query
+          description: return objects have images
+          schema:
+            type: boolean
+        - name: geoLocation
+          in: query
+          description: "returns objects that are of the specified geographic location. Examples include: 'Europe', 'France', 'Paris', 'China', 'New York', etc. (case sensitive). Multiple values to be separated by '|'"
+          schema:
+            type: string
+        - name: dateBegin
+          in: query
+          description: return objects that fall between the dateBegin year and dateEnd year. If you use this parameter, you must use `dateEnd` too.
+          schema:
+            type: integer
+        - name: dateEnd
+          in: query
+          description: return objects that fall between the dateBegin year and dateEnd year. If you use this parameter, you must use `dateBegin` too.
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: Total number of objects in result
+                  objectIDs:
+                    type: array
+                    description: A list of object ids
+                    items:
+                      type: integer
+components:
+  schemas:
+    Object:
+      type: object
+      properties:
+        objectID:
+          description: Identifying number for each artwork (unique, can be used as key field)
+          example: 437133
+          type: integer
+        isHighlight:
+          description: When "true" indicates a popular and important artwork in the collection
+          example: Vincent van Gogh's "Wheat Field with Cypresses"
+          type: boolean
+        accessionNumber:
+          description: Identifying number for each artwork (not always unique)
+          example: 67.241
+          type: string
+        accessionYear:
+          description: Year the artwork was acquired.
+          example: 1921
+          type: string
+        isPublicDomain:
+          description: When "true" indicates an artwork in the Public Domain
+          example: Vincent van Gogh's "Wheat Field with Cypresses"
+          type: boolean
+        primaryImage:
+          description: URL to the primary image of an object in JPEG format
+          example: https://images.metmuseum.org/CRDImages/ep/original/DT1567.jpg
+          type: string
+        primaryImageSmall:
+          description: URL to the lower-res primary image of an object in JPEG format
+          example: https://images.metmuseum.org/CRDImages/ep/web-large/DT1567.jpg
+          type: string
+        additionalImages:
+          description: An array containing URLs to the additional images of an object in JPEG format
+          type: array
+          items:
+            type: string
+        constituents:
+          description: An array containing the constituents associated with an object, with the constituent's role, name, ULAN URL, Wikidata URL, and gender, when available (currently contains female designations only).
+          example: '[{"constituentID": 161708,"role": "Artist","name": "Louise Bourgeois","constituentULAN_URL":
+            "http://vocab.getty.edu/page/ulan/500057350","constituentWikidata_URL": "https://www.wikidata.org/wiki/Q159409","gender":
+            "Female"}]'
+          type: array
+          items:
+            type: object
+        department:
+          description: Indicates The Met's curatorial department responsible for the artwork
+          example: Egyptian Art
+          type: string
+        objectName:
+          description: Describes the physical type of the object
+          example: Dress
+          type: string
+        title:
+          description: Title, identifying phrase, or name given to a work of art
+          example: Wheat Field with Cypresses
+          type: string
+        culture:
+          description: Information about the culture, or people from which an object was created
+          example: Afghan
+          type: string
+        period:
+          description: Time or time period when an object was created
+          example: Ming dynasty (1368-1644)
+          type: string
+        dynasty:
+          description: Dynasty (a succession of rulers of the same line or family) under which an object was created
+          example: Kingdom of Benin
+          type: string
+        reign:
+          description: Reign of a monarch or ruler under which an object was created
+          example: Amenhotep III
+          type: string
+        portfolio:
+          description: A set of works created as a group or published as a series.
+          example: Birds of America
+          type: string
+        artistRole:
+          description: Role of the artist related to the type of artwork or object that was created
+          example: '"Artist for Painting", "Designer for Dress"'
+          type: string
+        artistPrefix:
+          description: Describes the extent of creation or describes an attribution qualifier to the information given in the artistRole field
+          example: '"In the Style of", "Possibly by", "Written in French by"'
+          type: string
+        artistDisplayName:
+          description: Artist name in the correct order for display
+          example: Vincent van Gogh
+          type: string
+        artistDisplayBio:
+          description: Nationality and life dates of an artist, also includes birth and death city when known.
+          example: Dutch, Zundert 1853-1890 Auvers-sur-Oise
+          type: string
+        artistAlphaSort:
+          description: Used to sort artist names alphabetically. Last Name, First Name, Middle Name, Suffix, and Honorific fields, in that order.
+          example: Gogh, Vincent van
+          type: string
+        artistBeginDate:
+          description: Year the artist was born
+          example: 1840
+          type: string
+        artistEndDate:
+          description: Year the artist died
+          example: 1926
+          type: string
+        artistGender:
+          description: Gender of the artist (currently contains female designations only)
+          example: female
+          type: string
+        artistNationality:
+          description: National, geopolitical, cultural, or ethnic origins or affiliation of the creator or institution that made the artwork
+          example: '"Spanish"; "Dutch"; "French, born Romania"'
+          type: string
+        artistSuffix:
+          description: Used to record complex information that qualifies the role of a constituent, e.g. extent of participation by the Constituent (verso only, and followers)
+          example: '"verso only"'
+          type: string
+        artistULAN_URL:
+          description: ULAN URL for the artist
+          example: https://vocab.getty.edu/page/ulan/500003169
+          type: string
+        artistWikidata_URL:
+          description: Wikidata URL for the artist
+          example: https://www.wikidata.org/wiki/Q694774
+          type: string
+        city:
+          description: City where the artwork was created
+          example: New York
+          type: string
+        classification:
+          description: General term describing the artwork type.
+          example: Basketry
+          type: string
+        country:
+          description: Country where the artwork was created or found
+          example: China
+          type: string
+        county:
+          description: County where the artwork was created, may sometimes overlap with State
+          example: Orange County
+          type: string
+        creditLine:
+          description: Text acknowledging the source or origin of the artwork and the year the object was acquired by the museum.
+          example: Robert Lehman Collection, 1975
+          type: string
+        dimensions:
+          description: Size of the artwork or object
+          example: 16 x 20 in. (40.6 x 50.8 cm)
+          type: string
+        dimensionsParsed:
+          description: Size of the artwork or object in centimeters, parsed
+          example: [{"element":"Sheet","dimensionType":"Height","dimension":51},{"element":"Plate","dimensionType":"Height","dimension":47.5},{"element":"Sheet","dimensionType":"Width","dimension":72.8},{"element":"Plate","dimensionType":"Width","dimension":62.5}]
+          type: array
+          items:
+              type: object
+        excavation:
+          description: The name of an excavation. The excavation field usually includes dates of excavation.
+          example: MMA excavations, 1923-1324
+          type: string
+        geographyType:
+          description: Qualifying information that describes the relationship of the place catalogued in the geography fields to the object that is being catalogued
+          example: '"Made in", "From", or "Attributed to"'
+          type: string
+        isTimelineWork:
+          description: Whether the object is on the Timeline of Art History website
+          example: 'true'
+          type: boolean
+        linkResource:
+          description: URL to object's page on metmuseum.org
+          example: https://www.metmuseum.org/art/collection/search/547802
+          type: string
+        locale:
+          description: Geographic location more specific than subregion, but more specific
+            than locus, where the artwork was found (frequently null)
+          example: Tomb of Perneb
+          type: string
+        locus:
+          description: Geographic location that is less specific than locale, but more specific than excavation, where the artwork was found (frequently null)
+          example: 1st chamber W. wall
+          type: string
+        measurements:
+          description: Array of elements, each with a name, description, and set of measurements. Spatial measurements are in centimeters; weights are in kg.
+          type: array
+          items:
+            type: object
+        medium:
+          description: Refers to the materials that were used to create the artwork
+          example: Oil on canvas
+          type: string
+        metadataDate:
+          description: Date metadata was last updated
+          example: 2018-10-17T10:24:43.197Z
+          type: string
+        objectBeginDate:
+          description: Machine readable date indicating the year the artwork was started to be created
+          example: 1867
+          type: integer
+        objectDate:
+          description: Year, a span of years, or a phrase that describes the specific or approximate date when an artwork was designed or created
+          example: 1865-1367
+          type: string
+        objectEndDate:
+          description: Machine readable date indicating the year the artwork was completed (may be the same year or different year than the objectBeginDate)
+          example: 1888
+          type: integer
+        objectURL:
+          description: URL to object's page on metmuseum.org
+          example: https://www.metmuseum.org/art/collection/search/547802
+          type: string
+        objectWikidata_URL:
+          description: Wikidata URL for the object
+          example: https://www.wikidata.org/wiki/Q432253
+          type: string
+        region:
+          description: Geographic location more specific than country, but more specific than subregion, where the artwork was created or found (frequently null)
+          example: Bohemia
+          type: string
+        repository:
+          example: Metropolitan Museum of Art, New York, NY
+          type: string
+        rightsAndReproduction:
+          description: Credit line for artworks still under copyright.
+          example: © 2018 Estate of Pablo Picasso / Artists Rights Society (ARS), New York
+          type: string
+        river:
+          description: River is a natural watercourse, usually freshwater, flowing toward an ocean, a lake, a sea or another river related to the origins of an artwork (frequently null)
+          example: Mississippi River
+          type: string
+        state:
+          description: State or province where the artwork was created, may sometimes overlap with County
+          example: Derbyshire
+          type: string
+        subregion:
+          description: Geographic location more specific than Region, but less specific than Locale, where the artwork was created or found (frequently null)
+          example: Valley of the Kings
+          type: string
+        tags:
+          description: An array of subject keyword tags associated with the object and their respective AAT URL
+          example: '[{"term": "Abstraction","AAT_URL": "http://vocab.getty.edu/page/aat/300056508","Wikidata_URL":
+            "https://www.wikidata.org/wiki/Q162150"}]'
+          type: array
+          items:
+            type: object
+        GalleryNumber:
+          description: Gallery number, where available
+          example: 131
+          type: string
+    Department:
+      type: object
+      properties:
+        departmentId:
+          type: integer
+          example: 10
+          description: Department Id
+        displayName:
+          type: string
+          example: Egyptian Art
+          description: Department name

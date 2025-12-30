@@ -1,0 +1,148 @@
+openapi: 3.0.0
+info:
+  title: Open-Meteo Geocoding
+  description: |
+    Open-Meteo Geocoding offers free location search for open-source developers and non-commercial use. No API key is required.
+  version: '1.0'
+  contact:
+    name: Open-Meteo
+    url: https://open-meteo.com
+    email: info@open-meteo.com
+  license:
+    name: Attribution 4.0 International (CC BY 4.0)
+    url: https://creativecommons.org/licenses/by/4.0/
+  termsOfService: https://open-meteo.com/en/features#terms
+servers:
+  - url: https://geocoding-api.open-meteo.com
+paths:
+  /v1/search:
+    get:
+      tags:
+        - Geocoding
+      summary: Search for location
+      description: The API endpoint accepts a search term and returns a list of matching locations.
+      parameters:
+        - name: name
+          in: query
+          required: true
+          description: String to search for. An empty string or only 1 character will return an empty result. 2 characters will only match exact matching locations. 3 and more characters will perform fuzzy matching. The search string can be a location name or a postal code.
+          schema:
+            type: string
+        - name: count
+          description: The number of search results to return. Up to 100 results can be retrieved. Defaults to 10.
+          in: query
+          schema:
+            type: integer
+        - name: format
+          in: query
+          description: Defaults to 'json'
+          schema:
+            type: string
+            enum:
+              - json
+              - protobuf
+        - name: language
+          description: Return translated results, if available, otherwise return english or the native location name. Lower-cased. Defaults to 'en'
+          in: query
+          schema:
+            type: string
+            example: en
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Location'
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    description: Always set true for errors
+                  reason:
+                    type: string
+                    description: Description of the error
+                    example: Parameter count must be between 1 and 100.
+components:
+  schemas:
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: Unique ID for this location
+        name:
+          type: string
+          description: Location name. Localized following the `language` parameter, if possible.
+        latitude:
+          type: number
+          example: 52.52
+          description: Geographical WGS84 coordinates of this location.
+        longitude:
+          type: number
+          example: 13.419
+          description: Geographical WGS84 coordinates of this location.
+        elevation:
+          type: number
+          example: 2.2119
+          description: Elevation above mean sea level of this location.
+        timezone:
+          type: string
+          example: Europe/Berlin
+          description: Time zone using time zone database definitions
+        feature_code:
+          type: string
+          example: PPLC
+          description: Type of this location. Following the GeoNames feature_code definition.
+        country_code:
+          type: string
+          example: DE
+          description: 2-Character FIPS country code
+        country:
+          type: string
+          description: Country name. Localized following the `language` parameter, if possible
+        country_id:
+          type: integer
+          description: Unique ID for this country
+        population:
+          type: integer
+          description: Number of inhabitants
+        postcodes:
+          type: array
+          items:
+            type: string
+          description: List of postcodes for this location
+        admin1:
+          type: string
+          description: First administrative level
+        admin2:
+          type: string
+          description: Second administrative level
+        admin3:
+          type: string
+          description: Third administrative level
+        admin4:
+          type: string
+          description: Fourth administrative level
+        admin1_id:
+          type: integer
+          description: Unique ID for the first administrative area
+        admin2_id:
+          type: integer
+          description: Unique ID for the second administrative area
+        admin3_id:
+          type: integer
+          description: Unique ID for the third administrative area
+        admin4_id:
+          type: integer
+          description: Unique ID for the fourth administrative area

@@ -1,0 +1,210 @@
+openapi: 3.0.1
+info:
+  title: Digimon Cards API
+  description: Search the digimoncard.io Digimon TCG API. This API allows you to retrieve information for Digimon Cards from the Digimon TCG.
+  version: 1.0.0
+servers:
+  - url: https://digimoncard.io/api-public
+paths:
+  /search.php:
+    get:
+      summary: Search cards
+      description: Search digimon cards based on search criteria.
+      operationId: searchCards
+      parameters:
+        - name: n
+          in: query
+          description: Search by Card Name
+          schema:
+            type: string
+        - name: desc
+          in: query
+          description: Search by Card Description (searches Source Effect and Main Effect)
+          schema:
+            type: string
+            example: Reveal 5 cards
+        - name: color
+          in: query
+          description: Search by Card Color
+          schema:
+            type: string
+            enum:
+              - Black
+              - Blue
+              - Colorless
+              - Green
+              - Purple
+              - Red
+              - White
+              - Yellow
+        - name: type
+          in: query
+          description: Search by Card Type
+          schema:
+            type: string
+            enum:
+              - Digimon
+              - Option
+              - Tamer
+              - Digi-Egg
+        - name: attribute
+          in: query
+          description: Search by Card Attribute
+          schema:
+            type: string
+            example: Vaccine
+        - name: card
+          in: query
+          description: Search by Card Number
+          schema:
+            type: string
+            example: BT1-010
+        - name: pack
+          in: query
+          description: Search by Pack Name
+          schema:
+            type: string
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - name
+              - power
+              - code
+              - color
+              - random
+        - name: sortdirection
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: series
+          in: query
+          description: Set the game type
+          schema:
+            type: string
+            enum:
+              - Digimon Card Game
+              - Digimon Digi-Battle Card Game
+              - Digimon Collectible Card Game
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card'
+  /getAllCards.php:
+    get:
+      summary: All cards
+      description: Gets all cards from a certain series
+      operationId: listCards
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - name
+        - name: sortdirection
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: series
+          in: query
+          description: Set the game type
+          schema:
+            type: string
+            enum:
+              - Digimon Card Game
+              - Digimon Digi-Battle Card Game
+              - Digimon Collectible Card Game
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Card_Id'
+components:
+  schemas:
+    Card:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Digimon name
+          example: Leomon
+        type:
+          type: string
+          example: Digimon
+        color:
+          type: string
+          example: Red
+        stage:
+          type: string
+          example: Champion
+        digi_type:
+          type: string
+          example: Animal
+        attribute: 
+          type: string
+          example: Vaccine
+        level: 
+          type: integer
+          example: null
+        play_cost:
+          type: integer
+          example: null
+        evolution_cost:
+          type: integer
+          example: null
+        cardrarity:
+          type: string
+          example: null
+        artist:
+          type: string
+          example: null
+        dp:
+          type: integer
+          example: null
+        cardnumber:
+          type: string
+          example: BO-03
+        maineffect:
+          type: string
+          example: null
+        soureeffect:
+          type: string
+          example: null
+        set_name:
+          type: string
+          example: Series 1 Booster Pack
+        card_sets:
+          type: array
+          items:
+            type: string
+          example: ["Series 1 Booster Pack"]
+        image_url:
+          type: string
+          example: https://images.digimoncard.io/images/cards/BO-03.jpg
+    Card_Id:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Yokomon
+        cardnumber:
+          type: string
+          example: BT1-001
+        

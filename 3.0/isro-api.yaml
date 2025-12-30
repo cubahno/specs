@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: ISRO Data - OpenAPI 3.0
+  description: |-
+    This API provides information about the spacecrafts, launchers, satellites, and centers of ISRO (Indian Space Research Organisation)
+  version: 1.0.11
+servers:
+  - url: https://isro.vercel.app/api
+paths:
+  /spacecrafts:
+    get:
+      summary: Spacecrafts
+      description: List all spacecrafts
+      operationId: listSpacecrafts
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    spacecrafts:
+                      type: array
+                      items:
+                        type: object
+  /launchers:
+    get:
+      summary: Launchers
+      description: List all Launchers
+      operationId: listLaunchers
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    launchers:
+                      type: array
+                      items:
+                        type: object
+  /customer_satellites:
+    get:
+      summary: Customer Satellites
+      description: List all customer satellites
+      operationId: listSatellites
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    customer_satellites:
+                      type: array
+                      items:
+                        type: object
+  /centres:
+    get:
+      summary: Centers
+      description: List all centers
+      operationId: listCenters
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    centers:
+                      type: array
+                      items:
+                        type: object
+  

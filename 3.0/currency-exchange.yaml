@@ -1,0 +1,83 @@
+openapi: 3.0.3
+info:
+  title: Currency Exchange API
+  description: |
+    Free currency rates API for normal and crypto currencies
+
+    Rates are updated daily and go back to one year only. For the `date` parameter, use a date in the format 'YYYY-MM-DD' up to one year back, or pass 'latest' for the latest rates.
+  version: 2.0.0
+servers:
+  - url: https://cdn.jsdelivr.net/gh/fawazahmed0/currency-api@1
+paths:
+  /{date}/currencies.min.json:
+    get:
+      summary: All currencies
+      description: List all currencies in the database
+      operationId: listCurrencies
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: object
+  /{date}/currencies/{baseCurrency}:
+    get:
+      summary: Rates for base currency
+      description: List all exchange rates for base currency
+      operationId: listRatesForBase
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: baseCurrency
+          in: path
+          required: true
+          description: Use currency code and suffix with 'min.json'. For example 'eur.min.json'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: object
+  /{date}/currencies/{currency_from}/{currency_to}:
+    get:
+      summary: Convert between two currencies
+      description: Get exchange rate between two currencies
+      operationId: convert
+      parameters:
+        - name: date
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: currency_from
+          in: path
+          required: true
+          description: Use currency code only
+          schema:
+            type: string
+        - name: currency_to
+          in: path
+          required: true
+          description: Use currency code and suffix with '.json'. For example 'eur.json'
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: object

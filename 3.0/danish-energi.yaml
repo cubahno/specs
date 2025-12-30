@@ -1,0 +1,259 @@
+openapi: 3.0.1
+info:
+  title: EDS API
+  description: Explore data from Danish Energi Data Services
+  version: v1
+servers:
+  - url: https://api.energidataservice.dk
+paths:
+  /dataset/{datasetName}:
+    get:
+      tags:
+        - Data
+      summary: Gets data from dataset
+      description: "Gets data from dataset. Date format: yyyy, yyyy-MM, yyyy-MM-dd, yyyy-MM-ddTHH:mm. If no datetime bounderies are set and limit is not set also, the limit is set to 100"
+      parameters:
+        - name: datasetName
+          in: path
+          description: Name of dataset
+          required: true
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: >-
+            Start of period - incl. Either fixed value or dynamic - Now,
+            StartOfDay, StartOfMonth or StartOfYear {+|-} iso period. Ex
+            Now-PT12H
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: End of period - excl.
+          schema:
+            type: string
+        - name: columns
+          in: query
+          description: Comma separated list of columns. Leave blank to include all columns
+          schema:
+            type: array
+            items:
+              type: string
+        - name: filter
+          in: query
+          description: 'JSON string ex. "filters": {"PriceArea": "DK1,SE3"}.'
+          schema:
+            type: string
+        - name: sort
+          in: query
+          description: "Comma separated list of columns to sort by. Ex HourUTC, PriceArea. If left blank the dataset is sorted by the unique key"
+          schema:
+            type: array
+            items:
+              type: string
+        - name: offset
+          in: query
+          description: Read from position
+          schema:
+            type: integer
+            format: int32
+        - name: limit
+          in: query
+          description: Number of records returned (default 100). 0 returns all values
+          schema:
+            type: integer
+            format: int32
+        - name: timezone
+          in: query
+          description: DK (default) or UTC. For interpretation of fixed time values.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /meta/Dataset:
+    get:
+      tags:
+        - Dataset
+      summary: Gets a list of Datasets
+      description: Gets a list of Datasets
+      responses:
+        '200':
+          description: Success
+  /meta/Dataset/{datasetName}:
+    get:
+      tags:
+        - Dataset
+      summary: Gets info of a specific Dataset
+      description: Gets info of a specific Dataset
+      parameters:
+        - name: datasetName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /meta/Group:
+    get:
+      tags:
+        - Group
+      summary: Returns a list of all groups
+      description: Returns a list of all groups
+      responses:
+        '200':
+          description: Success
+  /meta/Group/{groupName}:
+    get:
+      tags:
+        - Group
+      summary: Returns details information of the specified group
+      description: Returns details information of the specified group
+      parameters:
+        - name: groupName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /meta/Group/{groupName}/dataset:
+    get:
+      tags:
+        - Group
+      summary: Returns a list of dataset in the specified group
+      description: Returns a list of dataset in the specified group
+      parameters:
+        - name: groupName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /News/actual:
+    get:
+      tags:
+        - News
+      summary: Return current info message - if any
+      description: Return current info message - if any
+      parameters:
+        - name: category
+          in: query
+          description: high or info
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /News:
+    get:
+      tags:
+        - News
+      summary: Return list of messages
+      description: Return list of messages
+      parameters:
+        - name: category
+          in: query
+          description: "Returns either all or if specified categories of news in the valid period with the first created first."
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /News/calendar:
+    get:
+      tags:
+        - News
+      responses:
+        '200':
+          description: Success
+  /News/archived:
+    get:
+      tags:
+        - News
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NewsViewModel'
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NewsViewModel'
+            text/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/NewsViewModel'
+  /meta/Organization:
+    get:
+      tags:
+        - Organization
+      summary: Returns a list of all organizations
+      description: Returns a list of all organizations
+      responses:
+        '200':
+          description: Success
+  /meta/Organization/{organizationName}:
+    get:
+      tags:
+        - Organization
+      summary: Returns a detailed information of the specified organization
+      description: Returns a detailed information of the specified organization
+      parameters:
+        - name: organizationName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+  /meta/TagGroup:
+    get:
+      tags:
+        - TagGroup
+      summary: Get a list of all taggroups with tags
+      description: Get a list of all taggroups with tags
+      responses:
+        '200':
+          description: Success
+components:
+  schemas:
+    NewsViewModel:
+      type: object
+      properties:
+        newsId:
+          type: integer
+          format: int32
+        category:
+          type: string
+          nullable: true
+        header:
+          type: string
+          nullable: true
+        story:
+          type: string
+          nullable: true
+        validFrom:
+          type: string
+          format: date-time
+        created:
+          type: string
+          format: date-time
+      additionalProperties: false

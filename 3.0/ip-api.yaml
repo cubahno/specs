@@ -1,0 +1,200 @@
+openapi: 3.0.1
+info:
+  title: IP API
+  description: |
+    ipapi.co provides a REST API to find the location of an IP address. Both IPv4 & IPv6 type addresses are supported.
+
+  version: 1.0.0
+servers:
+  - url: https://ipapi.co
+paths:
+  /{ip}/{format}/:
+    get:
+      summary: Get full location
+      description: This endpoint returns the complete location information for an IP address specified in the URL
+      operationId: getLocation
+      parameters:
+        - name: ip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: format
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - json
+              - jsonp
+              - xml
+              - csv
+              - yaml
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+  /{ip}/{field}/:
+    get:
+      summary: Get location field
+      description: This endpoint returns a single location field for an IP address specified in the URL.
+      operationId: getField
+      parameters:
+        - name: ip
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: field
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - network
+              - version
+              - city
+              - region
+              - region_code
+              - country
+              - country_name
+              - country_code
+              - country_code_iso3
+              - country_capital
+              - country_tld
+              - continent_code
+              - in_eu
+              - postal
+              - latitude
+              - longitude
+              - timezone
+              - utc_offset
+              - country_calling_code
+              - currency
+              - currency_name
+              - languages
+              - country_area
+              - country_population
+              - asn
+              - org
+      responses:
+        '200':
+          description: Success
+          content:
+            text/plain:
+              schema:
+                type: string
+components:
+  schemas:
+    Location:
+      type: object
+      properties:
+        ip:
+          type: string
+          description: public (external) IP address (same as URL ip)
+          example: 8.8.8.8
+        network:
+          type: string
+          description: network address and subnet mask
+          example: 8.8.8.0/24
+        version:
+          type: string
+          description: IP version
+          example: IPv4
+        city:
+          type: string
+          description: city name
+          example: Mountain View
+        region:
+          type: string
+          description: region name (administrative division)
+          example: California
+        region_code:
+          type: string
+          description: region code
+          example: CA
+        country:
+          type: string
+          description: country code (2 letter, ISO 3166-1 alpha-2)
+          example: US
+        country_name:
+          type: string
+          description: short country name
+          example: United States
+        country_code:
+          type: string
+          description: country code (2 letter, ISO 3166-1 alpha-2)
+          example: US
+        country_code_iso3:
+          type: string
+          description: country code (3 letter, ISO 3166-1 alpha-3)
+          example: USA
+        country_capital:
+          type: string
+          description: capital of the country
+          example: Washington
+        country_tld:
+          type: string
+          description: country specific TLD (top-level domain)
+          example: .us
+        continent_code:
+          type: string
+          description: continent code
+          example: NA
+        in_eu:
+          type: boolean
+          description: whether IP address belongs to a country that is a member of the European Union (EU)
+          example: false
+        postal:
+          type: string
+          description: postal code / zip code
+          example: 94043
+        latitude:
+          type: number
+          example: 37.42301
+        longitude:
+          type: number
+          example: -122.083352
+        timezone:
+          type: string
+          description: timezone (IANA format i.e. “Area/Location”)
+          example: America/Los_Angeles
+        utc_offset:
+          type: string
+          description: UTC offset (with daylight saving time) as +HHMM or -HHMM (HH is hours, MM is minutes)
+          example: '-0700'
+        country_calling_code:
+          type: string
+          description: country calling code (dial in code, comma separated)
+          example: '+1'
+        currency:
+          type: string
+          description: currency code (ISO 4217)
+          example: USD
+        currency_name:
+          type: string
+          description: currency name
+          example: Dollar
+        languages:
+          type: string
+          description: languages spoken (comma separated 2 or 3 letter ISO 639 code with optional hyphen separated country suffix)
+          example: en-US,es-US,haw,fr
+        country_area:
+          type: integer
+          description: area of the country (in sq km)
+          example: 9629091
+        country_population:
+          type: integer
+          description: population of the country
+          example: 327167434
+        asn:
+          type: string
+          description: autonomous system number
+          example: AS15169
+        org:
+          type: string
+          description: organization name
+          example: GOOGLE

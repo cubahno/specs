@@ -1,0 +1,166 @@
+openapi: 3.0.3
+info:
+  title: Makeup API - OpenAPI 3.0
+  description: |
+    An API to get information about makeup products.
+
+    Here is a list of products types and categories:
+      + Bluch:
+        - Powder
+        - Cream
+      + Bronzer:
+        - Powder
+      + Eyebrow:
+        - Pencil
+      + Eyeliner:
+        - Liquid
+        - Pencil
+        - Gel
+        - Cream
+      + Eyeshadow:
+        - Palette
+        - Pencil
+        - Cream
+      + Foundation:
+        - Concealer
+        - Liquid
+        - Contour
+        - Bb cc
+        - Cream
+        - Mineral
+        - Powder
+        - Highlighter
+      + Lip liner:
+        - Pencil
+      + Lipstick:
+        - Lipstick
+        - Lip gloss
+        - Liquid
+        - Lip stain
+  version: 1.0.0
+servers:
+  - url: https://makeup-api.herokuapp.com/api/v1
+paths:
+  /products.json:
+    get:
+      summary: Search makeup products
+      description: Search makeup products
+      operationId: searchProducts
+      parameters:
+        - name: product_type
+          in: query
+          schema:
+            type: string
+            enum:
+              - blush
+              - bronzer
+              - eyebrow
+              - eyeliner
+              - eyeshadow
+              - foundation
+              - lip liner
+              - lipstick
+              - mascara
+              - nail polish
+          description: The type of makeup being searched for
+        - name: product_category
+          in: query
+          schema:
+            type: string
+          description: Sub-category for each makeup-type. See a full list in the main description
+        - name: product_tags
+          in: query
+          explode: true
+          description: "a list of tags - possible values are: 'Canadian', 'CertClean', 'Chemical Free', 'Dairy Free', 'EWG Verified', 'EcoCert', 'Fair Trade', 'Gluten Free', 'Hypoallergenic', 'Natural', 'No Talc', 'Non-GMO', 'Organic', 'Peanut Free Product', 'Sugar Free', 'USDA Organic', 'Vegan', 'alcohol free', 'cruelty free', 'oil free', 'purpicks', 'silicone free', 'water free'"
+          schema:
+            type: array
+            items:
+              type: string
+        - name: brand
+          in: query
+          schema:
+            type: string
+            enum:
+              - almay
+              - alva
+              - anna sui
+              - annabelle
+              - benefit
+              - boosh
+              - burt's bees
+              - butter london
+              - c'est moi
+              - cargo cosmetics
+              - china glaze
+              - clinique
+              - coastal classic creation
+              - colourpop
+              - covergirl
+              - dalish
+              - deciem
+              - dior
+              - dr. hauschka
+              - e.l.f.
+              - essie
+              - fenty
+              - glossier
+              - green people
+              - iman
+              - l'oreal
+              - lotus cosmetics usa
+              - maia's mineral galaxy
+              - marcelle
+              - marienatie
+              - maybelline
+              - milani
+              - mineral fusion
+              - misa
+              - mistura
+              - moov
+              - nudus
+              - nyx
+              - orly
+              - pacifica
+              - penny lane organics
+              - physicians formula
+              - piggy paint
+              - pure anada
+              - rejuva minerals
+              - revlon
+              - sally b's skin yummies
+              - salon perfect
+              - sante
+              - sinful colours
+              - smashbox
+              - stila
+              - suncoat
+              - w3llpeople
+              - wet n wild
+              - zorah
+              - zorah biocosmetiques
+          description: Brand of the product. Will return all products for each brand
+        - name: price_greater_than
+          in: query
+          schema:
+            type: number
+        - name: price_less_than
+          in: query
+          schema:
+            type: number
+        - name: rating_greater_than
+          in: query
+          schema:
+            type: number
+        - name: rating_less_than
+          in: query
+          schema:
+            type: number
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object

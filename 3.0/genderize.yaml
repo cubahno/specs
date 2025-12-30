@@ -1,0 +1,88 @@
+openapi: 3.0.3
+info:
+  title: Genderize API - OpenAPI 3.0
+  description: |-
+    A simple API to predict the gender of a person given their name
+  version: 1.0.11
+servers:
+  - url: https://api.genderize.io
+
+paths:
+  /:
+    get:
+      summary: Finds gender by name
+      description: Finds gender by name or genders of list of names
+      operationId: getGender
+      parameters:
+        - name: name
+          in: query
+          description: a single name to get gender for
+          schema:
+            type: string
+            example: peter
+        - name: name[]
+          in: query
+          explode: true
+          description: a list of names to get genders for
+          schema:
+            type: array
+            items:
+              type: string
+        - name: country_id
+          in: query
+          description: An ISO 3166-1 alpha-2 for country codes for localization. In a lot of cases, this will make the guess more correct.
+          schema:
+            type: string
+            example: US
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - schema:
+                      $ref: '#/components/schemas/Gender'
+                  - schema:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Gender'
+        '422':
+          description: Missing name(s)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing 'name' parameter
+        '429':
+          description: Rate limiting error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Request limit reached
+components:
+  schemas:
+    Gender:
+      type: object
+      properties:
+        name:
+          type: string
+          example: peter
+        gender:
+          type: string
+          example: male
+        probability:
+          type: number
+          description: Certainty of the assigned gender
+          example: 0.99
+        count:
+          type: integer
+          description: The number of data rows examined in order to calculate the response
+          example: 165452

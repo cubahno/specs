@@ -1,0 +1,193 @@
+openapi: 3.0.3
+info:
+  title: FBI Wanted - OpenAPI 3.0
+  description: |-
+    The FBI Wanted API is designed to help developers easily get information on the FBI Wanted program.
+  version: 2.0.0
+servers:
+  - url: https://api.fbi.gov
+paths:
+  /@wanted:
+    get:
+      summary: FBI Wanted List
+      description: Get a list of persons wanted by the FBI
+      operationId: getPeople
+      parameters:
+        - name: pageSize
+          in: query
+          description: page size defaults to 20
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: sort_on
+          in: query
+          description: defaults to 'publication'
+          schema:
+            type: string
+            enum:
+              - publication
+              - modified
+        - name: sort_order
+          in: query
+          description: defaults to 'desc'
+          schema:
+            type: string
+            enum:
+              - desc
+              - asc
+        - name: title
+          in: query
+          description: search by name/title
+          schema:
+            type: string
+        - name: sex
+          in: query
+          description: filter by gender
+          schema:
+            type: string
+        - name: field_offices
+          in: query
+          description: filter by field office
+          schema: 
+            type: string
+        - name: person_classification
+          in: query
+          schema:
+            type: string
+            enum:
+              - Main
+              - Victim
+              - Accomplice
+        - name: poster_classification
+          in: query
+          description: "Valid options: default (Wanted: Violent, Cyber, White Collar, Criminal Enterprise, etc), ten (Ten Most Wanted), terrorist (Terrorist), information (Seeking Information), kidnapping (Kidnapping), missing (Missing Persons), most (Most Wanted), crimes-against-children (Crimes Against Children), ecap (ECAP), law-enforcement-assistance (Law Enforcement Assistance)"
+          schema:
+            type: string
+            enum:
+              - default
+              - ten
+              - terrorist
+              - information
+              - kidnapping
+              - missing
+              - most
+              - crimes-against-children
+              - ecap
+              - law-enforcement-assistance
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum:
+              - na
+              - captured
+              - recovered
+              - located
+              - surrendered
+              - deceased
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+  /@wanted-person/{id}:
+    get:
+      summary: FBI Wanted Person
+      description: Get a wanted person by id
+      operationId: getPersonById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+  /@artcrimes:
+    get:
+      summary: FBI Art Crimes List
+      description: Get a list of art crimes
+      operationId: getArtCrimes
+      parameters:
+        - name: pageSize
+          in: query
+          description: page size defaults to 20
+          schema:
+            type: integer
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: sort_on
+          in: query
+          description: defaults to 'publication'
+          schema:
+            type: string
+            enum:
+              - publication
+              - modified
+        - name: sort_order
+          in: query
+          description: defaults to 'desc'
+          schema:
+            type: string
+            enum:
+              - desc
+              - asc
+        - name: title
+          in: query
+          description: title of art crime object
+          schema:
+            type: string
+        - name: crimeCategory
+          in: query
+          description: filter by crime category, e.g. 'paintings', 'sculpture', etc ...
+          schema: 
+            type: string
+        - name: maker
+          in: query
+          description: search by maker
+          schema:
+            type: string
+        - name: referenceNumber
+          in: query
+          description: search by art crime reference number
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+  /@artcrimes/{id}:
+    get:
+      summary: FBI Art Crime
+      description: Get an art crime by id
+      operationId: getArtCrimeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas:

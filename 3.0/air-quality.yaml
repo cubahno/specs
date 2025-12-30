@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: Open-Meteo Air Quality
+  description: |
+    Open-Meteo Air Quality offers free pollutants and pollen forecast in 11 km resolution for open-source developers and non-commercial use. No API key is required.
+    The `hourly` parameter takes the list of variables to return in the response. Possible values are:
+      + Particulate matter concentration measured in μg/m³:
+        - 'pm10' | Particulate matter with diameter smaller than 10 µm
+        - 'pm2_5' | Particulate matter with diameter smaller than 2.5 µm
+      + Atmospheric gases concentration measured in μg/m³:
+        - 'carbon_monoxide'
+        - 'nitrogen_dioxide'
+        - 'sulphur_dioxide'
+        - 'ozone'
+      + Ammonia concentration measured in μg/m³. Only available for Europe:
+        - 'ammonia'
+      + Aerosol optical depth at 550 nm of the entire atmosphere to indicate haze
+        - 'aerosol_optical_depth'
+      + Saharan dust particles concentration measured in μg/m³:
+        - 'dust'
+      + UV index considering clouds and clear sky:
+        - 'uv_index'
+        - 'uv_index_clear_sky'
+      + Pollen for various plants measured in Grains/m³. Only available in Europe:
+        - 'alder_pollen'
+        - 'birch_pollen'
+        - 'grass_pollen'
+        - 'mugwort_pollen'
+        - 'olive_pollen'
+        - 'ragweed_pollen'
+      + European Air Quality Index (AQI). Ranges from 0-20 (good), 20-40 (fair), 40-60 (moderate), 60-80 (poor), 80-100 (very poor) and exceeds 100 for extremely poor conditions:
+        - 'european_aqi'
+        - 'european_aqi_pm2_5'
+        - 'european_aqi_pm10'
+        - 'european_aqi_no2'
+        - 'european_aqi_o3'
+        - 'european_aqi_so2'
+      + United States Air Quality Index (AQI). Ranges from 0-50 (good), 51-100 (moderate), 101-150 (unhealthy for sensitive groups), 151-200 (unhealthy), 201-300 (very unhealthy) and 301-500 (hazardous):
+        - 'us_aqi'
+        - 'us_aqi_pm2_5'
+        - 'us_aqi_pm10'
+        - 'us_aqi_no2'
+        - 'us_aqi_o3'
+        - 'us_aqi_so2'
+        - 'us_aqi_co'
+      
+  version: '1.0'
+  contact:
+    name: Open-Meteo
+    url: https://open-meteo.com
+    email: info@open-meteo.com
+  license:
+    name: Attribution 4.0 International (CC BY 4.0)
+    url: https://creativecommons.org/licenses/by/4.0/
+  termsOfService: https://open-meteo.com/en/features#terms
+servers:
+  - url: https://air-quality-api.open-meteo.com
+paths:
+  /v1/air-quality:
+    get:
+      tags:
+        - Air Quality
+      summary: 5 day air quality forecast for coordinates
+      description: |
+        This endpoint accepts a geographical coordinate and a list of air quality variables and responds with a JSON hourly air quality forecast for 5 days. Time always starts at 0:00 today.
+        Forecast is based on the 11 kilometer CAMS European air quality forecast and the 40 kilometer CAMS global atmospheric composition forecasts. The two domains are not coupled and may show different forecasts.
+      parameters:
+        - name: latitude
+          in: query
+          required: true
+          description: WGS84 coordinate
+          schema:
+            type: number
+            format: float
+        - name: longitude
+          in: query
+          required: true
+          description: WGS84 coordinate
+          schema:
+            type: number
+            format: float
+        - name: hourly
+          description: A list of air quality variables as explained in the main description.
+          in: query
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: domains
+          in: query
+          description: Automatically combine both domains or specify one. Defaults to 'auto'
+          schema:
+            type: string
+            enum:
+              - auto
+              - cams_europe
+              - cams_global
+        - name: timeformat
+          description: Defaults to 'iso8601'
+          in: query
+          schema:
+            type: string
+            enum:
+              - iso8601
+              - unixtime
+        - name: timezone
+          description: If `timezone` is set, all timestamps are returned as local-time. Use 'auto' to estimate the timezone based on the coordinates. Defaults to 'GMT'.
+          in: query
+          schema:
+            type: string
+            default: GMT
+        - name: past_days
+          in: query
+          description: If `past_days` is set, yesterdays or the day before yesterdays data are also returned. Defaults to 0
+          schema:
+            type: integer
+            enum:
+              - 0
+              - 1
+              - 2
+        - name: start_date
+          in: query
+          description: The start date of the interval as ISO8601 date
+          schema:
+            type: string
+          example: '2022-06-30'
+        - name: end_date
+          in: query
+          description: The end date of the interval as ISO8601 date
+          schema:
+            type: string
+          example: '2022-07-13'
+        - name: cell_selection
+          in: query
+          description: Set a preference how grid-cells are selected.
+          schema:
+            type: string
+            enum:
+              - land
+              - sea
+              - nearest
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  latitude:
+                    type: number
+                    example: 52.52
+                    description: WGS84 of the center of the air quality grid-cell which was used to generate this forecast. This coordinate might be a few kilometers away from the requested coordinate.
+                  longitude:
+                    type: number
+                    example: 13.419.52
+                    description: WGS84 of the center of the air quality grid-cell which was used to generate this forecast. This coordinate might be a few kilometers away from the requested coordinate.
+                  generationtime_ms:
+                    type: number
+                    example: 2.2119
+                    description: Generation time of the air quality forecast in milli seconds. This is mainly used for performance monitoring and improvements.
+                  utc_offset_seconds:
+                    type: integer
+                    example: 3600
+                    description: Applied timezone offset from the `timezone` parameter.
+                  timezone:
+                    type: string
+                    example: Europe/Berlin
+                    description: Timezone identifier
+                  timezone_abbreviation:
+                    type: string
+                    example: CEST
+                    description: Timezone abbreviation
+                  hourly:
+                    type: object
+                    description: For each selected air quality variable, data will be returned as a floating point array. Additionally a time array will be returned with ISO8601 timestamps.
+                  hourly_units:
+                    type: object
+                    description: For each selected air quality variable, the unit will be listed here.
+        '400':
+          description: Bad Request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: boolean
+                    description: Always set true for errors
+                  reason:
+                    type: string
+                    description: Description of the error
+                    example: 'Latitude must be in range of -90 to 90°. Given: 300'

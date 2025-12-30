@@ -1,0 +1,147 @@
+openapi: 3.0.3
+info:
+  title: BD API - OpenAPI 3.0
+  description: |-
+    BD API is a RestAPI service. Developed by Keramot UL Islam.
+    Divisions, Districts, Upazilla, Thana, Post Office, Post Code etc of Bangladesh are available in Bangla and English within endpoints.
+  contact:
+    email: keramotul.islam@gmail.com
+  version: 1.1.0
+externalDocs:
+  description: Find out more about the API
+  url: https://bdapis.com/
+servers:
+  - url: https://bdapis.com/api/v1.1
+paths:
+  /divisions:
+    get:
+      summary: All devisions
+      description: List all divisions
+      operationId: listDivisions
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Division'
+  /districts:
+    get:
+      summary: All districts
+      description: List all districts
+      operationId: listDistricts
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/District'
+  /division/{divisionName}:
+    get:
+      summary: Division details
+      description: Returns all Districts and Upazilla of the given Division
+      operationId: getDivisionByName
+      parameters:
+        - name: divisionName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    $ref: '#/components/schemas/Status'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Details'
+components:
+  schemas:
+    Division:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: barishal
+        division:
+          type: string
+          example: Barishal
+          description: Name of the division in English.
+        divisionbn:
+          type: string
+          example: বরিশাল
+          description: Name of the division in Bangala.
+        coordinates:
+          type: string
+          example: 22.3811, 90.3372
+          description: Latitude and Longitude of the division, respectively.
+    District:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: bagerhat
+        district:
+          type: string
+          example: Bagerhat
+          description: Name of the district in English.
+        districtbn:
+          type: string
+          example: বাগেরহাট
+          description: Name of the district in Bangala.
+        coordinates:
+          type: string
+          example: 22.6602, 89.7895
+          description: Latitude and Longitude of the district, respectively.
+    Details:
+      type: object
+      properties:
+        _id:
+          type: string
+          example: barguna
+        district:
+          type: string
+          example: Barguna
+          description: Name of the district in English.
+        coordinates:
+          type: string
+          example: 22.6602, 89.7895
+          description: Latitude and Longitude of the district, respectively.
+        upazilla:
+          type: array
+          items:
+            type: string
+          example: ["Amtali", "Bamna", "Barguna Sadar", "Betagi", "Patharghata", "Taltali"]
+    Status:
+      type: object
+      properties:
+        code:
+          type: integer
+          example: 200
+        message:
+          type: string
+          example: ok
+        date:
+          type: string
+          example: Fri, 14 Apr 2023 14:45:36 GMT

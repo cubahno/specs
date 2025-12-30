@@ -1,0 +1,777 @@
+openapi: 3.0.3
+info:
+  title: Swagger Petstore - OpenAPI 3.0
+  description: |-
+    API with information on Doctor Who episodes and related data.
+  version: 1.0.0
+
+servers:
+  - url: https://api.catalogopolis.xyz/v1
+tags:
+  - name: actor
+  - name: companion
+  - name: director
+  - name: doctor
+  - name: episode
+  - name: season
+  - name: serial
+  - name: writer
+paths:
+  /actors/{id}:
+    get:
+      tags:
+        - actor
+      summary: Single actor
+      description: Retrieve a single Actor
+      operationId: getActorById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Actor'
+  /actors:
+    get:
+      tags:
+        - actor
+      summary: All actors
+      description: Retrieve all actors
+      operationId: listActors
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Actor'
+  /actors/{id}/doctors:
+    get:
+      tags:
+        - actor
+      summary: Doctors by actor
+      description: Retrieve all doctors portrayed by an actor
+      operationId: getDoctorsByActor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Doctor'
+  /companions/{id}:
+    get:
+      tags:
+        - companion
+      summary: Single companion
+      description: Retrieve a single companion
+      operationId: getCompanionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Companion'
+  /companions:
+    get:
+      tags:
+        - companion
+      summary: All companions
+      description: Retrieve all companions
+      operationId: listCompanions
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Companion'
+  /companions/{id}/serials:
+    get:
+      tags:
+        - companion
+      summary: Serials with a companion
+      description: Retrieve all serials with a companion
+      operationId: getSerialswithCompanion
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Serial'
+  /directors/{id}:
+    get:
+      tags:
+        - director
+      summary: Single director
+      description: Retrieve a single director
+      operationId: getDirectorById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Director'
+  /directors:
+    get:
+      tags:
+        - director
+      summary: All directors
+      description: Retrieve all directors
+      operationId: listDirectors
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Director'
+  /directors/{id}/serials:
+    get:
+      tags:
+        - director
+      summary: Serials by a director
+      description: Retrieve all serials by a director
+      operationId: getSerialsByDirectors
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Serial'
+  /doctors/{id}:
+    get:
+      tags:
+        - doctor
+      summary: Single doctor
+      description: Retrieve a single doctor
+      operationId: getDoctorById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Doctor'
+  /doctors:
+    get:
+      tags:
+        - doctor
+      summary: All doctors
+      description: Retrieve all doctors
+      operationId: listDoctors
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Doctor'
+  /doctors/{id}/actors:
+    get:
+      tags:
+        - doctor
+      summary: Actors who portrayed a doctor
+      description: Retrieve all actors who portrayed a doctor
+      operationId: getActorsByDoctor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Serial'
+  /doctors/{id}/serials:
+    get:
+      tags:
+        - doctor
+      summary: Serials featuring a doctor
+      description: Retrieve all serials featuring a director
+      operationId: getSerialsByDoctor
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Serial'
+  /episodes/{id}:
+    get:
+      tags:
+        - episode
+      summary: Single episode
+      description: Retrieve a single episode
+      operationId: getEpisodeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+  /episodes:
+    get:
+      tags:
+        - episode
+      summary: All episodes
+      description: Retrieve all episodes
+      operationId: listEpisodes
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Episode'
+  /seasons/{id}:
+    get:
+      tags:
+        - season
+      summary: Single season
+      description: Retrieve a single season
+      operationId: getSeasonsById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Season'
+  /seasons:
+    get:
+      tags:
+        - season
+      summary: All seasons
+      description: Retrieve all seasons
+      operationId: listSeasons
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Season'
+  /seasons/{id}/serials:
+    get:
+      tags:
+        - season
+      summary: Serials in a season
+      description: Retrieve all serials in a season
+      operationId: getSerialsBySeason
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Serial'
+  /serials/{id}:
+    get:
+      tags:
+        - serial
+      summary: Single serial
+      description: Retrieve a single serial
+      operationId: getSerialById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Serial'
+  /serials/{id}/companions:
+    get:
+      tags:
+        - serial
+      summary: Companions in a serial
+      description: Retrieve all companions in a serial
+      operationId: getCompanionsOfSerial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: serial id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Companion'
+  /serials/{id}/directors:
+    get:
+      tags:
+        - serial
+      summary: Directors of a serial
+      description: Retrieve all directors of a serial
+      operationId: getDirectorsOfSerial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: serial id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Director'
+  /serials/{id}/doctors:
+    get:
+      tags:
+        - serial
+      summary: Doctors in a serial
+      description: Retrieve all doctors who appeared in a serial
+      operationId: getDoctorsOfSerial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: serial id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Doctor'
+  /serials/{id}/episodes:
+    get:
+      tags:
+        - serial
+      summary: Episodes in a serial
+      description: Retrieve all episodes in a serial
+      operationId: getEpisodesOfSerial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: serial id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Episode'
+  /serials:
+    get:
+      tags:
+        - serial
+      summary: All serials
+      description: Retrieve all serials
+      operationId: listSerials
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Serial'
+  /serials/{id}/writers:
+    get:
+      tags:
+        - serial
+      summary: Writers of a serial
+      description: Retrieve all writers of a serial
+      operationId: getWritersOfSerial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: serial id
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Writer'
+  /writers/{id}:
+    get:
+      tags:
+        - writer
+      summary: Single writer
+      description: Retrieve a single writer
+      operationId: getWriterById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Writer'
+  /writers:
+    get:
+      tags:
+        - writer
+      summary: All writers
+      description: Retrieve all writers
+      operationId: listWriters
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Writer'
+  /writers/{id}/serials:
+    get:
+      tags:
+        - writer
+      summary: Writers of a serial
+      description: Retrieve all writers of a serial
+      operationId: getWritersBySerial
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Serial'
+components:
+  schemas:
+    Actor:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 7
+        name:
+          type: string
+          example: Sylvester McCoy
+        gender:
+          type: string
+          example: male
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/actors/7
+    Doctor:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        incarnation:
+          type: string
+          example: First Doctor
+        primaryActorID:
+          type: integer
+          example: 1
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/doctors/1
+    Companion:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 5
+        name:
+          type: string
+          example: Steven Taylor
+        gender:
+          type: string
+          example: male
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/companions/5
+    Director:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 7
+        name:
+          type: string
+          example: Adam Smith
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/directors/1
+    Serial:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 17
+        seasonID:
+          type: integer
+          example: 2
+        story:
+          type: string
+          example: 17
+        serial:
+          type: integer
+          example: 9
+        title:
+          type: string
+          example: The Time Meddler
+        productionCode:
+          type: string
+          example: "S"
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/serials/17
+    Episode:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 17
+        title:
+          type: string
+          example: An Unearthly Child
+        serialID:
+          type: integer
+          example: 1
+        episodeOrder:
+          type: string
+          example: "1.0"
+        originalAirDate:
+          type: string
+          example: 1963-11-23
+        runtime:
+          type: string
+          example: 23:24
+        ukViewersMM:
+          type: number
+          example: 4.4
+        appreciationIndex:
+          type: integer
+          example: 63
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/episodes/1
+    Season:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 1
+        name:
+          type: string
+          example: Season 1
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/seasons/1
+    Writer:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 49
+        name:
+          type: string
+          example: John Lucarotti
+        links:
+          type: array
+          items:
+            type: object
+            properties:
+              rel:
+                type: string
+                example: self
+              href:
+                type: string
+                example: /v1/writers/49

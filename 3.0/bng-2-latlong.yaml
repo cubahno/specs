@@ -1,0 +1,50 @@
+openapi: 3.0.3
+info:
+  title: BNG-2-latlong API
+  description: |
+    Convert an OSGB36 easting and northing (British National Grid) to WGS84 latitude and longitude.
+  version: 1.0.0
+servers:
+  - url: https://api.getthedata.com
+paths:
+  /bng2latlong/{easting}/{northing}:
+    get:
+      summary: Converter
+      description: Convert easting and northing to latitude and longitude
+      operationId: convert
+      parameters:
+        - name: easting
+          in: path
+          required: true
+          schema:
+            type: number
+        - name: northing
+          in: path
+          required: true
+          schema:
+            type: number
+      responses:
+        '200':
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: ok
+                  easting:
+                    type: number
+                    description: The provided easting
+                    example: 529090
+                  northing:
+                    type: number
+                    description: The provided northing
+                    example: 179645
+                  latitude:
+                    type: number
+                    exampl: 51.50101
+                  longitude:
+                    type: number
+                    example: -0.14158

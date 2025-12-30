@@ -1,0 +1,256 @@
+openapi: 3.0.1
+info:
+  title: Hacker News API
+  description: |
+    An API to retieve items and related data from YCombinator's Hacker news.
+
+    Responses can optionally be pretty printed by passing the `print` parameter and setting it to 'pretty'.
+  version: 0.0.1
+servers:
+  - url: https://hacker-news.firebaseio.com/v0
+paths:
+  /item/{id}.json:
+    get:
+      tags:
+        - item
+      summary: Get item
+      description: Stories, comments, jobs, Ask HNs and even polls are just items. They're identified by their ids, which are unique integers.
+      operationId: getItemById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: print
+          in: query
+          schema:
+            type: string
+            enum:
+              - pretty
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Item'
+  /user/{id}.json:
+    get:
+      tags:
+        - user
+      summary: Get user contributions
+      description: Users are identified by case-sensitive ids. Only users that have public activity (comments or story submissions) on the site are available through the API.
+      operationId: getUserById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: print
+          in: query
+          schema:
+            type: string
+            enum:
+              - pretty
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  /maxitem.json:
+    get:
+      tags:
+        - live
+      summary: Latest item
+      description: Get the current largest item id. You can walk backward from here to discover all items.
+      operationId: getLatestItem
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: integer
+  /{type}.json:
+    get:
+      tags:
+        - live
+      summary: Latest Ask, Show, and Job stories
+      description: Up to 200 of the latest Ask HN, Show HN, and Job stories.
+      operationId: getLatestItems
+      parameters:
+        - name: type
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - askstories
+              - showstories
+              - jobstories
+        - name: print
+          in: query
+          schema:
+            type: string
+            enum:
+              - pretty
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                description: Array of items ids.
+  /{topcategory}.json:
+    get:
+      tags:
+        - live
+      summary: Top stories, news and best stories
+      description: Up to 500 top and new stories (also contains jobs).
+      operationId: getTopItems
+      parameters:
+        - name: topcategory
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - topstories
+              - newstories
+              - beststories
+        - name: print
+          in: query
+          schema:
+            type: string
+            enum:
+              - pretty
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: integer
+                description: Array of items ids.
+  /updates.json:
+    get:
+      tags:
+        - live
+      summary: Updates
+      description: Get the item and profile changes
+      operationId: getUpdates
+      parameters:
+        - name: print
+          in: query
+          schema:
+            type: string
+            enum:
+              - pretty
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  items:
+                    type: array
+                    description: A list of items ids
+                    items:
+                      type: integer
+                  profiles:
+                    type: array
+                    description: A list of profile ids
+                    items:
+                      type: string
+components:
+  schemas:
+    Item:
+      type: object
+      properties:
+        by:
+          type: string
+          description: The username of the item's author.
+          example: dhouston
+        descendants:
+          type: integer
+          description: In the case of stories or polls, the total comment count.
+          example: 71
+        id:
+          type: integer
+          description: The item's unique id.
+          example: 8863
+        kids:
+          type: array
+          items:
+            type: integer
+          description: The ids of the item's comments, in ranked display order.
+          example: '[9224, 8917, 8952, 8958, 8884]'
+        score:
+          type: integer
+          description: The story's score, or the votes for a pollopt.
+          example: 104
+        time:
+          type: integer
+          description: Creation date of the item, in Unix Time.
+          example: 1175714200
+        title:
+          type: string
+          description: The title of the story, poll or job. HTML.
+          example: 'My YC app: Dropbox - Throw away your USB drive'
+        type:
+          type: string
+          description: The type of item. One of "job", "story", "comment", "poll", or "pollopt".
+          example: story
+        dead:
+          type: boolean
+          description: true if the item is dead.
+        parent:
+          type: integer
+          description: The comment's parent, either another comment or the relevant story.
+        poll:
+          type: string
+          description: The pollopt's associated poll.
+        url:
+          type: string
+          description: The URL of the story.
+          example: http://www.getdropbox.com/u/2/screencast.html
+    User:
+      type: object
+      properties:
+        about:
+          type: string
+          description: The user's optional self-description. HTML.
+          example: This is a test
+        created:
+          type: integer
+          description: Creation date of the user, in Unix Time.
+          example: 1173923446
+        delay:
+          type: integer
+          description: ''
+          example: 0
+        id:
+          type: string
+          description: The user's unique username. Case-sensitive.
+          example: jl
+        karma:
+          type: integer
+          description: The user's karma.
+          example: 2937
+        submitted:
+          type: array
+          items:
+            type: integer
+          description: List of the user's stories, polls and comments.
+          example: '[8265435, 8168423, 8090946, 8090326, 7699907, 7637962, 7596179, 7596163]'

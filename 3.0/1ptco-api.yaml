@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: 1pt.co API - OpenAPI 3.0
+  description: |-
+    The 1pt.co API is public so anyone can create a shortened URL
+  version: 1.0.0
+servers:
+- url: https://csclub.uwaterloo.ca/~phthakka/1pt-express
+paths:
+  /addURL:
+    post:
+      summary: Shorten url
+      description: Send a url and get it back shortened
+      operationId: shortURL
+      parameters:
+        - name: long
+          in: query
+          required: true
+          description: The long URL to shorten
+          schema:
+            type: string
+        - name: short
+          in: query
+          description: The part after 1pt.co/ that will redirect to your long URL. If this paramter is not provided or the requested short URL is already taken, it will return a random 5-letter string
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: Added!
+                  short:
+                    type: string
+                    example: lorem
+                  long:
+                    type: string
+                    example: https://www.param.me

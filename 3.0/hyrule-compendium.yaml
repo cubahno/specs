@@ -1,0 +1,97 @@
+openapi: 3.0.1
+info:
+  title: Hyrule Compendium API
+  description: |
+    An API serving data on all creatures, monsters, materials, equipment, and treasure in The Legend of Zelda: Breath of the Wild.
+
+  version: 1.0.1
+servers:
+  - url: https://botw-compendium.herokuapp.com/api/v2
+paths:
+  /entry/{entry}:
+    get:
+      summary: Get single entry
+      description: This endpoint is used for retrieving a specific entry, using it's name or ID. If you are using a name to search for an item, spaces are to be replaced with an underscore or "%20".
+      operationId: getEntry
+      parameters:
+        - name: entry
+          in: path
+          required: true
+          description: Name or id of entity
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /category/{category}:
+    get:
+      summary: Get all entries from category
+      description: This endpoint is used for retrieving all entries in a category.
+      operationId: getCategory
+      parameters:
+        - name: category
+          in: path
+          required: true
+          description: Name or id of entity
+          schema:
+            type: string
+            enum:
+              - creatures
+              - equipment
+              - materials
+              - monsters
+              - treasure
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /all:
+    get:
+      summary: Get everything
+      description: This endpoint is for retrieving all data.
+      operationId: getAll
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /master_mode/entry/{entry}:
+    get:
+      summary: Get single master entry
+      description: This endpoint retrieves data on a master mode exclusive entry, using it's name or ID. If you are using a name to search for an item, spaces are to be replaced with an underscore or "%20".
+      operationId: getMasterEntry
+      parameters:
+        - name: entry
+          in: path
+          required: true
+          description: Name or id of entity
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /master_mode/all:
+    get:
+      summary: Get everything master
+      description: This endpoint retrieves all data on master mode exclusive entries.
+      operationId: getMasterAll
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object

@@ -1,0 +1,479 @@
+openapi: 3.0.3
+info:
+  title: SpaceX API V4
+  version: 1.0.0
+  contact: {}
+  description: Open Source REST API for launch, rocket, core, capsule, starlink, launchpad, and landing pad data.
+servers:
+- url: https://api.spacexdata.com
+paths:
+  /v4/capsules:
+    get:
+      tags:
+      - Capsules
+      summary: Get all capsules
+      description: Get all capsules
+      operationId: getAllCapsules
+      responses:
+        '200':
+          description: ''
+  /v4/capsules/{capsuleID}:
+    get:
+      tags:
+      - Capsules
+      summary: Get one capsule
+      description: Get one capsule
+      operationId: getOneCapsule
+      parameters:
+        - in: path
+          name: capsuleID
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: ''
+  /v4/capsules/query:
+    post:
+      tags:
+      - Capsules
+      summary: Query capsules
+      description: Query capsules
+      operationId: queryCapsules
+      responses:
+        '200':
+          description: ''
+  /v4/company:
+    get:
+      tags:
+      - Company Info
+      summary: Get Company Info
+      description: Get Company Info
+      operationId: getCompanyInfo
+      responses:
+        '200':
+          description: ''
+  /v4/cores:
+    get:
+      tags:
+      - Cores
+      summary: Get all Cores
+      description: Get all Cores
+      operationId: getAllCores
+      responses:
+        '200':
+          description: ''
+  /v4/cores/{coreID}:
+    get:
+      tags:
+      - Cores
+      summary: Get one Core
+      description: Get one Core
+      operationId: getOneCore
+      parameters:
+        - in: path
+          name: coreID
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: ''
+  /v4/cores/query:
+    post:
+      tags:
+      - Cores
+      summary: Query Cores
+      description: Query Cores
+      operationId: queryCores
+      responses:
+        '200':
+          description: ''
+  /v4/crew:
+    get:
+      tags:
+      - Crew
+      summary: Get all Crew
+      description: Get all Crew
+      operationId: getAllCrew
+      responses:
+        '200':
+          description: ''
+  /v4/crew/{id}:
+    get:
+      tags:
+      - Crew
+      summary: Get one Crew Member
+      description: Get one Crew Member
+      operationId: getOneCrewMember
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: ''
+  /v4/crew/query:
+    post:
+      tags:
+      - Crew
+      summary: Query Crew Members
+      description: Query Crew Members
+      operationId: queryCrewMembers
+      responses:
+        '200':
+          description: ''
+  /v4/dragons:
+    get:
+      tags:
+      - Dragons
+      summary: Get all Dragons
+      description: Get all Dragons
+      operationId: getAllDragons
+      responses:
+        '200':
+          description: ''
+  /v4/dragons/{id}:
+    get:
+      tags:
+      - Dragons
+      summary: Get one Dragon
+      description: Get one Dragon
+      operationId: getOneDragon
+      parameters:
+        - in: path
+          name: id
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: ''
+  /v4/dragons/query:
+    post:
+      tags:
+      - Dragons
+      summary: Query Dragons
+      description: Query Dragons
+      operationId: queryDragons
+      responses:
+        '200':
+          description: ''
+  /v4/landpads:
+    get:
+      tags:
+      - Landpads
+      summary: Get all Landpads
+      description: Get all Landpads
+      operationId: getAllLandpads
+      responses:
+        '200':
+          description: ''
+  /v4/landpads/{id}:
+    get:
+      tags:
+      - Landpads
+      summary: Get one Landpad
+      description: Get one Landpad
+      operationId: getOneLandpad
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v4/landpads/query:
+    post:
+      tags:
+      - Landpads
+      summary: Query Landpads
+      description: Query Landpads
+      operationId: queryLandpads
+      responses:
+        '200':
+          description: ''
+  /v4/launches:
+    get:
+      tags:
+      - Launches
+      summary: Get all Launches
+      description: Get all Launches
+      operationId: getAllLaunches
+      responses:
+        '200':
+          description: ''
+  /v4/launches/{id}:
+    get:
+      tags:
+      - Launches
+      summary: Get one Launch
+      description: Get one Launch
+      operationId: getOneLaunch
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v4/launches/query:
+    post:
+      tags:
+      - Launches
+      summary: Query Launches
+      description: Query Launches
+      operationId: queryLaunches
+      responses:
+        '200':
+          description: ''
+  /v4/launches/past:
+    get:
+      tags:
+      - Launches
+      summary: Get past Launches
+      description: Get past Launches
+      operationId: getPastLaunches
+      responses:
+        '200':
+          description: ''
+  /v4/launches/upcoming:
+    get:
+      tags:
+      - Launches
+      summary: Get upcoming Launches
+      description: Get upcoming Launches
+      operationId: getUpcomingLaunches
+      responses:
+        '200':
+          description: ''
+  /v4/launches/latest:
+    get:
+      tags:
+      - Launches
+      summary: Get latest Launch
+      description: Get latest Launch
+      operationId: getLatestLaunch
+      responses:
+        '200':
+          description: ''
+  /v4/launches/next:
+    get:
+      tags:
+      - Launches
+      summary: Get next Launch
+      description: Get next Launch
+      operationId: getNextLaunch
+      responses:
+        '200':
+          description: ''
+  /v4/launchpads:
+    get:
+      tags:
+      - Launchpads
+      summary: Get all Launchpads
+      description: Get all Launchpads
+      operationId: getAllLaunchpads
+      responses:
+        '200':
+          description: ''
+  /v4/launchpads/{id}:
+    get:
+      tags:
+      - Launchpads
+      summary: Get one Launchpad
+      description: Get one Launchpad
+      operationId: getOneLaunchpad
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v4/launchpads/query:
+    post:
+      tags:
+      - Launchpads
+      summary: Query Launchpads
+      description: Query Launchpads
+      operationId: queryLaunchpads
+      responses:
+        '200':
+          description: ''
+  /v4/payloads:
+    get:
+      tags:
+      - Payloads
+      summary: Get all Payloads
+      description: Get all Payloads
+      operationId: getAllPayloads
+      responses:
+        '200':
+          description: ''
+  /v4/payloads/{id}:
+    get:
+      tags:
+      - Payloads
+      summary: Get one Payload
+      description: Get one Payload
+      operationId: getOnePayload
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v4/payloads/query:
+    post:
+      tags:
+      - Payloads
+      summary: Query Payloads
+      description: Query Payloads
+      operationId: queryPayloads
+      responses:
+        '200':
+          description: ''
+  /v4/roadster:
+    get:
+      tags:
+      - Roadster Info
+      summary: Get Roadster Info
+      description: Get Roadster Info
+      operationId: getRoadsterInfo
+      responses:
+        '200':
+          description: ''
+  /v4/rockets:
+    get:
+      tags:
+      - Rockets
+      summary: Get all Rockets
+      description: Get all Rockets
+      operationId: getAllRockets
+      responses:
+        '200':
+          description: ''
+  /v4/rockets/{id}:
+    get:
+      tags:
+      - Rockets
+      summary: Get one Rocket
+      description: Get one Rocket
+      operationId: getOneRocket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v4/rockets/query:
+    post:
+      tags:
+      - Rockets
+      summary: Query Rockets
+      description: Query Rockets
+      operationId: queryRockets
+      responses:
+        '200':
+          description: ''
+  /v4/ships:
+    get:
+      tags:
+      - Ships
+      summary: Get all Ships
+      description: Get all Ships
+      operationId: getAllShips
+      responses:
+        '200':
+          description: ''
+  /v4/ships/{id}:
+    get:
+      tags:
+      - Ships
+      summary: Get one Ship
+      description: Get one Ship
+      operationId: getOneShip
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v4/ships/query:
+    get:
+      tags:
+      - Ships
+      summary: Query Ships
+      description: Query Ships
+      operationId: queryShips
+      responses:
+        '200':
+          description: ''
+  /v4/starlink:
+    get:
+      tags:
+      - Starlink
+      summary: Get all Starlink sats
+      description: Get all Starlink sats
+      operationId: getAllStarlinkSats
+      responses:
+        '200':
+          description: ''
+  /v4/starlink/{id}:
+    get:
+      tags:
+      - Starlink
+      summary: Get one Starlink sat
+      description: Get one Starlink sat
+      operationId: getOneStarlinkSat
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: ''
+  /v4/starlink/query:
+    post:
+      tags:
+      - Starlink
+      summary: Query Starlink sats
+      description: Query Starlink sats
+      operationId: queryStarlinkSats
+      responses:
+        '200':
+          description: ''
+tags:
+- name: Capsules
+- name: Company Info
+- name: Cores
+- name: Crew
+- name: Dragons
+- name: Landpads
+- name: Launches
+- name: Launchpads
+- name: Payloads
+- name: Roadster Info
+- name: Rockets
+- name: Ships
+- name: Starlink

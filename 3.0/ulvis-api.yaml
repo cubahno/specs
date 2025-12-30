@@ -1,0 +1,157 @@
+openapi: 3.0.3
+info:
+  title: Ulvis - OpenAPI 3.0
+  description: |-
+    ulvis.net is a free Url Shortener API (free api without key). The shortened url can optionally be made private, protected by password, you can set an expiration data, or set a certain number of 'uses' after which the url will be inactive.
+  version: 1.0.0
+servers:
+- url: https://ulvis.net
+paths:
+  /API/write/get:
+    get:
+      summary: Send URL to be shortened
+      description: Send URL to be shortened
+      operationId: writeURL
+      parameters:
+        - name: url
+          in: query
+          required: true
+          description: The url you want to shrink
+          schema:
+            type: string
+        - name: custom
+          in: query
+          schema:
+            type: string
+          description: Optional custom name you want to give to the shortened url
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - json
+              - xml
+          description: Response format, default is 'json'
+        - name: private
+          in: query
+          schema:
+            type: string
+          description: Set url to private (not listed)
+        - name: password
+          in: query
+          schema:
+            type: string
+          description: Set url password, max 10 chars
+        - name: uses
+          in: query
+          schema:
+            type: integer
+          description: Number of uses for the short url, after which it will expire
+        - name: expire
+          in: query
+          schema:
+            type: string
+          description: date in format MM/DD/YYYY to expire url
+        - name: via
+          in: query
+          schema:
+            type: string
+          description: Adds a signature to track your application
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: the custom name given
+                        example: lorem
+                      url:
+                        type: string
+                        description: The shortened url
+                        example: https:\/\/ulvis.net\/lorem
+                      full:
+                        type: string
+                        description: The original url
+                        example: https:\/\/google.com\/
+  /API/read/get:
+    get:
+      summary:  Get details of shortened URL
+      description: Get details of shortened URL
+      operationId: readURL
+      parameters:
+        - name: id
+          in: query
+          required: true
+          description: The id given to the url in the "write" step
+          schema:
+            type: string
+        - name: password
+          in: query
+          schema:
+            type: string
+          description: password for url (if protected)
+        - name: type
+          in: query
+          schema:
+            type: string
+            enum:
+              - json
+              - xml
+          description: Response format, default is 'json'
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        description: the custom name given
+                        example: lorem
+                      uses:
+                        type: string
+                        description: Number of clicks left to inactivate url
+                      hits:
+                        type: string
+                        description: Number of hits to the link
+                        example: "0"
+                      ads:
+                        type: string
+                        description: Indicate if url use ads
+                        example: "1"
+                      url:
+                        type: string
+                        description: The shortened url
+                        example: https:\/\/ulvis.net\/lorem
+                      full:
+                        type: string
+                        description: The original url
+                        example: https:\/\/google.com\/
+                      created:
+                        type: integer
+                        description:
+                        example: 1682076954
+                      expire:
+                        type: string
+                        description: Timestamp to inactivate link
+                      last:
+                        type: string
+                        description: Timestamp for the last click

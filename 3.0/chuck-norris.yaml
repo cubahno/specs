@@ -1,0 +1,142 @@
+openapi: 3.0.3
+info:
+  title: Chuck Norris Facts and Jokes - OpenAPI 3.0
+  description: |-
+    A free JSON API for hand curated Chuck Norris facts.
+  termsOfService: http://swagger.io/terms/
+  contact:
+    email: apiteam@swagger.io
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.11
+externalDocs:
+  description: Find out more about Swagger
+  url: http://swagger.io
+servers:
+  - url: https://api.chucknorris.io
+tags:
+  - name: jokes
+paths:
+  /jokes/categories:
+    get:
+      tags:
+        - jokes
+      summary: Available categories.
+      description: Retrieve a list of available categories.
+      operationId: listCategories
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /jokes/random:
+    get:
+      tags:
+        - jokes
+      summary: Random joke
+      description: Get a random Chuck Norris joke. You can optionally filter by a category.
+      operationId: getRandom
+      parameters:
+        - name: category
+          in: query
+          description: You can get a list of possible values by using the `listCategories` endpoint.
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Joke'
+        '404':
+          description: Invalid category
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  timestamp:
+                    type: string
+                  status:
+                    type: integer
+                    example: 404
+                  error:
+                    type: string
+                    example: Not Found
+                  message:
+                    type: string
+                    example: No jokes for category x found.
+                  path:
+                    type: string
+                    example: /jokes/random
+  /jokes/search:
+    get:
+      tags:
+        - jokes
+      summary: Free text search
+      description: Search jokes
+      operationId: searchJokes
+      parameters:
+        - name: query
+          in: query
+          description: search text
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total:
+                    type: integer
+                    description: Number of returned results
+                  results:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Joke'
+        '400':
+          description: No query supplied
+        '404':
+          description: Joke not found
+components:
+  schemas:
+    Joke:
+      type: object
+      properties:
+        categories:
+          type: array
+          items:
+            type: string
+        created_at:
+          type: string
+          description: Time the joke were created in the database
+          example: 2020-01-05 13:42:19.576875
+        icon_url:
+          type: string
+        id:
+          type: string
+          description: Id of the joke
+          example: zk14uc6xr82d7ig9qhaymg
+        updated_at:
+          type: string
+          description: Time the joke were created in the database
+          example: 2020-01-05 13:42:19.576875
+        url:
+          type: string
+          example: https://api.chucknorris.io/jokes/zk14uc6xr82d7ig9qhaymg
+        value:
+          type: string
+          description: Text of the joke
+          example: Chuck Norris is actually the front man for Apple. He let's Steve Jobs run the show when he's on a mission. Chuck Norris is always on a mission.

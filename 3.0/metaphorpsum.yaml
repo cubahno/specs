@@ -1,0 +1,83 @@
+openapi: 3.0.1
+info:
+  title: Metaphorpsum API
+  description: |
+    Metaphorpsum is a wise – if perhaps slightly pedantic – generator of metaphor. It's an API to generate placeholder text to insert it in whatever software/webapp you want.
+
+    You can optionally have the returned paragraphs in the response enclosed in <p> html tags. Passing any value in the `p` parameter other than an empty string ensures the paragraphs are enclosed in a <p> tags.
+
+  version: 1.0.0
+servers:
+  - url: http://metaphorpsum.com
+paths:
+  /paragraphs/{numPar}:
+    get:
+      summary: Generate paragraphs
+      description: Generate a given number of paragraphs with a random number of sentences
+      operationId: makePars
+      parameters:
+        - name: numPar
+          in: path
+          required: true
+          description: number of paragraphs to generate, max 20
+          schema:
+            type: integer
+        - name: p
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string
+  /paragraphs/{numPar}/{numSent}:
+    get:
+      summary: Generate paragraphs with sentences
+      description: Generate a given number of paragraphs, each with a given number of sentences
+      operationId: makeParsWithSents
+      parameters:
+        - name: numPar
+          in: path
+          required: true
+          description: number of paragraphs to generate, max 20
+          schema:
+            type: integer
+        - name: numSent
+          in: path
+          required: true
+          description: number of sentences in each paragraph, max 50
+          schema:
+            type: integer
+        - name: p
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string
+  /sentences/{numSent}:
+    get:
+      summary: Generate sentences
+      description: Just grab a few sentences
+      operationId: makeSents
+      parameters:
+        - name: numSent
+          in: path
+          required: true
+          description: number of sentences to generate, max 50
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string

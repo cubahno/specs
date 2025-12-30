@@ -1,0 +1,146 @@
+openapi: 3.0.3
+info:
+  title: City Bikes API
+  description: |
+    Information about bike sharing networks.
+
+    You can use the `fields` parameter to choose the properties to return in the response
+  version: 2.0.1
+servers:
+  - url: http://api.citybik.es/v2
+paths:
+  /networks:
+    get:
+      summary: All networks
+      description: List all available networks, optionally filter the fields in the response
+      operationId: listNetworks
+      parameters:
+        - name: fields
+          description: "Options are: company, location, name, id, href."
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  networks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Network'
+  /networks/{network_id}:
+    get:
+      summary: Single network
+      description: Get the details of a single netwok by its id, optionally filter the fields in the response
+      operationId: getNetwork
+      parameters:
+        - name: network_id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: fields
+          description: "Options are: company, location, name, id, href, stations."
+          in: query
+          style: form
+          explode: false
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: 
+                  networks:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Network'
+        '404':
+          description: Network not found
+components:
+  schemas:
+    Network:
+      type: object
+      properties:
+        company:
+          type: array
+          description: All possible names of the company behind the network
+          items:
+            type: string
+          example: ["PBSC", "Serco Group plc"]
+        href:
+          type: string
+          description: API url of the network
+          example: /v2/networks/santander-cycles
+        id:
+          type: string
+          description: Unique identifier of the network
+          example: santander-cycles
+        location:
+          type: object
+          description: Location details
+          properties:
+            city:
+              type: string
+              example: London
+            country:
+              type: string
+              example: GB
+            latitude:
+              type: number
+              example: 51.51121389999999
+            longitude:
+              type: number
+              example: -0.1198244
+        name:
+          type: string
+          description: Network name
+          example: Santander Cycles
+        stations:
+          type: array
+          items:
+            $ref: '#/components/schemas/Station'
+    Station:
+      type: object
+      properties:
+        empty_slots:
+          type: integer
+          example: 31
+        extra:
+          type: object
+          description: Some extra info about the bike in the station
+        free_bikes:
+          type: integer
+          description: Number of available bikes at the station
+          example: 27
+        id:
+          type: string
+          description: Station id
+          example: a24c2bb9202ce90e84c472e04c28f360
+        latitude:
+          type: number
+          example: 51.51135
+        longitude:
+          type: number
+          example: -0.59156182
+        name:
+          type: string
+          description: Name of the station
+          example: 1 Slough Train Station
+        timestamp:
+          type: string
+          description: Last time data was available
+          example: 2022-09-06T06:03:13.967000Z

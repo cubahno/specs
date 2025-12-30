@@ -1,0 +1,745 @@
+openapi: 3.0.0
+servers:
+  - description: USGS Earthquake
+    url: https://earthquake.usgs.gov/fdsnws/event/1/
+info:
+  version: 1.0.0
+  title: usgs-earthquake
+  description: The API for the USGS Earthquake Program
+paths:
+  /application.json:
+    get:
+      summary: Get Application Information
+      operationId: application
+      description: Request known enumerated parameter values for the interface.
+      responses:
+        '200':
+          description: Application information
+          content:
+            application/xml:
+              schema:
+                $ref: '#/components/schemas/ApplicationResponse'
+  /catalogs:
+    get:
+      operationId: catalogs
+      description: request available catalogs
+      responses:
+        '200':
+          description: catalog information
+          content:
+            application/xml:
+              schema:
+                type: string
+  /contributors:
+    get:
+      operationId: contributors
+      description: request available contributors
+      responses:
+        '200':
+          description: contributors information
+          content:
+            application/json:
+              schema:
+                type: string
+  /count:
+    get:
+      summary: Get Count
+      operationId: count
+      description: 'to perform a count on a data request. Count uses the same parameters as the query method, and is available in these formats: plain text (default), geojson, and xml.'
+      parameters:
+        - in: query
+          name: format
+          description: format to return data
+          schema:
+            type: string
+            enum:
+              - geojson
+              - kml
+              - quakeml
+              - text
+              - xml
+            default: geojson
+        - in: query
+          name: endtime
+          description: End time, defaults to now. UTC time is implied unless offset is explicitly included.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: starttime
+          description: Start time, defaults to now - 30 days. UTC time is implied unless offset is explicitly included.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: updatedAfter
+          description: Limit to events updated after the specified time. UTC time is implied unless offset is explicitly included.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: minlatitude
+          description: 'Limit to events with a latitude larger than the specified minimum.NOTE: min values must be less than max values. Defualt is -90'
+          schema:
+            maximum: 90
+            minimum: -90
+            type: number
+        - description: 'Limit to events with a longitude larger than the specified minimum.NOTE: rectangles may cross the date line by using a minlongitude < -180 or maxlongitude> 180. NOTE: min values must be less than max values. Default is -180'
+          in: query
+          name: minlongitude
+          schema:
+            maximum: 360
+            minimum: -360
+            type: number
+        - description: 'Limit to events with a latitude smaller than the specified maximum. NOTE: min values must be less than max values. Default is 90'
+          in: query
+          name: maxlatitude
+          schema:
+            maximum: 90
+            minimum: -90
+            type: number
+        - description: 'Limit to events with a longitude smaller than the specified maximum. NOTE: rectangles may cross the date line by using a minlongitude < -180 or maxlongitude > 180. NOTE: min values must be less than max values. Default is 180'
+          in: query
+          name: maxlongitude
+          schema:
+            maximum: 360
+            minimum: -360
+            type: number
+        - description: Specify the latitude to be used for a radius search.
+          in: query
+          name: latitude
+          schema:
+            maximum: 90
+            minimum: -90
+            type: number
+        - description: Specify the longitude to be used for a radius search.
+          in: query
+          name: longitude
+          schema:
+            maximum: 180
+            minimum: -180
+            type: number
+        - description: 'Limit to events within the specified maximum number of degrees from the geographic point defined by the latitude and longitude parameters. NOTE: This option is mutually exclusive with maxradiuskm and specifying both will result in an error. Default is 180'
+          in: query
+          name: maxradius
+          schema:
+            type: number
+        - description: 'Limit to events within the specified maximum number of kilometers from the geographic point defined by the latitude and longitude parameters. NOTE: This option is mutually exclusive with maxradius and specifying both will result in an error.'
+          in: query
+          name: maxradiuskm
+          schema:
+            type: number
+        - description: 'Limit to events from a specified catalog. Use the Catalogs Method to find available catalogs. NOTE: when catalog and contributor are omitted, the most preferred information from any catalog or contributor for the event is returned.'
+          in: query
+          name: catalog
+          schema:
+            type: string
+        - description: 'Limit to events contributed by a specified contributor. Use the Contributors Method to find available contributors. NOTE: when catalog and contributor are omitted, the most preferred information from any catalog or contributor for the event is returned.'
+          in: query
+          name: contributor
+          schema:
+            type: string
+        - description: 'Select a specific event by ID; event identifiers are data center specific. NOTE: Selecting a specific event implies includeallorigins, includeallmagnitudes, and, additionally, associated moment tensor and focal-mechanisms are included.'
+          in: query
+          name: eventid
+          schema:
+            type: string
+        - description: 'Specify if all magnitudes for the event should be included, default is data center dependent but is suggested to be the preferred magnitude only. NOTE: because magnitudes and origins are strongly associated, this parameter is interchangeable with includeallmagnitudes'
+          in: query
+          name: includeallmagnitudes
+          schema:
+            type: boolean
+        - description: 'Specify if all origins for the event should be included, default is data center dependent but is suggested to be the preferred origin only. NOTE: because magnitudes and origins are strongly associated, this parameter is interchangable with includeallmagnitudes'
+          in: query
+          name: includeallorigins
+          schema:
+            type: boolean
+        - description: 'Specify if phase arrivals should be included. NOTE: NOT CURRENTLY IMPLEMENTED default is false'
+          in: query
+          name: includearrivals
+          schema:
+            type: boolean
+        - description: 'Specify if deleted products and events should be included. The value only returns only deleted events.Deleted events otherwise return the HTTP status 409 Conflict.  NOTE: Only supported by the csv and geojson formats, which include status. Default is false'
+          in: query
+          name: includedeleted
+          schema:
+            type: boolean
+        - description: 'Specify if superseded products should be included. This also includes all deleted products, and is mutually exclusive to the includedeleted parameter. NOTE: Only works when specifying eventid parameter.default is false'
+          in: query
+          name: includesuperseded
+          schema:
+            type: boolean
+        - description: 'Limit the results to the specified number of events. NOTE: The service= limits queries to 20000, and any that exceed this limit will generate a HTTP response code  Bad Request.'
+          in: query
+          name: limit
+          schema:
+            maximum: 20000
+            minimum: 1
+            type: integer
+        - description: Limit to events with depth less than the specified maximum.
+          in: query
+          name: maxdepth
+          schema:
+            type: number
+        - description: Limit to events with a magnitude smaller than the specified maximum.
+          in: query
+          name: maxmagnitude
+          schema:
+            type: number
+        - description: Limit to events with depth more than the specified minimum.
+          in: query
+          name: mindepth
+          schema:
+            type: number
+        - description: Limit to events with a magnitude larger than the specified minimum.
+          in: query
+          name: minmagnitude
+          schema:
+            type: number
+        - description: Return results starting at the event count specified, starting at 1.
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Order the results. Default is time.
+          in: query
+          name: orderby
+          schema:
+            type: string
+            enum:
+              - time
+              - time-asc
+              - magnitude
+              - magnitude-asc
+        - description: Limit to events with a specific PAGER alert level. Default is null.
+          in: query
+          name: alertlevel
+          schema:
+            type: string
+            enum:
+              - green
+              - yellow
+              - orange
+              - red
+        - description: 'Convert GeoJSON output to a JSONP response using this callback. Mime-type is javascript.Callback values are restricted to the characters [A-Za-z0-9\._]+  NOTE: Must be used with format=geojson'
+          in: query
+          name: callback
+          schema:
+            type: string
+        - description: 'Limit to events of a specific type. NOTE: earthquake will filter non-earthquake events.'
+          in: query
+          name: eventtype
+          schema:
+            type: string
+        - description: 'Request JSON(P) formatted output even on API error results. NOTE: Must be used with format=geojson'
+          in: query
+          name: jsonerror
+          schema:
+            type: boolean
+        - description: 'Whether to include timestamp in generated kml, for google earth animation support. NOTE: Must be used with format=kml'
+          in: query
+          name: kmlanimated
+          schema:
+            type: boolean
+        - description: How earthquakes are colored. Default is age.
+          in: query
+          name: kmlcolorby
+          schema:
+            type: string
+            enum:
+              - age
+              - depth
+        - description: Maximum value for Maximum Community Determined Intensity reported by DYFI.
+          in: query
+          name: maxcdi
+          schema:
+            maximum: 12
+            minimum: 0
+            type: number
+        - description: Limit to events with no more than this azimuthal gap.
+          in: query
+          name: maxgap
+          schema:
+            maximum: 360
+            minimum: 0
+            type: number
+        - description: Maximum value for Maximum Modified Mercalli Intensity reported by ShakeMap.
+          in: query
+          name: maxmmi
+          schema:
+            maximum: 12
+            minimum: 0
+            type: number
+        - description: Limit to events with no more than this significance.
+          in: query
+          name: maxsig
+          schema:
+            type: integer
+        - description: Minimum value for Maximum Community Determined Intensity reported by DYFI.
+          in: query
+          name: mincdi
+          schema:
+            type: number
+        - description: Limit to events with this many DYFI responses.
+          in: query
+          name: minfelt
+          schema:
+            type: integer
+        - description: Limit to events with no less than this azimuthal gap.
+          in: query
+          name: mingap
+          schema:
+            maximum: 360
+            minimum: 0
+            type: number
+        - description: Limit to events with no less than this significance.
+          in: query
+          name: minsig
+          schema:
+            type: integer
+        - description: Define the error code that will be returned when no data is found. Default is 204
+          in: query
+          name: nodata
+          schema:
+            type: integer
+        - description: Limit to events that have this type of product associated. Example producttypes:moment-tensor, focal-mechanism, shakemap, losspager dyfi
+          in: query
+          name: producttype
+          schema:
+            type: string
+        - description: Return the event that is associated with the productcode. The event will be returned even if the productcode is not the preferred code for the event. Example productcodes:nn00458749 at00ndf1fr
+          in: query
+          name: productcode
+          schema:
+            type: string
+        - description: 'Limit to events with a specific review status. The different review statuses are: reviewstatus=automatic Limit to events with review status "automatic". reviewstatus=reviewed Limit to events with review status "reviewed"'
+          in: query
+          name: reviewstatus
+          schema:
+            enum:
+              - automatic
+              - reviewed
+            type: string
+      responses:
+        '200':
+          description: catalog information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResponse'
+  /query:
+    get:
+      tags:
+        - Query
+      description: Query the USGS Earthquake Database
+      operationId: query
+      parameters:
+        - in: query
+          name: format
+          description: format to return data
+          schema:
+            type: string
+            enum:
+              - geojson
+              - kml
+              - quakeml
+              - text
+              - xml
+            default: geojson
+        - in: query
+          name: endtime
+          description: End time, defaults to now. UTC time is implied unless offset is explicitly included.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: starttime
+          description: Start time, defaults to now - 30 days. UTC time is implied unless offset is explicitly included.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: updatedAfter
+          description: Limit to events updated after the specified time. UTC time is implied unless offset is explicitly included.
+          schema:
+            type: string
+            format: date-time
+        - in: query
+          name: minlatitude
+          description: 'Limit to events with a latitude larger than the specified minimum.NOTE: min values must be less than max values. Defualt is -90'
+          schema:
+            maximum: 90
+            minimum: -90
+            type: number
+        - description: 'Limit to events with a longitude larger than the specified minimum.NOTE: rectangles may cross the date line by using a minlongitude < -180 or maxlongitude> 180. NOTE: min values must be less than max values. Default is -180'
+          in: query
+          name: minlongitude
+          schema:
+            maximum: 360
+            minimum: -360
+            type: number
+        - description: 'Limit to events with a latitude smaller than the specified maximum. NOTE: min values must be less than max values. Default is 90'
+          in: query
+          name: maxlatitude
+          schema:
+            maximum: 90
+            minimum: -90
+            type: number
+        - description: 'Limit to events with a longitude smaller than the specified maximum. NOTE: rectangles may cross the date line by using a minlongitude < -180 or maxlongitude > 180. NOTE: min values must be less than max values. Default is 180'
+          in: query
+          name: maxlongitude
+          schema:
+            maximum: 360
+            minimum: -360
+            type: number
+        - description: Specify the latitude to be used for a radius search.
+          in: query
+          name: latitude
+          schema:
+            maximum: 90
+            minimum: -90
+            type: number
+        - description: Specify the longitude to be used for a radius search.
+          in: query
+          name: longitude
+          schema:
+            maximum: 180
+            minimum: -180
+            type: number
+        - description: 'Limit to events within the specified maximum number of degrees from the geographic point defined by the latitude and longitude parameters. NOTE: This option is mutually exclusive with maxradiuskm and specifying both will result in an error. Default is 180'
+          in: query
+          name: maxradius
+          schema:
+            type: number
+        - description: 'Limit to events within the specified maximum number of kilometers from the geographic point defined by the latitude and longitude parameters. NOTE: This option is mutually exclusive with maxradius and specifying both will result in an error.'
+          in: query
+          name: maxradiuskm
+          schema:
+            type: number
+        - description: 'Limit to events from a specified catalog. Use the Catalogs Method to find available catalogs. NOTE: when catalog and contributor are omitted, the most preferred information from any catalog or contributor for the event is returned.'
+          in: query
+          name: catalog
+          schema:
+            type: string
+        - description: 'Limit to events contributed by a specified contributor. Use the Contributors Method to find available contributors. NOTE: when catalog and contributor are omitted, the most preferred information from any catalog or contributor for the event is returned.'
+          in: query
+          name: contributor
+          schema:
+            type: string
+        - description: 'Select a specific event by ID; event identifiers are data center specific. NOTE: Selecting a specific event implies includeallorigins, includeallmagnitudes, and, additionally, associated moment tensor and focal-mechanisms are included.'
+          in: query
+          name: eventid
+          schema:
+            type: string
+        - description: 'Specify if all magnitudes for the event should be included, default is data center dependent but is suggested to be the preferred magnitude only. NOTE: because magnitudes and origins are strongly associated, this parameter is interchangeable with includeallmagnitudes'
+          in: query
+          name: includeallmagnitudes
+          schema:
+            type: boolean
+        - description: 'Specify if all origins for the event should be included, default is data center dependent but is suggested to be the preferred origin only. NOTE: because magnitudes and origins are strongly associated, this parameter is interchangable with includeallmagnitudes'
+          in: query
+          name: includeallorigins
+          schema:
+            type: boolean
+        - description: 'Specify if phase arrivals should be included. NOTE: NOT CURRENTLY IMPLEMENTED default is false'
+          in: query
+          name: includearrivals
+          schema:
+            type: boolean
+        - description: 'Specify if deleted products and events should be included. The value only returns only deleted events.Deleted events otherwise return the HTTP status 409 Conflict.  NOTE: Only supported by the csv and geojson formats, which include status. Default is false'
+          in: query
+          name: includedeleted
+          schema:
+            type: boolean
+        - description: 'Specify if superseded products should be included. This also includes all deleted products, and is mutually exclusive to the includedeleted parameter. NOTE: Only works when specifying eventid parameter.default is false'
+          in: query
+          name: includesuperseded
+          schema:
+            type: boolean
+        - description: 'Limit the results to the specified number of events. NOTE: The service= limits queries to 20000, and any that exceed this limit will generate a HTTP response code  Bad Request.'
+          in: query
+          name: limit
+          schema:
+            maximum: 20000
+            minimum: 1
+            type: integer
+        - description: Limit to events with depth less than the specified maximum.
+          in: query
+          name: maxdepth
+          schema:
+            type: number
+        - description: Limit to events with a magnitude smaller than the specified maximum.
+          in: query
+          name: maxmagnitude
+          schema:
+            type: number
+        - description: Limit to events with depth more than the specified minimum.
+          in: query
+          name: mindepth
+          schema:
+            type: number
+        - description: Limit to events with a magnitude larger than the specified minimum.
+          in: query
+          name: minmagnitude
+          schema:
+            type: number
+        - description: Return results starting at the event count specified, starting at 1.
+          in: query
+          name: offset
+          schema:
+            type: integer
+        - description: Order the results. Default is time.
+          in: query
+          name: orderby
+          schema:
+            type: string
+            enum:
+              - time
+              - time-asc
+              - magnitude
+              - magnitude-asc
+        - description: Limit to events with a specific PAGER alert level. Default is null.
+          in: query
+          name: alertlevel
+          schema:
+            type: string
+            enum:
+              - green
+              - yellow
+              - orange
+              - red
+        - description: 'Convert GeoJSON output to a JSONP response using this callback. Mime-type is javascript.Callback values are restricted to the characters [A-Za-z0-9\._]+  NOTE: Must be used with format=geojson'
+          in: query
+          name: callback
+          schema:
+            type: string
+        - description: 'Limit to events of a specific type. NOTE: earthquake will filter non-earthquake events.'
+          in: query
+          name: eventtype
+          schema:
+            type: string
+        - description: 'Request JSON(P) formatted output even on API error results. NOTE: Must be used with format=geojson'
+          in: query
+          name: jsonerror
+          schema:
+            type: boolean
+        - description: 'Whether to include timestamp in generated kml, for google earth animation support. NOTE: Must be used with format=kml'
+          in: query
+          name: kmlanimated
+          schema:
+            type: boolean
+        - description: How earthquakes are colored. Default is age.
+          in: query
+          name: kmlcolorby
+          schema:
+            type: string
+            enum:
+              - age
+              - depth
+        - description: Maximum value for Maximum Community Determined Intensity reported by DYFI.
+          in: query
+          name: maxcdi
+          schema:
+            maximum: 12
+            minimum: 0
+            type: number
+        - description: Limit to events with no more than this azimuthal gap.
+          in: query
+          name: maxgap
+          schema:
+            maximum: 360
+            minimum: 0
+            type: number
+        - description: Maximum value for Maximum Modified Mercalli Intensity reported by ShakeMap.
+          in: query
+          name: maxmmi
+          schema:
+            maximum: 12
+            minimum: 0
+            type: number
+        - description: Limit to events with no more than this significance.
+          in: query
+          name: maxsig
+          schema:
+            type: integer
+        - description: Minimum value for Maximum Community Determined Intensity reported by DYFI.
+          in: query
+          name: mincdi
+          schema:
+            type: number
+        - description: Limit to events with this many DYFI responses.
+          in: query
+          name: minfelt
+          schema:
+            type: integer
+        - description: Limit to events with no less than this azimuthal gap.
+          in: query
+          name: mingap
+          schema:
+            maximum: 360
+            minimum: 0
+            type: number
+        - description: Limit to events with no less than this significance.
+          in: query
+          name: minsig
+          schema:
+            type: integer
+        - description: Define the error code that will be returned when no data is found. Default is 204
+          in: query
+          name: nodata
+          schema:
+            type: integer
+        - description: Limit to events that have this type of product associated. Example producttypes:moment-tensor, focal-mechanism, shakemap, losspager dyfi
+          in: query
+          name: producttype
+          schema:
+            type: string
+        - description: Return the event that is associated with the productcode. The event will be returned even if the productcode is not the preferred code for the event. Example productcodes:nn00458749 at00ndf1fr
+          in: query
+          name: productcode
+          schema:
+            type: string
+        - description: 'Limit to events with a specific review status. The different review statuses are: reviewstatus=automatic Limit to events with review status "automatic". reviewstatus=reviewed Limit to events with review status "reviewed"'
+          in: query
+          name: reviewstatus
+          schema:
+            enum:
+              - automatic
+              - reviewed
+            type: string
+      responses:
+        '200':
+          description: Earthquakes
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/QueryResponse'
+components:
+  schemas:
+    QueryResponse:
+      type: object
+      properties:
+        type:
+          type: string
+        metadata:
+          type: object
+          properties:
+            generated:
+              type: integer
+            url:
+              type: string
+            title:
+              type: string
+            status:
+              type: integer
+            api:
+              type: string
+            limit:
+              type: integer
+            offset:
+              type: integer
+            count:
+              type: integer
+        features:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              properties:
+                type: object
+                properties:
+                  mag:
+                    type: number
+                  place:
+                    type: string
+                  time:
+                    type: integer
+                  updated:
+                    type: integer
+                  tz:
+                    type: string
+                  url:
+                    type: string
+                  detail:
+                    type: string
+                  felt:
+                    type: string
+                  cdi:
+                    type: string
+                  mmi:
+                    type: string
+                  alert:
+                    type: string
+                  status:
+                    type: string
+                  tsunami:
+                    type: integer
+                  sig:
+                    type: integer
+                  net:
+                    type: string
+                  code:
+                    type: string
+                  ids:
+                    type: string
+                  sources:
+                    type: string
+                  types:
+                    type: string
+                  nst:
+                    type: integer
+                  dmin:
+                    type: number
+                  rms:
+                    type: number
+                  gap:
+                    type: integer
+                  magType:
+                    type: string
+                  type:
+                    type: string
+                  title:
+                    type: string
+              geometry:
+                type: object
+                properties:
+                  type:
+                    type: string
+                  coordinates:
+                    type: array
+                    items:
+                      type: number
+              id:
+                type: string
+    CountResponse:
+      type: object
+      properties:
+        count:
+          type: integer
+        maxAllowed:
+          type: integer
+    ApplicationResponse:
+      type: object
+      properties:
+        catalogs:
+          type: array
+          items:
+            type: string
+        contributors:
+          type: array
+          items:
+            type: string
+        producttypes:
+          type: array
+          items:
+            type: string
+        eventtypes:
+          type: array
+          items:
+            type: string
+        magnitudetypes:
+          type: array
+          items:
+            type: string

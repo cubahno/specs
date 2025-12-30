@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: Open Notify API
+  version: 1.0.0
+  description: This API provides data about the current location of the ISS and the number of people in space right now.
+
+servers:
+  - url: http://api.open-notify.org
+
+paths:
+  /iss-now.json:
+    get:
+      summary: ISS location
+      description: Get the current location of the ISS
+      operationId: getISSLocation
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  iss_position:
+                    type: object
+                    properties:
+                      latitude:
+                        type: string
+                        example: -30.3198
+                      longitude:
+                        type: string
+                        example: -126.1922
+                  message:
+                    type: string
+                    example: success
+                  timestamp:
+                    type: integer
+                    example: 1681388681
+  /astros.json:
+    get:
+      summary: Number of people in space
+      description: Get the number of people currently in space
+      operationId: getNumPeople
+      responses:
+        200:
+          description: Success response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: success
+                  number:
+                    type: integer
+                    example: 10
+                    description: total number of people in space
+                  people:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Person'
+components:
+  schemas:
+    Person:
+      type: object
+      properties:
+        craft:
+          type: string
+          example: ISS
+          description: The spacecraft the person is currently occupying
+        name:
+          type: string
+          example: Frank Rubio
+          description: Name of the person

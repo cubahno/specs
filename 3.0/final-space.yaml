@@ -1,0 +1,322 @@
+openapi: 3.0.1
+info:
+  title: Final Space API
+  description: |
+    The Final Space API is based on the television show Final Space by Olan Rogers from TBS.
+
+    The `sort` parameter can be used to sort the response list by id. The `limit` parameter can be used to limit the number of results.
+  version: 1.0.0
+servers:
+  - url: https://finalspaceapi.com/api/v0
+paths:
+  /character:
+    get:
+      tags:
+        - character
+      summary: All characters
+      description: List all characters
+      operationId: listCharacters
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Character'
+  /character/{id}:
+    get:
+      tags:
+        - character
+      summary: Single character
+      description: Get a single character by id
+      operationId: getCharacterById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Character'
+  /episode:
+    get:
+      tags:
+        - episode
+      summary: All episodes
+      description: List all episodes
+      operationId: listEpisodes
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Episode'
+  /episode/{id}:
+    get:
+      tags:
+        - episode
+      summary: Single episode
+      description: Get a single episode by id
+      operationId: getEpisodeById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Episode'
+  /location:
+    get:
+      tags:
+        - location
+      summary: All locations
+      description: List all locations
+      operationId: listLocations
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Location'
+  /location/{id}:
+    get:
+      tags:
+        - location
+      summary: Single location
+      description: Get a single location by id
+      operationId: getLocationById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Location'
+  /quote:
+    get:
+      tags:
+        - quote
+      summary: All quotes
+      description: List all quotes
+      operationId: listQuotes
+      parameters:
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum:
+              - asc
+              - desc
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+components:
+  schemas:
+    Character:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The id of the character (starting from 1)
+          example: 5
+        name:
+          type: string
+          description: The name of the character
+          example: Avocato
+        status:
+          type: string
+          description: The status of the character
+          example: Alive
+        species:
+          type: string
+          description: The species of the character
+          example: Ventrexian
+        gender:
+          type: string
+          description: The gender of the character
+          example: Male
+        hair:
+          type: string
+          description: The hair color of the character
+          example: Dark Teal / White
+        alias:
+          type: array
+          items:
+            type: string
+          description: Different names of character
+          example: ["General Avocato", "Mr. Whiskers (by Gary)", "Cat Guy (by Gary)", "Dad (by Little Cato)", "My Boyfriend (by Gary)", "Furry Fantasy Dad Guy (by Biskit)", "Daddy-O (by Little Cato)", "Pops (by Little Cato)", "Ventrexian Filth (by Ash)"]
+        origin:
+          type: string
+          description: Name of the character's origin location
+          example: Ventrexia
+        abilities:
+          type: array
+          items:
+            type: string
+          description: Different abilities of character
+          example: ["Marksmanship", "Surgery", "Combat prowess"]
+        img_url:
+          type: string
+          description: Link to the character's image. (300x300)
+          example: https://finalspaceapi.com/api/character/avatar/avocato.jpg
+    Episode:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The id of the episode (starting from 1)
+          example: 1
+        name:
+          type: string
+          description: The name of the episode.
+          example: Chapter 1
+        air_date:
+          type: string
+          description: The air date of the episode.
+          example: 02/15/2018
+        director:
+          type: string
+          description: The director of the episode.
+          example: Mike Roberts
+        writer:
+          type: string
+          description: The writer of the episode.
+          example: Olan Rogers
+        characters:
+          type: array
+          items:
+            type: string
+          description: Different characters of the episode.
+          example: ["https://finalspaceapi.com/api/v0/character/1", "https://finalspaceapi.com/api/v0/character/2",
+            "https://finalspaceapi.com/api/v0/character/3", "https://finalspaceapi.com/api/v0/character/5",
+            "https://finalspaceapi.com/api/v0/character/6", "https://finalspaceapi.com/api/v0/character/9",
+            "https://finalspaceapi.com/api/v0/character/11"]
+        img_url:
+          type: string
+          description: Link to the episode's image. (640x480)
+          example: http://finalspaceapi.com/episode/image/chapter1.jpg
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The id of the location (starting from 1).
+          example: 1
+        name:
+          type: string
+          description: The name of the location.
+          example: Earth
+        type:
+          type: string
+          description: The type of the location.
+          example: Planet
+        inhabitants:
+          type: array
+          items:
+            type: string
+          description: Inhabitants of the location.
+          example: ["Humans", "Animals", "Robots", "Aliens"]
+        notable_residents:
+          type: array
+          items:
+            type: string
+          description: Notable residents(if any).
+          example: ["https://finalspaceapi.com/api/v0/character/1", "https://finalspaceapi.com/api/v0/character/3"]
+        img_url:
+          type: string
+          description: Image of the location. (400x300)
+          example: https://finalspaceapi.com/api/location/image/earth.jpg
+    Quote:
+      type: object
+      properties:
+        id:
+          type: integer
+          description: The id of the quote (starting from 1).
+          example: 1
+        quote:
+          type: string
+          description: Quote from Final Space.
+          example: "How about fricken' no?!"
+        by:
+          type: string
+          description: Character who said the Quote.
+          example: Gary Goodspeed
+        character:
+          type: string
+          description: URL to Character endpoint.
+          example: https://finalspaceapi.com/api/v0/character/1
+        image:
+          type: string
+          description: Image of the Charater.
+          example: https://finalspaceapi.com/api/character/avatar/gary_goodspeed.jpg

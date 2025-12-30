@@ -1,0 +1,149 @@
+openapi: 3.0.1
+info:
+  title: Disify API
+  description: |
+    EmojiHub provides an opportunity to get random emojis from already sorted categories and groups. You can also get a whole list of emojis by a certain category, group, or get the entire emoji database consisting of 1791 objects.
+
+    Here's a coprehinseve list of all categories and groups:
+      - The 'smileys-and-people' category has the following groups: 'body', 'cat-face', 'clothing', 'creature-face', 'emotion', 'face-negative', 'face-neutral', 'face-positive', 'face-role', 'face-sick', 'family', 'monkey-face', 'person', 'person-activity', 'person-gesture', 'person-role', 'skin-tone'.
+      - The 'animals-and-nature' category has the following groups: 'animal-amphibian', 'animal-bird', 'animal-bug', 'animal-mammal', 'animal-marine', 'animal-reptile', 'plant-flower', 'plant-other'.
+      - The 'food-and-drink' category has the following groups: 'dishware', 'drink', 'food-asian', 'food-fruit', 'food-prepared', 'food-sweat', 'food-vegetable'.
+      - The 'travel-and-places' has one group: 'travel-and-places'.
+      - The 'activities' category has one group: 'activities'.
+      - The 'objects' category has one group: 'objects'.
+      - The 'symbols' category has one group: 'symbols'.
+      - The 'flags' category has one group: 'flags'.
+  version: 1.0.0
+servers:
+  - url: https://emojihub.yurace.pro/api
+paths:
+  /random:
+    get:
+      summary: Random emoji
+      description: Get a single random emoji
+      operationId: getRandom
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Emoji'
+  /all:
+    get:
+      summary: All emojis
+      description: List all emojies in database
+      operationId: listAll
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Emoji'
+  /random/category/{category}:
+    get:
+      summary: Random from category
+      description: Get a random emoji from a certain category
+      operationId: getRandomFromCategory
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Emoji'
+  /all/category/{category}:
+    get:
+      summary: All from category
+      description: Get all emojis from a certain category
+      operationId: listAllInCategory
+      parameters:
+        - name: category
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Emoji'
+  /random/group/{group}:
+    get:
+      summary: Random from group
+      description: Get a random emoji from a certain group
+      operationId: getRandomFromGroup
+      parameters:
+        - name: group
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Emoji'
+  /all/group/{group}:
+    get:
+      summary: All from group
+      description: Get all emojis from a certain group
+      operationId: listAllInGroup
+      parameters:
+        - name: group
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Emoji'
+components:
+  schemas:
+    Emoji:
+      type: object
+      properties:
+        name:
+          type: string
+          example: ox
+        category:
+          type: string
+          example: animals and nature
+        group:
+          type: string
+          example: animal mammal
+        htmlCode:
+          type: array
+          items:
+            type: string
+          example: ["&#128002;"]
+        unicode:
+          type: array
+          items:
+            type: string
+          example: ["U+1F402"]

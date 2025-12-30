@@ -795,4 +795,3 @@ securityDefinitions:
       admin: Admin scope
       user: User scope
     type: apiKey
-swagger: "2.0"

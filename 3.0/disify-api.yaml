@@ -1,0 +1,117 @@
+openapi: 3.0.1
+info:
+  title: Disify API
+  description: DISIFY is free email validation API which also includes validation for disposable (DEA) or temporary email addresses.
+  version: 1.0.0
+servers:
+  - url: https://www.disify.com/api
+paths:
+  /email/{address}:
+    get:
+      summary: Single email address
+      description: Validate and verify single email address.
+      operationId: singleEmail
+      parameters:
+        - name: address
+          in: path
+          required: true
+          description: Email address to validate
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /email/{email_list}/mass:
+    get:
+      summary: Mass email Check
+      description: Validate and verify bulk of email addresses
+      operationId: massEmail
+      parameters:
+        - name: email_list
+          in: path
+          required: true
+          description: a comma delimited list of email address to validate
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+  /domain/{domain_list}/mass:
+    get:
+      summary: Mass domain Check
+      description: Validate and verify bulk of domains
+      operationId: massDomain
+      parameters:
+        - name: domain_list
+          in: path
+          required: true
+          description: a comma delimited list of domains to validate
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Session'
+  /view/{session}:
+    get:
+      summary: Retireve previoulsy validate items
+      description: Retrieve previoulsy validated emails or domains via session id
+      operationId: getSession
+      parameters:
+        - name: session
+          in: path
+          required: true
+          description: Session id that was returned in a previous mass request
+          schema:
+            type: string
+      responses:
+          '200':
+            description: Success
+            content:
+              application/text:
+                schema:
+                  type: string
+components:
+  schemas:
+    Session:
+      type: object
+      properties:
+        total:
+          type: integer
+          description: Number of items in provided list
+          example: 2
+        invalid_format:
+          type: integer
+          description: How many items had invalid format
+          example: 0
+        invalid_dns:
+          type: integer
+          description: How many items had invlalid DNS records
+          example: 0
+        disposable:
+          type: integer
+          description: How may items represnted disposable email addresses.
+          example: 1
+        unique:
+          type: integer
+          description: How many unique items passed
+          example: 2
+        valid:
+          type: integer
+          description: How many valid items passed.
+          example: 1
+        session:
+          type: string
+          description: A unique id to identify the session so that invalid items can be retireved later
+          example: 5ea961286ff3344c44701de7ed080d12

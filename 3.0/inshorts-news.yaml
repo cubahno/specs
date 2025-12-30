@@ -1,0 +1,87 @@
+openapi: 3.0.1
+info:
+  title: InShorts News API
+  description: |
+    This API is capable of fetching news contents from various sources as gathered by Inshorts app.
+
+    This API supports category-wise news. Here is a complete list of all categories.
+    - all
+    - national (Indian News only)
+    - business
+    - sports
+    - world
+    - politics
+    - technology
+    - startup
+    - entertainment
+    - miscellaneous
+    - hatke
+    - science
+    - automobile
+  version: 1.0.0
+servers:
+  - url: https://inshorts.deta.dev
+paths:
+  /news:
+    get:
+      summary: Get news category
+      description: Get all short news stories in this category
+      operationId: getCategory
+      parameters:
+        - name: category
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    description: News stories category
+                    example: sports
+                  date:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Story'
+                  success:
+                    type: boolean
+                    description: Set to 'true' if no errors occurred
+                    example: true
+components:
+  schemas:
+    Story:
+      type: object
+      properties:
+        author:
+          type: string
+          example: Anmol Sharma
+        content:
+          type: string
+          example: During the toss ahead of LSG-CSK IPL 2023 match, cricketer-turned-commentator Danny Morrison asked MS Dhoni how he is enjoying his "last" IPL. Dhoni responded, "Well, you have decided that it is my last." Morrison then proceeded by telling the crowd that Dhoni "will be coming back" next year.
+        date:
+          type: string
+          example: 03 May 2023,Wednesday
+        id:
+          type: string
+          example: 4700994607f34987be04043d590dcafb
+        imageUrl:
+          type: string
+          example: https://static.inshorts.com/inshorts/images/v1/variants/jpg/m/2023/05_may/3_wed/img_1683109180453_597.jpg?
+        readMoreUrl:
+          type: string
+          example: https://twitter.com/mufaddal_vohra/status/1653702155839340546?utm_campaign=fullarticle&utm_medium=referral&utm_source=inshorts
+        time:
+          type: string
+          example: 04:04 pm
+        title:
+          type: string
+          example: "You have decided it's my last: Dhoni to Morrison asking how he's enjoying his \"last\" IPL"
+        url:
+          type: string
+          example: https://www.inshorts.com/en/news/you-have-decided-its-my-last-dhoni-to-morrison-asking-how-hes-enjoying-his-last-ipl-1683110081455

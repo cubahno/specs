@@ -1,0 +1,54 @@
+openapi: 3.0.3
+info:
+  title: Lucifer Quotes - OpenAPI 3.0
+  description: |-
+    A simple API to retrieve some quotes of Lucifer, shawty!
+  version: 1.0.0
+servers:
+- url: https://lucifer-quotes.vercel.app/api
+paths:
+  /quotes:
+    get:
+      summary: Random quote
+      description: Get a random quote
+      operationId: getRandom
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+  /quotes/{number}:
+    get:
+      summary: A given number of quotes
+      description: Return the given number of quotes
+      operationId: getNumber
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Quote'
+components:
+  schemas:
+    Quote:
+      type: object
+      properties:
+        quote:
+          type: string
+          description: Text of the quote
+        author:
+          type: string
+          description: Name of the character who said the quote on the show

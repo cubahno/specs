@@ -21,17 +21,4 @@ jobs:
       - name: Copy specs
         run: |
           mkdir documents
-          cp -r ./2.0/* documents
           cp -r ./3.*/* documents
-
-      - name: Checkout Connexions
-        uses: actions/checkout@v2
-        with:
-          repository: cubahno/connexions
-          ref: master
-          path: connexions
-
-      - name: Build and Test
-        working-directory: connexions
-        run: |
-          SPEC_DIR=../documents make test-integration

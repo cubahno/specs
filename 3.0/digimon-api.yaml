@@ -1,0 +1,77 @@
+openapi: 3.0.1
+info:
+  title: Digimon API
+  description: A simple API to retrieve information about Digimons
+  version: 1.0.0
+servers:
+  - url: https://digimon-api.vercel.app/api
+paths:
+  /digimon:
+    get:
+      summary: All digimons
+      description: Returns an array of all Digimons in our database.
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Digimon'
+  /digimon/name/{name}:
+    get:
+      summary: Single digimon
+      description: Gets a single digimon by its name
+      parameters:
+        - name: name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Digimon'
+  /digimon/level/{level}:
+    get:
+      summary: Search by level
+      description: Returns an array of Digimons based on their level.
+      parameters:
+        - name: level
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Digimon'
+components:
+  schemas:
+    Digimon:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Digimon name
+          example: Koromon
+        img:
+          type: string
+          description: Link to digimon's picture
+          example: https://digimon.shadowsmith.com/img/koromon.jpg
+        level:
+          type: string
+          description: Digimon level.
+          example: In Training
+        

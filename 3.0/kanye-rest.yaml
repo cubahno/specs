@@ -1,0 +1,26 @@
+openapi: 3.0.1
+info:
+  title: Kanye REST API
+  description: |
+    A free REST API for random Kanye West quotes (Kanye as a Service)
+
+  version: 1.0.0
+servers:
+  - url: https://api.kanye.rest
+paths:
+  /:
+    get:
+      summary: Random quote
+      description: Get a random Kanye West quote
+      operationId: getRandom
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  quote:
+                    type: string
+                    description: Text of the quote

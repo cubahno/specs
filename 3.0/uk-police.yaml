@@ -1,0 +1,809 @@
+openapi: 3.0.3
+info:
+  title: UK Police - OpenAPI 3.0
+  description: |-
+    The API provides a rich data source for information related to UK Police activities.
+
+    ### Parameters:
+      - The `date` parameter takes date in the format (YYYY-MM). It limits results to a specific month. The latest month will be shown by default if omitted.
+      - The `poly` parameter takes lat/lng pairs which define the boundary of the custom area in this format '[lat],[lng]:[lat],[lng]:[lat],[lng]'. The first and last coordinates need not be the same. If a custom area contains more than 10,000 crimes, the API will return a 503 status code.
+      - Crimes, stop-andsearches, and outcomes are mapped to specific locations on the map. Valid IDs are returned by some methods which return location information. Use these ids for `location_id` parameter.
+  version: 1.0.11
+servers:
+  - url: https://data.police.uk/api
+tags:
+  - name: Force
+  - name: Crime
+  - name: Neighbourhood
+  - name: Stop and search
+paths:
+  /crimes-street-dates:
+    get:
+      summary: Data availability
+      description: Get the latest dates where data is available for each jurisdiction
+      operationId: availability
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    date:
+                      type: string
+                      example: 2023-02
+                    stop-and-search:
+                      type: array
+                      items:
+                        type: string
+                      example: ["bedfordshire", "btp", "cambridgeshire"]
+  /forces:
+    get:
+      tags:
+        - Force
+      summary: List forces
+      description: A list of all the police forces available via the API except the British Transport Police
+      operationId: listForces
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: avon-and-somerset
+                    name:
+                      type: string
+                      example: Avon and Somerset Constabulary
+  /forces/{id}:
+    get:
+      tags:
+        - Force
+      summary: Get single force
+      description: Get a single force by id
+      operationId: getForceById
+      parameters:
+        - name: id
+          in: path
+          description: force id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  description:
+                    type: string
+                  url:
+                    type: string
+                    description: website of the specific force
+                  engagement_methods:
+                    type: array
+                    description: different methods for engagin with the specific police force
+                    items:
+                      type: object
+                  telephone:
+                    type: string
+                    example: 101
+                  id:
+                    type: string
+                    example: leicestershire
+                  name:
+                    type: string
+                    example: Leicestershire Police
+        '404':
+          description: Force not found
+  /forces/{id}/people:
+    get:
+      tags:
+        - Force
+      summary: List senior officers
+      description: List senior officers of a specific police force
+      operationId: listSeniors
+      parameters:
+        - name: id
+          in: path
+          description: force id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Officer'
+  /crime-categories:
+    get:
+      tags:
+        - Crime
+      summary: Crime categories list
+      description: Returns a list of valid categories for a given dataset date
+      operationId: listCrimeCats
+      parameters:
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    url:
+                      type: string
+                      description: Unique identifier of the category
+                      example: bicycle-theft
+                    name:
+                      type: string
+                      description: Name of the category
+                      example: Bicycle theft
+  /crimes-street/{category}:
+    get:
+      tags:
+        - Crime
+      summary: Street-level crimes
+      description: Crimes at street-level; either within a 1 mile radius of a single point, or within a custom area
+      operationId: getCrimesInArea
+      parameters:
+        - name: category
+          in: path
+          description: category of the crime
+          required: true
+          schema:
+            type: string
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: poly
+          in: query
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Crime'
+        '404':
+          description: Not found
+  /outcomes-at-location:
+    get:
+      tags:
+        - Crime
+      summary: Outcomes in certian area
+      description: Outcomes at street-level; either at a specific location, within a 1 mile radius of a single point, or within a custom area.
+      operationId: getOutcomesInArea
+      parameters:
+        - name: location_id
+          in: query
+          schema:
+            type: integer
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: poly
+          in: query
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    category:
+                      type: object
+                      description: Outcome category
+                      properties:
+                        code:
+                          type: string
+                          example: no-further-action
+                        name:
+                          type: string
+                          example: Investigation complete; no suspect identified
+                    date:
+                      type: string
+                      description: date of the outcome
+                    person_id:
+                      type: integer
+                      description: An identifier for the suspect/offender, where available.
+                    crime:
+                      $ref: '#/components/schemas/Crime'
+  /crimes-at-location:
+    get:
+      tags:
+        - Crime
+      summary: Crimes at specific location
+      description: Returns just the crimes which occurred at the specified location, rather than those within a radius. If given latitude and longitude, finds the nearest pre-defined location and returns the crimes which occurred there.
+      operationId: getCrimesByLocation
+      parameters:
+        - name: location_id
+          in: query
+          schema:
+            type: integer
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Crime'
+        '404':
+          description: Not found
+  /crimes-no-location:
+    get:
+      tags:
+        - Crime
+      summary: Crimes with no location
+      description: Returns a list of crimes that could not be mapped to a location
+      operationId: getCrimesNoLocation
+      parameters:
+        - name: category
+          in: query
+          description: crime category
+          schema:
+            type: string
+        - name: force
+          in: query
+          description: force id
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Crime'
+        '404':
+          description: Not found
+  /{forceId}/neighbourhoods:
+    get:
+      tags:
+        - Neighbourhood
+      summary: Neighbourhoods of force
+      description: List of teams/neighbourhoods for a force
+      operationId: listTeamsByForce
+      parameters:
+        - name: forceId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      description: Police force specific team identifier
+                      example: NC04
+                    name:
+                      type: string
+                      description: Name for the neighbourhood
+                      example: City Centre
+  /{forceId}/{teamId}:
+    get:
+      tags:
+        - Neighbourhood
+      summary: Specific police team/neighbourhood
+      description: Get single team/neighbourhood
+      operationId: getTeam
+      parameters:
+        - name: forceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+        '404':
+          description: Not found
+  /{forceId}/{teamId}/boundary:
+    get:
+      tags:
+        - Neighbourhood
+      summary: Specific neighbourhood boundary
+      description: A list of latitude/longitude pairs that make up the boundary of a neighbourhood.
+      operationId: getNeighbourhoodBoundary
+      parameters:
+        - name: forceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    latitude:
+                      type: string
+                    longitude:
+                      type: string
+        '404':
+          description: Not found
+  /{forceId}/{teamId}/people:
+    get:
+      tags:
+        - Neighbourhood
+      summary: Specific neighbourhood team
+      description: A list of police team members in a specific neighbourhood.
+      operationId: getNeighbourhoodTeam
+      parameters:
+        - name: forceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Officer'
+        '404':
+          description: Not found
+  /{forceId}/{teamId}/events:
+    get:
+      tags:
+        - Neighbourhood
+      summary: Specific neighbourhood events
+      description: A list of events in a specific neighbourhood.
+      operationId: getNeighbourhoodEvents
+      parameters:
+        - name: forceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    contact_details:
+                      type: object
+                      description: Contact details for the event (if available)
+                    description:
+                      type: string
+                      description: Description of the event
+                    title:
+                      type: string
+                      description: Title of the event
+                    address:
+                      type: string
+                      description: Address of the event
+                    type:
+                      type: string
+                      description: Type of event
+                    start_date:
+                      type: string
+                      description: Start of the event in ISO date format
+                    end_date:
+                      type: string
+                      description: End of the event in ISO date format
+        '404':
+          description: Not found
+  /{forceId}/{teamId}/priorities:
+    get:
+      tags:
+        - Neighbourhood
+      summary: Specific neighbourhood priorities
+      description: A list of priorities in a specific neighbourhood.
+      operationId: getNeighbourhoodPriorities
+      parameters:
+        - name: forceId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: teamId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    action:
+                      type: string
+                      description: Action taken to address the priority
+                    issue-date:
+                      type: string
+                      description: When the priority was agreed upon
+                    action-date:
+                      type: string
+                      description: When action was last taken
+                    issue:
+                      type: string
+                      description: An issue raised with the police
+        '404':
+          description: Not found
+  /locate-neighbourhood:
+    get:
+      tags:
+        - Neighbourhood
+      summary: Locate neighbourhood
+      description: Find the neighbourhood policing team responsible for a particular area.
+      operationId: findNeighbourhood
+      parameters:
+        - name: q
+          in: query
+          description: A Latitude & Longitude, e.g. 51.500617,-0.124629
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    force:
+                      type: string
+                      description: Unique force identifier
+                    neighbourhood:
+                      type: string
+                      description: Force specific team identifier
+        '404':
+          description: Not found
+  /stops-street:
+    get:
+      tags:
+        - Stop and search
+      summary: Stop-and-searches at street-level
+      description: Stop-and-searches at street-level; either within a 1 mile radius of a single point, or within a custom area.
+      operationId: getStopsByArea
+      parameters:
+        - name: lat
+          in: query
+          schema:
+            type: number
+        - name: lng
+          in: query
+          schema:
+            type: number
+        - name: poly
+          in: query
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
+        '404':
+          description: Not found
+  /stops-at-location:
+    get:
+      tags:
+        - Stop and search
+      summary: Stop-and-searches at specific location
+      description: Stop and searches at a particular location.
+      operationId: getStopsByLocation
+      parameters:
+        - name: location_id
+          in: query
+          schema:
+            type: integer
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
+        '404':
+          description: Not found
+  /stops-no-location:
+    get:
+      tags:
+        - Stop and search
+      summary: Stop-and-searches at no specific location
+      description: Stop and searches that could not be mapped to a location.
+      operationId: getStopsNoLocation
+      parameters:
+        - name: location_id
+          in: query
+          schema:
+            type: integer
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
+        '404':
+          description: Not found
+  /stops-force:
+    get:
+      tags:
+        - Stop and search
+      summary: Stop-and-searches at no specific location
+      description: Stop and searches that could not be mapped to a location.
+      operationId: getStopsByForce
+      parameters:
+        - name: force
+          in: query
+          description: force Id
+          schema:
+            type: integer
+        - name: date
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Stop'
+        '404':
+          description: Not found
+components:
+  schemas:
+    Crime:
+      type: object
+      properties:
+        category:
+          type: string
+        location_type:
+          type: string
+          description: The type of the location. Either 'Force' or 'BTP'. Force indicates a normal police force location; BTP indicates a British Transport Police location. BTP locations fall within normal police force boundaries.
+        location:
+          $ref: '#/components/schemas/Location'
+        context:
+          type: string
+        outcome_status:
+          type: object
+          properties:
+            category:
+              type: string
+              description: Category of outcome
+              example: Under investigation
+            date:
+              type: string
+              example: 2023-02
+        persistent_id:
+          type: string
+          example: 188de6f512fb5f8de782f2977b6413e1798043fd58a648bf9bb7ba0ab7628341
+        id:
+          type: integer
+          description: Crime id
+          example: 108221039
+        location_subtype:
+          type: string
+          description: For BTP locations, the type of location at which this crime was recorded.
+        month:
+          type: string
+          example: 2023-02
+    Officer:
+      type: object
+      properties:
+        bio:
+          type: string
+          description: Team member biography (if available)
+        contact_details:
+          type: object
+          description: Contact details for the team member
+        name:
+          type: string
+          description: Name of the person
+          example: Simon Cole
+        rank:
+          type: string
+          description: Force rank
+          example: Chief Constable
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: string
+          description: approximate latitude of the crime location
+        street:
+          type: object
+          properties:
+            id:
+              type: integer
+              description: Street id
+            name:
+              type: string
+              description: Human-readable summary of the location
+              example: On or near Gower Street
+        longitude:
+          type: string
+          description: approximate longitude of the crime location
+    Stop:
+      type: object
+      properties:
+        type:
+          type: string
+          description: Whether this was a 'Person search', a 'Vehicle search', or a 'Person and Vehicle search'
+        involved_person:
+          type: string
+          description: Whether a person was searched in this incident (derived from type; true if anything but 'Vehicle search')
+        datetime:
+          type: string
+          description: When the stop and search took place. Note that some forces only provide dates for their stop and searches, so you might see a disproportionate number of incidents occuring at midnight.
+        operation:
+          type: string
+          description: Whether this stop and search was part of a policing operation
+        operation_name:
+          type: string
+          description: The name of the operation this stop and search was part of
+        location:
+          $ref: '#/components/schemas/Location'
+        gender:
+          type: string
+          description: Human-readable gender of the person stopped, if applicable and provided
+        age_range:
+          type: string
+          description: The age range of the person stopped at the time the stop occurred
+        self_defined_ethnicity:
+          type: string
+          description: The self-defined ethnicity of the person stopped
+        officer_defined_ethnicity:
+          type: string
+          description: The officer-defined ethnicity of the person stopped
+        legislation:
+          type: string
+          description: The power used to carry out the stop and search
+        object_of_search:
+          type: string
+          description: The reason the stop and search was carried out
+        outcome:
+          type: string
+          description: The outcome of the stop. false if nothing was found, an empty string if no outcome was provided.
+        outcome_linked_to_object_of_search:
+          type: string
+          description: Whether the outcome was related to the reason the stop and search was carried out, as a boolean value (or null if not provided)
+        removal_of_more_than_outer_clothing:
+          type: string
+          description: Whether the person searched had more than their outer clothing removed, as a boolean value (or null if not provided)

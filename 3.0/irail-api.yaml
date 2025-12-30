@@ -1,0 +1,443 @@
+openapi: 3.0.3
+info:
+  title: IRail API - OpenAPI 3.0
+  description: |-
+    iRail supports digital creativity concerning mobility in Belgium. This is an attempt to make the railway time schedules in Belgium easily available for anyone.
+    The iRail api allows anyone to query trains, stations, liveboards and connections.
+
+    The response can be in 'xml', 'json', or 'jsonp' format. The default is 'xml'.
+
+    You can choose the language of the response by using the `lang` parameter. It defaults to 'en'.
+
+    The `time` parameter has the format "hhmm" and defaults to current time in Belgium
+
+    The `date` parameter has the format "ddmmyy" and defaults to current date in Belgium
+  version: 1.0.11
+servers:
+  - url: https://api.irail.be
+paths:
+  /stations:
+    get:
+      summary: Stations List
+      description: Retrieve a list of all stations
+      operationId: listStations
+      parameters:
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum:
+              - xml
+              - json
+              - jsonp
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum:
+              - nl
+              - fr
+              - en
+              - de
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Stations'
+  /liveboard:
+    get:
+      summary: Livboard
+      description: A liveboard for a specified station. This includes departures or arrivals, along with their delays, train ids, occupancy, etc …
+      operationId: getLiveboard
+      parameters:
+        - name: station
+          in: query
+          schema:
+            type: string
+          description: The name of the station to query
+        - name: id
+          in: query
+          schema:
+            type: string
+          description: If you know the id of a station, this might be used instead of a name. Do not use both at the same time.
+        - name: arrdep
+          in: query
+          schema:
+            type: string
+            enum:
+              - departure
+              - arrival
+          description: Whether the results should show arrivals departures in the station. Defaults to 'departure'
+        - name: alerts
+          in: query
+          schema:
+            type: boolean
+          description: Whether or not to include alerts about a train in the response
+        - name: time
+          in: query
+          schema:
+            type: string
+        - name: date
+          in: query
+          schema:
+            type: string
+        - name: format
+          in: query
+          schema:
+            type: string
+            enum:
+              - xml
+              - json
+              - jsonp
+        - name: lang
+          in: query
+          schema:
+            type: string
+            enum:
+              - nl
+              - fr
+              - en
+              - de
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Liveboard'
+  /connections:
+    get:
+      summary: Connections
+      description: Get routes between two stations, including realtime data on delays.
+      operationId: getConnections
+      parameters:
+        - description: The name or id of the station of departure.
+          in: query
+          name: from
+          required: true
+          schema:
+            type: string
+        - description: The name or id of the destination.
+          in: query
+          name: to
+          required: true
+          schema:
+            type: string
+        - description: Whether the results should show arrivals departures in the station.
+          in: query
+          name: timesel
+          schema:
+            type: string
+            enum:
+              - departure
+              - arrival
+        - description: The types of transport to include in the search. Automatic will only allow national (normal) trains for travelling between two stations in Belgium, but will still allow international high speed trains for travel outside Belgium.
+          in: query
+          name: typeOfTransport
+          schema:
+            type: string
+            enum:
+              - automatic
+              - trains
+              - nointernationaltrains
+              - all
+        - in: query
+          name: time
+          schema:
+            type: string
+        - in: query
+          name: date
+          schema:
+            type: string
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum:
+              - xml
+              - json
+              - jsonp
+        - in: query
+          name: lang
+          schema:
+            type: string
+            enum:
+              - nl
+              - fr
+              - en
+              - de
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Connections'
+  /vehicle:
+    get:
+      summary: Vehicles
+      description: Retrieve information about a vehicle (train), including stops, occupancy, current location and delays.
+      operationId: getVehicles
+      parameters:
+        - in: query
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: date
+          schema:
+            type: string
+        - description: Whether or not to include alerts about a train in the response.
+          in: query
+          name: alerts
+          schema:
+            type: boolean
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum:
+              - xml
+              - json
+              - jsonp
+        - in: query
+          name: lang
+          schema:
+            type: string
+            enum:
+              - nl
+              - fr
+              - en
+              - de
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Vehicles'
+  /composition:
+    get:
+      summary: Compositions
+      description: Retrieve information about train composition
+      operationId: getCompositions
+      parameters:
+        - description: The ID of the train for which you want to fetch the composition.
+          in: query
+          name: id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum:
+              - xml
+              - json
+              - jsonp
+        - in: query
+          name: lang
+          schema:
+            type: string
+            enum:
+              - nl
+              - fr
+              - en
+              - de
+        - description: By default we filter a list of fields which we guarantee to be present in every response. Set this parameter to 'all' in order to get all raw unfiltered data as iRail fetches it from the NMBS. These extra fields allow you to use any data instead of our 'curated' list of useful fields, but come without any guarantees. Let us know if you'd like to see a raw field added to the 'normal' stable output.
+          in: query
+          name: data
+          schema:
+            type: string
+            enum:
+              - 
+              - all
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+  /disturbances:
+    get:
+      summary: Disturbances
+      description: Retrieve information about current disturbances
+      operationId: getDisturbances
+      parameters:
+        - description: The character to use for line breaks. By default these are removed to create a continuous text without special characters, but you may provide a linebreak character sequence here to get line breaks which are compatible with your client. Examples are  and \n.'
+          in: query
+          name: lineBreakCharacter
+          schema:
+            type: string
+        - in: query
+          name: format
+          schema:
+            type: string
+            enum:
+              - xml
+              - json
+              - jsonp
+        - in: query
+          name: lang
+          schema:
+            type: string
+            enum:
+              - nl
+              - fr
+              - en
+              - de
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+components:
+  schemas:
+    Stations:
+      type: object
+      properties:
+        station:
+          properties:
+            '@id':
+              type: string
+            id:
+              description: The (iRail) id of the station. The NMBS id can be deducted by removing the leading 'BE.NMBS.00'
+              type: string
+            locationX:
+              description: The longitude of the station
+              type: number
+            locationY:
+              description: The latitude of the station
+              type: number
+            name:
+              description: The default name of this station
+              type: string
+            standardname:
+              description: The consistent name of this station
+              type: string
+          required:
+          - id
+          - '@id'
+          - locationX
+          - locationY
+          - standardname
+          - name
+          type: object
+        timestamp:
+          type: number
+        version:
+          type: string
+      required:
+      - version
+      - timestamp
+      - station
+    Liveboard:
+      type: object
+      properties:
+        departures:
+          properties:
+            departure:
+              type: array
+            number:
+              type: number
+          required:
+          - number
+          type: object
+        station:
+          type: string
+        stationinfo:
+          properties:
+            '@id':
+              type: string
+            id:
+              description: The (iRail) id of the station. The NMBS id can be deducted by
+                removing the leading 'BE.NMBS.00'
+              type: string
+            locationX:
+              description: The longitude of the station
+              type: number
+            locationY:
+              description: The latitude of the station
+              type: number
+            name:
+              description: The default name of this station
+              type: string
+            standardname:
+              description: The consistent name of this station
+              type: string
+          required:
+          - id
+          - '@id'
+          - locationX
+          - locationY
+          - standardname
+          - name
+          type: object
+        timestamp:
+          type: number
+        version:
+          type: string
+      required:
+      - version
+      - timestamp
+      - station
+      - departures
+    Connections:
+      properties:
+        connection:
+          type: array
+        timestamp:
+          type: number
+        version:
+          type: string
+      required:
+      - version
+      - timestamp
+      - connection
+      type: object
+    Vehicles:
+      properties:
+        stops:
+          properties:
+            number:
+              type: number
+            stop:
+              type: array
+          required:
+          - number
+          type: object
+        timestamp:
+          type: number
+        vehicle:
+          type: string
+        vehicleinfo:
+          properties:
+            '@id':
+              type: string
+            locationX:
+              type: number
+            locationY:
+              type: number
+            name:
+              type: string
+            shortname:
+              type: string
+          required:
+          - name
+          - locationX
+          - locationY
+          - shortname
+          - '@id'
+          type: object
+        version:
+          type: string
+      required:
+      - vehicle
+      type: object

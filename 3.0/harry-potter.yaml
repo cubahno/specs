@@ -1,0 +1,85 @@
+openapi: 3.0.3
+info:
+  title: Harry Potter - OpenAPI 3.0
+  description: |-
+    A JSON-based API for getting information on Harry Potter characters and spells.
+  version: 1.0.0
+servers:
+- url: https://hp-api.onrender.com/api
+paths:
+  /characters:
+    get:
+      summary: All characters
+      description: List all characters
+      operationId: listCharacters
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: array
+                items:
+                  type: object
+  /characters/{role}:
+    get:
+      summary:  Characters by role
+      description: Get characters who are Hogwarts students or staff during the book series
+      operationId: listCharactersByRole
+      parameters:
+        - name: role
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+              - students
+              - staff
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: array
+                items:
+                  type: object
+  /characters/house/{house}:
+    get:
+      summary:  Characters by House
+      description: Get characters in a certain house, e.g. 'gryffindor'
+      operationId: listCharactersByHouse
+      parameters:
+        - name: house
+          in: path
+          required: true
+          schema:
+            type: string
+            enum:
+             - gryffindor
+             - hufflepuff
+             - ravenclaw
+             - slytherin
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: array
+                items:
+                  type: object
+  /spells:
+    get:
+      summary: All spells
+      description: List all spells
+      operationId: listSpills
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/josn:
+              schema:
+                type: array
+                items:
+                  type: object

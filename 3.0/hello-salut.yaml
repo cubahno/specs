@@ -1,0 +1,54 @@
+openapi: 3.0.1
+info:
+  title: Hello, Salut API
+  description: |
+    Say hello to anyone in their native language!
+
+  version: 1.0.1
+servers:
+  - url: https://hellosalut.stefanbohacek.dev
+paths:
+  /:
+    get:
+      summary: Say Salut
+      description: Retrieve how anyone says hello in their native language
+      operationId: sayHello
+      parameters:
+        - name: lang
+          in: query
+          description: Language code in two letter format, e.g. 'ar', 'de', 'en', 'en-gb', 'en-us', ...
+          schema:
+            type: string
+        - name: ip
+          in: query
+          description: Estimate language based on IP address
+          schema:
+            type: string
+        - name: cc
+          in: query
+          description: Country code in two letter format, e.g. 'eg', 'de', 'us', ...
+          schema:
+            type: string
+        - name: mode
+          in: query
+          description: Determine the country and langauge based on the request source IP address. Overrides all other parameters.
+          schema:
+            type: string
+            enum:
+              - auto
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                    description: The language code
+                    example: de
+                  hello:
+                    type: string
+                    description: The word 'Hello' in the provided language.
+                    example: Hallo

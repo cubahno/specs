@@ -1,0 +1,44 @@
+openapi: 3.0.1
+info:
+  title: Random Joke
+  description: The API can be used to get random jokes. You can also get jokes according to type (e.g., programming jokes only) and also get ten random jokes.
+  version: '0.1'
+servers:
+  - url: https://official-joke-api.appspot.com
+paths:
+  /jokes/ten:
+    get:
+      description: The endpoint fetches ten random joke
+      operationId: getTen
+      responses:
+        '200':
+          description: Return an json array of ten random jokes
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+  /jokes/programming/ten:
+    get:
+      description: The endpoint fetches ten random programming jokes
+      operationId: getProgrammingTen
+      responses:
+        '200':
+          description: Return an json array of ten programming jokes
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}
+  /jokes/random:
+    get:
+      description: The endpoint fetches a random joke
+      operationId: getRandom
+      responses:
+        '200':
+          description: Return a random joke
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: string
+              examples: {}

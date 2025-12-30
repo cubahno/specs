@@ -1,0 +1,57 @@
+openapi: 3.0.3
+info:
+  title: Bacon Ipsum API
+  description: |
+    The Bacon Ipsum JSON API is a REST interface for generating meaty lorem ipsum text and can be used by any application.
+  version: 1.0.0
+servers:
+  - url: https://baconipsum.com/api
+paths:
+  /:
+    get:
+      summary: Meaty Ipsum
+      description: Get Meaty Ipsum paragraphs and sentnces.
+      operationId: getBacon
+      parameters:
+        - name: type
+          in: query
+          required: true
+          description: Use 'all-meat' for meat only or 'meat-and-filler' for meat mixed with miscellaneous 'lorem ipsum' filler.
+          schema:
+            type: string
+            enum:
+              - all-meat
+              - meat-and-filler
+        - name: paras
+          in: query
+          description: Number of paragraphs, defaults to 5
+          schema:
+            type: integer
+        - name: sentences
+          in: query
+          description: Number of sentences (this overrides paragraphs)
+          schema:
+            type: integer
+        - name: start-with-lorem
+          in: query
+          description: pass 1 to start the first paragraph with 'Bacon ipsum dolor sit amet'
+          schema:
+            type: integer
+        - name: format
+          in: query
+          description: Response format, defaults to 'json'
+          schema:
+            type: string
+            enum:
+              - json
+              - text
+              - html
+      responses:
+        '200':
+          description: Success operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string

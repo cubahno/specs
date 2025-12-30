@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: RPS-101 - OpenAPI 3.0
+  description: |-
+    Play Rock, Paper, Scissors with 101 objects.
+  version: 1.0.0
+servers:
+  - url: https://rps101.pythonanywhere.com/api/v1
+
+paths:
+  /objects/all:
+    get:
+      summary: All 101 objects
+      description: This endpoint gives you a json array of the 101 objects
+      operationId: get101
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+  /objects/{objectName}:
+    get:
+      summary: Single object
+      description: This endpoint gives you a json array of the winning outcomes for a given object
+      operationId: getObject
+      parameters:
+        - name: objectName
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    example: nuke
+                  winning outcomes:
+                    type: array
+                    items:
+                      type: array
+                      items:
+                        type: string
+                      example: ["poisons", "Sky"]
+  /match:
+    get:
+      summary: Which object wins
+      description: This endpoint gives you the result of a match between two objects
+      operationId: whoWins
+      parameters:
+        - name: object_one
+          in: query
+          required: true
+          schema:
+            type: string
+            example: nuke
+        - name: object_two
+          in: query
+          required: true
+          schema:
+            type: string
+            example: tank
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Outcome'
+components:
+  schemas:
+    Outcome:
+      type: object
+      properties:
+        winner:
+          type: string
+          example: Nuke
+        outcome:
+          type: string
+          example: incinerates
+        loser:
+          type: string
+          example: Tank

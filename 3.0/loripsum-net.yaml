@@ -1,0 +1,46 @@
+openapi: 3.0.1
+info:
+  title: Loripsum.net API
+  description: |
+    Loripsum.net has an API to generate placeholder text to insert it in whatever software/webapp you want.
+
+    You can add extra options to specify the output you're going to get. Here's a comprehensive list of these options:
+      - (integer) - The number of paragraphs to generate.
+      - One of 'short', 'medium', 'long', 'verylong' - The average length of a paragraph.
+      - 'decorate' - Add bold, italic and marked text.
+      - 'link' - Add links.
+      - 'ul' - Add unordered lists.
+      - 'ol' - Add numbered lists.
+      - 'dl' - Add description lists.
+      - 'bq' - Add blockquotes.
+      - 'code' - Add code samples.
+      - 'headers' - Add headers between paragraphs.
+      - 'allcaps' - Use ALL CAPS.
+      - 'prude' - Prude version.
+      - 'plaintext' - Return plain text, no HTML.
+
+    Say, you need 10 short paragraphs with headings, use "10/short/headers"
+
+  version: 1.0.0
+servers:
+  - url: https://loripsum.net/api
+paths:
+  /{options}:
+    get:
+      summary: Get lorem ipsum
+      description: Generate lorem ipsum paragraphs according to provided options
+      operationId: generate
+      parameters:
+        - name: options
+          in: path
+          required: true
+          description: a list of options separated by forward slashes "/", e.g. "4/medium/headers/code"
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: string

@@ -1,0 +1,33 @@
+openapi: 3.0.1
+info:
+  title: Kickbox API
+  description: |
+    Kickbox provides a free, open API endpoint for checking a domain or email address against a frequently-updated list of disposable domains.
+
+  version: 1.0.0
+servers:
+  - url: https://open.kickbox.com/v1
+paths:
+  /disposable/{email_domain}:
+    get:
+      summary: Check if disposable
+      description: Check the provided email or domain
+      operationId: check
+      parameters:
+        - name: email_domain
+          in: path
+          required: true
+          description: email or domain to check
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  disposable:
+                    type: boolean
+                    description: whether the provided email/domain is disposable.

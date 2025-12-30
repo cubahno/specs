@@ -1,0 +1,1120 @@
+openapi: 3.0.1
+info:
+  title: Pinball Map API
+  description: An API to fetch data about pinball machine locations, operators, and scores.
+  version: v1
+servers:
+  - url: https://pinballmap.com/api/v1
+tags:
+  - name: Events
+  - name: Location machine xrefs
+  - name: Location types
+  - name: Locations
+  - name: Machine score xrefs
+  - name: Machines
+  - name: Operators
+  - name: Regions
+  - name: Zones
+paths:
+  /region/{region}/events.json:
+    get:
+      tags:
+        - Events
+      summary: All events
+      operationId: getEvents
+      description: Get all events for a single region
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: sorted
+          in: query
+          description: If present, sort/group by event category
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  events:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Event'
+  /region/{region}/location_machine_xrefs.json:
+    get:
+      tags:
+        - Location machine xrefs
+      summary: Machines at locations in a region
+      description: Get all machines at locations in a single region.
+      operationId: getRegionLocationMachine
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location_machine_xrefs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Location_machine_xref"
+        "404":
+          description: Not Found
+  /location_machine_xrefs/{id}.json:
+    get:
+      tags:
+        - Location machine xrefs
+      summary: Single lmx
+      description: Get info about a single location machine xref
+      operationId: GetLmxById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location_machine:
+                    $ref: "#/components/schemas/Location_machine_xref"
+        "404":
+          description: Not Found
+  /location_machine_xrefs/top_n_machines.json:
+    get:
+      tags:
+        - Location machine xrefs
+      summary: Top N machines
+      description: Show the top N machines
+      operationId: getTopN
+      parameters:
+        - name: n
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  machines:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Machine"
+        "404":
+          description: Not Found
+  /location_types.json:
+    get:
+      tags:
+        - Location types
+      summary: Location types
+      description: Fetch all location types
+      operationId: listLocationTypes
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location_types:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Location_type"
+  /region/{region}/locations.json:
+    get:
+      tags:
+        - Locations
+      description: Fetch locations for a single region
+      summary: Locations for a regions
+      operationId: getLocationsInRegion
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: by_location_name
+          in: query
+          schema:
+            type: string
+        - name: by_location_id
+          in: query
+          schema:
+            type: integer
+        - name: by_machine_id
+          in: query
+          schema:
+            type: integer
+        - name: by_ipdb_id
+          in: query
+          schema:
+            type: integer
+        - name: by_opdb_id
+          in: query
+          schema:
+            type: integer
+        - name: by_machine_name
+          in: query
+          schema:
+            type: string
+        - name: by_city_id
+          in: query
+          schema:
+            type: string
+        - name: by_state_id
+          in: query
+          schema:
+            type: string
+        - name: by_machine_group_id
+          in: query
+          schema:
+            type: string
+        - name: by_zone_id
+          in: query
+          schema:
+            type: integer
+        - name: by_operator_id
+          in: query
+          schema:
+            type: integer
+        - name: by_type_id
+          in: query
+          schema:
+            type: integer
+        - name: by_at_least_n_machines_type
+          in: query
+          description: Only locations with N or more machines
+          schema:
+            type: integer
+        - name: by_is_stern_army
+          in: query
+          description: Send only locations labeled as Stern Army
+          schema:
+            type: integer
+        - name: no_details
+          in: query
+          description: Omit lmx/condition data from pull
+          schema:
+            type: integer
+        - name: regionless_only
+          in: query
+          description: Show only regionless locations
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  locations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Location"
+        "404":
+          description: Not Found
+  /locations/closest_by_lat_lon.json:
+    get:
+      tags:
+        - Locations
+      description: Returns the closest location to transmitted lat/lon
+      summary: Closest to lat/lon
+      operationId: getLocationNearby
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: by_type_id
+          in: query
+          schema:
+            type: integer
+        - name: by_machine_id
+          in: query
+          schema:
+            type: integer
+        - name: by_operator_id
+          in: query
+          schema:
+            type: integer
+        - name: by_at_least_n_machines_type
+          in: query
+          description: Only locations with N or more machines
+          schema:
+            type: integer
+        - name: max_distance
+          in: query
+          description: "Closest location within 'max_distance' miles, with a max of 500"
+          schema:
+            type: string
+        - name: no_details
+          in: query
+          description: Omit data that app does not need from pull
+          schema:
+            type: integer
+        - name: send_all_within_distance
+          in: query
+          description: Send all locations within max_distance param, or 50 miles.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  location:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Location"
+        "404":
+          description: Not Found
+  /locations/within_bounding_box.json:
+    get:
+      tags:
+        - Locations
+      summary: Locations in box
+      description: Returns locations within transmitted bounding box
+      operationId: getLocationsInBox
+      parameters:
+        - name: swlat
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: swlon
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: nelat
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: nelon
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: by_type_id
+          in: query
+          schema:
+            type: integer
+        - name: by_machine_id
+          in: query
+          schema:
+            type: integer
+        - name: by_operator_id
+          in: query
+          schema:
+            type: integer
+        - name: by_at_least_n_machines_type
+          in: query
+          description: Only locations with N or more machines
+          schema:
+            type: integer
+        - name: no_details
+          in: query
+          description: Omit data that app does not need from pull
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  locations:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Location"
+        "404":
+          description: Not Found
+  /locations/{id}.json:
+    get:
+      tags:
+        - Locations
+      summary: Single location
+      description: Get location by id
+      operationId: getLocationById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+        - name: no_details
+          in: query
+          description: Omit lmx/condition data
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Location"
+        "404":
+          description: Not Found
+  /locations/{id}/machine_details.json:
+    get:
+      tags:
+        - Locations
+      summary: Machine details at location
+      description: Display the details of the machines at this location
+      operationId: getMachineDetails
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  machines:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Machine"
+        "404":
+          description: Not Found
+  /locations/top_cities.json:
+    get:
+      tags:
+        - Locations
+      summary: Top cities by number of locations
+      description: Fetch top 10 cities by number of locations
+      operationId: listTopCitiesLocations
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/City"
+  /locations/top_cities_by_machine.json:
+    get:
+      tags:
+        - Locations
+      summary: Top cities by number of machines
+      description: Fetch top 10 cities by number of machines
+      operationId: listTopCitiesMachines
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/City"
+  /locations/type_count.json:
+    get:
+      tags:
+        - Locations
+      summary: Count location types
+      description: Fetch a count of each location type
+      operationId: getTypeCounts
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Type_count"
+  /region/{region}/machine_score_xrefs.json:
+    get:
+      tags:
+        - Machine score xrefs
+      summary: Region high scores
+      description: Fetch all high scores for a region
+      operationId: getRegionHighScores
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: zone_id
+          in: query
+          schema:
+            type: integer
+        - name: limit
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  machine_score_xrefs:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/Machine_score_xref"
+  /machine_score_xrefs/{id}.json:
+    get:
+      tags:
+        - Machine score xrefs
+      summary: High scores for a location's machine
+      description: View all high scores for a location's machine
+      operationId: getMachineHighScores
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: The location machine ID, NOT the machine score ID
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+  /machines.json:
+    get:
+      tags:
+        - Machines
+      summary: All machines
+      description: Fetch all machines
+      operationId: getAllMachines
+      parameters:
+        - name: no_details
+          in: query
+          description: Omit unnecessary metadata for initial app loading
+          schema:
+            type: integer
+        - name: region_id
+          in: query
+          schema:
+            type: integer
+        - name: manufacturer
+          in: query
+          description: show only machines from this manufacturer
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  machines:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Machine'
+  /operators.json:
+    get:
+      tags:
+        - Operators
+      summary: All operators
+      description: Fetch all operators for all regions
+      operationId: listOperators
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  operators:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Operator'
+  /region/{region}/operators.json:
+    get:
+      tags:
+        - Operators
+      summary: All operators in region
+      description: Fetch all operators in a certain region
+      operationId: listOperatorsInRegion
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  operators:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Operator'
+  /regions/location_and_machine_counts.json:
+    get:
+      tags:
+        - Regions
+      summary: Location and machine counts
+      description: Get location and machine counts
+      operationId: listMachineCounts
+      parameters:
+        - name: region_name
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  num_locations:
+                    type: integer
+                    example: 8778
+                  num_lmxes:
+                    type: integer
+                    example: 35493
+  /regions/closest_by_lat_lon.json:
+    get:
+      tags:
+        - Regions
+      summary: Nearest region
+      description: Find closest region based on lat/lon
+      operationId: findNearestRegion
+      parameters:
+        - name: lat
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: lon
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  region:
+                    $ref: '#/components/schemas/Region'
+  /regions.json:
+    get:
+      tags:
+        - Regions
+      summary: All regions
+      description: Fetch all regions
+      operationId: listRegions
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  regions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Region'
+  /regions/{id}.json:
+    get:
+      tags:
+        - Regions
+      summary: Single region
+      description: Fetch information for a single region
+      operationId: getRegionById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  regions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Region'
+  /region/{region}/zones.json:
+    get:
+      tags:
+        - zones
+      summary: Region zones
+      description: Fetch zones for a single region
+      operationId: getZonesInRegion
+      parameters:
+        - name: region
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  zones:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Zone'
+components:
+  schemas:
+    Event:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 108293
+        region_id:
+          type: integer
+          example: 4
+        name:
+          type: string
+          example: On Tilt Pinball League
+        long_desc:
+          type: string
+          example: On Tilt Pinball League Season 11!!!!\nStandard IFPA Sanctioned Pinball League meeting Bi-Weekly. Lowest Score dropped at end of season.\nMeet dates:\nWeek 1 January 26, 2023\nWeek 2 February 9, 2023\nWeek 3 February 23, 2023\nWeek 4 March 9, 2023\nWeek 5 March 23, 2023\nWeek 6 April 6, 2023\nWeek 7 April ...\n7128 Van Nuys Blvd, Los Angeles, CA, 
+        external_link:
+          type: string
+          example: https://fb.me/e/5f1yUqz3R
+        category_no:
+          type: string
+          description: String instead of null
+          example: null
+        start_date:
+          type: string
+          example: '2023-01-26'
+        end_date:
+          type: string
+          example: '2023-05-18'
+        location_id:
+          type: integer
+          example: null
+        created_at:
+          type: string
+          example: '2022-12-23T16:01:02.082-08:00'
+        updated_at:
+          type: string
+          example: '2022-12-23T16:01:02.082-08:00'
+        category:
+          type: string
+          example: IFPA Sanctioned Events
+        external_location_name:
+          type: string
+          example: null
+        ifpa_calendar_id:
+          type: integer
+          example: 57740
+        ifpa_tournament_id:
+          type: integer
+          example: 57740
+    Location:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 13527
+        name:
+          type: string
+          example: Dyno Bar (Aero Club)
+        street:
+          type: string
+          example: 3367 India St
+        city:
+          type: string
+          example: San Diego
+        state:
+          type: string
+          example: CA
+        zip:
+          type: string
+          example: '92103'
+        phone:
+          type: string
+          example: (619) 297-7211
+        lat:
+          type: string
+          example: '32.7381229'
+        lon:
+          type: string
+          example: '-117.1765576'
+        website:
+          type: string
+          example: http://www.dynobarsd.com/
+        created_at:
+          type: string
+          example: '2019-11-12T12:04:04.203-08:00'
+        updated_at:
+          type: string
+          example: '2023-05-07T16:57:03.652-07:00'
+        zone_id:
+          type: integer
+          example: 40
+        region_id:
+          type: integer
+          example: 4
+        location_type_id:
+          type: integer
+          example: 3
+        description:
+          type: string
+          example: "Pincraft Pinball is the premier pinball operator in San Diego! To report problems contact mark@pincraftpinball.com or 860-287-2137.\r\nAmusement Connect card operated system -  game cards/credits are also valid at Club Marina and Harbor Town Pub!"
+        operator_id:
+          type: integer
+          example: 151
+        date_last_updated:
+          type: string
+          example: '2023-05-07'
+        last_updated_by_user_id:
+          type: integer
+          example: 485
+        is_stern_army:
+          type: boolean
+          example: false
+        country:
+          type: string
+          example: US
+        ic_active:
+          type: boolean
+          example: true
+    Machine:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 3643
+        name:
+          type: string
+          example: James Bond 007 (60th Anniversary)
+        is_active:
+          type: boolean
+          example: false
+        created_at:
+          type: string
+          example: '2022-09-22T16:26:51.146-07:00'
+        updated_at:
+          type: string
+          example: '2023-04-18T20:08:38.946-07:00'
+        ipdb_link:
+          type: string
+          example: null
+        year:
+          type: integer
+          example: 2022
+        manufacturer:
+          type: string
+          example: Stern
+        machine_group_id:
+          type: integer
+          example: null
+        ipdb_id:
+          type: integer
+          example: null
+        opdb_id:
+          type: string
+          example: Ge1Dy-M9Rrp
+        opdb_img:
+          type: string
+          example: null
+        opdb_img_height:
+          type: integer
+          example: null
+        opdb_img_width:
+          type: integer
+          example: null
+        machine_type:
+          type: string
+          example: ss
+        machine_display:
+          type: string
+          example: lcd
+        ic_eligible:
+          type: boolean
+          example: true
+    Location_machine_xref:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 130078
+        created_at:
+          type: string
+          example: '2023-05-07T16:57:26.948-07:00'
+        updated_at:
+          type: string
+          example: '2023-05-07T16:57:26.948-07:00'
+        location_id:
+          type: integer
+          example: 13527
+        machine_id:
+          type: integer
+          example: 3643
+        condition:
+          type: string
+          example: null
+        condition_date:
+          type: string
+          example: null
+        ip:
+          type: string
+          example: null
+        user_id:
+          type: integer
+          example: 485
+        machine_score_xrefs_count:
+          type: integer
+          example: null
+        ic_enabled:
+          type: boolean
+          example: null
+        location:
+          $ref: '#/components/schemas/Location'
+        machine:
+          $ref: '#/components/schemas/Machine'
+    Location_type:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 68
+        created_at:
+          type: string
+          example: '2017-05-31T10:25:59.487-07:00'
+        updated_at:
+          type: string
+          example: '2021-04-18T22:32:53.750-07:00'
+        name:
+          type: string
+          example: Airport
+        icon:
+          type: string
+          example: airport
+        library:
+          type: string
+          example: material-community
+    City:
+      type: object
+      properties:
+        city:
+          type: string
+          example: Portland
+        state:
+          type: string
+          example: OR
+        location_count:
+          type: integer
+          example: 164
+        id:
+          type: integer
+          example: null
+    Type_count:
+      type: object
+      properties:
+        name:
+          type: string
+          example: Bar
+        type_count:
+          type: integer
+          example: 1875
+        id:
+          type: integer
+          example: null
+    Machine_score_xref:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 12770
+        location_machine_xref_id:
+          type: integer
+          example: 47413
+        score:
+          type: integer
+          example: 58568780
+        created_at:
+          type: string
+          example: '2023-04-15T15:42:59.017-07:00'
+        updated_at:
+          type: string
+          example: '2023-04-15T15:42:59.021-07:00'
+        ip:
+          type: string
+          example: null
+        user_id:
+          type: integer
+          example: 7886
+        rank:
+          type: string
+          example: null
+        username:
+          type: string
+          example: rustybus
+    Operator:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 237
+        name:
+          type: string
+          example: 1-Up Amusements
+        region_id:
+          type: integer
+          example: 1
+        website:
+          type: string
+          example: ''
+        operator_has_email:
+          type: boolean
+          example: true
+    Region:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 4
+        name:
+          type: string
+          example: sandiego
+        created_at:
+          type: string
+          example: null
+        updated_at:
+          type: string
+          example: '2019-03-04T16:12:00.000-08:00'
+        full_name:
+          type: string
+          example: San Diego
+        motd:
+          type: string
+          example: Click 'Events' to see nearby IFPA sanctioned events!
+        lat:
+          type: string
+          example: '32.7162'
+        lon:
+          type: string
+          example: '-117.1591'
+        n_search_no:
+          type: integer
+          example: 2
+        default_search_type:
+          type: string
+          example: ''
+        should_email_machine_removal:
+          type: boolean
+          example: true
+        should_auto_delete_empty_locations:
+          type: boolean
+          example: true
+        send_digest_comment_emails:
+          type: boolean
+          example: true
+        send_digest_removal_emails:
+          type: boolean
+          example: true
+        state:
+          type: string
+          example: California
+        effective_radius:
+          type: integer
+          example: 40
+        distance:
+          type: number
+          example: 0.12128877965802606
+        bearing:
+          type: string
+          example: '75.963756514729'
+    Zone:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 41
+        name:
+          type: string
+          example: East County
+        region_id:
+          type: integer
+          example: 4
+        created_at:
+          type: string
+          example: null
+        updated_at:
+          type: string
+          example: 2012-07-04T20:19:01.000-07:00
+        short_name:
+          type: string
+          example: east
+        is_primary:
+          type: boolean
+          example: false

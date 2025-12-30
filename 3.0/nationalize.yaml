@@ -1,0 +1,75 @@
+openapi: 3.0.3
+info:
+  title: Nationalize API - OpenAPI 3.0
+  description: |-
+    Nationalize.io predicts the nationality of a person given their name.
+  version: 1.0.11
+servers:
+  - url: https://api.nationalize.io
+
+paths:
+  /:
+    get:
+      summary: Finds nationality by name
+      description: Finds nationality by name or list of names
+      operationId: getNationality
+      parameters:
+        - name: name
+          in: query
+          description: a single name to get nationality for
+          schema:
+            type: string
+            example: peter
+        - name: name[]
+          in: query
+          explode: true
+          description: a list of names to get nationalities for
+          schema:
+            type: array
+            items:
+              type: string
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  country:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Country'
+        '422':
+          description: Missing name(s)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Missing 'name' parameter
+        '429':
+          description: Rate limiting error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Request limit reached
+components:
+  schemas:
+    Country:
+      type: object
+      properties:
+        country_id:
+          type: string
+          example: US
+          description: An ISO 3166-1 alpha-2 country code
+        probability:
+          type: number
+          description: Certainty of the assigned country
+          example: 0.99

@@ -1,0 +1,22 @@
+openapi: 3.0.3
+info:
+  title: JAMES CLEAR QUOTES - OpenAPI 3.0
+  description: |-
+    This is a sample API which fetches random quotes by James Clear, author of the book "Atomic Habits".
+
+  version: 1.0.0
+servers:
+  - url: https://www.jcquotes.com/api
+paths:
+  /quotes/random:
+    get:
+      summary: Random quote
+      description: Get one random quote
+      operationId: getRandom
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                type: object
