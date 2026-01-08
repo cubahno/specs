@@ -31,9 +31,9 @@ info:
         url: 'https://sftool.gov'
         altText: SFTool logo
     
-servers:    
+servers:
     - url: 'https://api.gsa.gov'
-        description: Default server
+      description: Default server
 paths:
     /sustainability/sftool/v1/building-systems/resources:
         get:
@@ -46,7 +46,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/contentpages:
         get:
             
@@ -58,7 +59,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/building-systems/case-studies:
         get:
             
@@ -70,7 +72,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/procurementclauses/naics/238220:
         get:
             
@@ -196,7 +199,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/building-systems/mandates:
         get:
             
@@ -208,7 +212,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/building-systems/rating-systems:
         get:
             
@@ -220,7 +225,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/building-systems/integrative-teams:
         get:
             
@@ -261,7 +267,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/building-systems/1/integrative-teams:
         get:
             
@@ -273,7 +280,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/building-systems/1/resources:
         get:
             
@@ -302,7 +310,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/building-systems/10/system-bundles:
         get:
             
@@ -382,7 +391,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/services/10:
         get:
             
@@ -394,7 +404,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/materials/2022/alternatives:
         get:
             
@@ -423,7 +434,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/materials/1968:
         get:
             
@@ -471,7 +483,7 @@ paths:
                     in: query
                     schema:
                         type: string
-                    example: Wastebasket Liners (24" x 33" or smaller)
+                    example: 'Wastebasket Liners (24" x 33" or smaller)'
             responses:
                 '200':
                     
@@ -496,7 +508,8 @@ paths:
                     example: pest management
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/services/10/related-products/details:
         get:
             
@@ -525,7 +538,8 @@ paths:
                     example: pest management
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/products/11:
         get:
             
@@ -554,7 +568,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/services:
         get:
             
@@ -578,7 +593,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/products/byname/details:
         get:
             
@@ -592,7 +608,7 @@ paths:
                     in: query
                     schema:
                         type: string
-                    example: Wastebasket Liners (24" x 33" or smaller)
+                    example: 'Wastebasket Liners (24" x 33" or smaller)'
             responses:
                 '200':
                     
@@ -612,7 +628,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/tags/480:
         get:
             
@@ -641,7 +658,8 @@ paths:
                     example: DEMO_KEY
             responses:
                 '200':
-                    
+                    description: Success
+
     /sustainability/sftool/v1/workspaces/83:
         get:
             
