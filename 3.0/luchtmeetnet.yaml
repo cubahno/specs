@@ -1,0 +1,567 @@
+openapi: 3.0.3
+info:
+  title: LuchtMeetNet API
+  version: "2.0"
+  description: |
+    The website Luchtmeetnet is an initiative of the Ministry of Infrastructure and the Environment, the National Institute of Public Health and the Environment (RIVM), GGD Amsterdam, EPA for the greater Rotterdam area (DCMR), the Province of Limburg, EPA's middle and western Brabant (OMWB) and EPA region Arnhem (ODRA). The website displays the measured air quality on several measuring stations in the Netherlands and the calculated air quality maps.
+
+    Some endpoints return paginated response. For these endpoints, the `page` and `order_by` parameters are optionally used in the request. The values to be passed in the `order_by` parameter depends on the properties in the response.
+servers:
+  - url: https://api.luchtmeetnet.nl/open_api
+paths:
+  /components:
+    get:
+      summary: All components
+      description: Method to retrieve a listing of known components.
+      operationId: getAllComps
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: order_by
+          in: query
+          schema:
+            type: string
+            enum:
+              - order
+              - formula
+              - name_nl
+              - name_en
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Component'
+  /components/{formula}:
+    get:
+      summary: Specifics of one component
+      description: Method to retrieve the specifics of a selected component.
+      operationId: getComponent
+      parameters:
+        - name: formula
+          in: path
+          description: chemical notation of the component
+          schema:
+            type: string
+          required: true
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Component_Details'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reason:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Not Found
+  /organisations:
+    get:
+      summary: All organizations
+      description: Method to retrieve a list of all organizations contrbuting data to this API
+      operationId: listOrgs
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Organization'
+  /stations:
+    get:
+      summary: All stations
+      description: Method to retrieve a list of all the stations that are made available.
+      operationId: listStations
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: order_by
+          in: query
+          schema:
+            type: string
+            enum:
+              - location
+              - number
+        - name: organisation_id
+          in: query
+          description: id of the organisation the station belongs to
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Station'
+  /stations/{number}:
+    get:
+      summary: Single station info
+      description: Method to retrieve the specifics of a selected station.
+      operationId: getStationByNumber
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Station_Details'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reason:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Not Found
+  /stations/{number}/measurements:
+    get:
+      operationId: getMeasurement
+      summary: Station measurement
+      description: Method to retrieve the measurements of a selected station.
+      parameters:
+        - name: number
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: order
+          in: query
+          schema:
+            type: string
+            enum:
+              - timestamp_measured
+              - formula
+        - name: order_direction
+          in: query
+          description: default is 'desc'
+          schema:
+            type: integer
+            enum:
+              - desc
+              - asc
+        - name: formula
+          in: query
+          description: filter on specific component by its formula
+          schema:
+            type: string
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Measurement'
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  reason:
+                    type: string
+                    example: not_found
+                  message:
+                    type: string
+                    example: Not Found
+  /measurements:
+    get:
+      summary: All measurements
+      description: Method to retrieve a list of all the measurements that are made available. Please note that requesting a timerange larger than 7 days will result in an HTTP 302 with an adjusted start parameter ensuring a small enough dataset to request.
+      operationId: getAllMeasurement
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: order_by
+          in: query
+          schema:
+            type: string
+            enum:
+              - timestamp_measured
+              - formula
+        - name: order_direction
+          in: query
+          description: default is 'desc'
+          schema:
+            type: integer
+            enum:
+              - desc
+              - asc
+        - name: station_number
+          in: query
+          description: optionally filter by station
+          schema:
+            type: string
+        - name: formula
+          in: query
+          description: filter on specific component by its formula
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: timestamp in ISO8601 notation
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: timestamp in ISO8601 notation
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Station_Measurement'
+  /lki:
+    get:
+      summary: Air quality indicator
+      description: Method to retrieve a list of the calculated LKI, Dutch for Air Quality Inidcator. Please note that requesting a timerange larger than 7 days will result in an HTTP 302 with an adjusted start parameter ensuring a small enough dataset to request.
+      operationId: getLKI
+      parameters:
+        - name: page
+          in: query
+          schema:
+            type: integer
+        - name: order_by
+          in: query
+          schema:
+            type: string
+            enum:
+              - timestamp_measured
+        - name: order_direction
+          in: query
+          description: default is 'desc'
+          schema:
+            type: integer
+            enum:
+              - desc
+              - asc
+        - name: station_number
+          in: query
+          description: optionally filter by station
+          schema:
+            type: string
+        - name: start
+          in: query
+          description: timestamp in ISO8601 notation
+          schema:
+            type: string
+        - name: end
+          in: query
+          description: timestamp in ISO8601 notation
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  pagination:
+                    $ref: '#/components/schemas/Pagination'
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/LKI_Measurement'
+components:
+  schemas:
+    Pagination:
+      type: object
+      properties:
+        last_page:
+          type: integer
+          example: 5
+        first_page:
+          type: integer
+          example: 1
+        prev_page:
+          type: integer
+          example: 1
+        current_page:
+          type: integer
+          example: 1
+        page_list:
+          type: array
+          items:
+            type: integer
+          example: [1, 2, 3, 4, 5]
+        next_page:
+          type: integer
+          example: 2
+    Component:
+      type: object
+      properties:
+        formula:
+          type: string
+          description: Chemical notation of the component
+          example: NO2
+        name:
+          type: object
+          properties:
+            NL:
+              type: string
+              description: Name of the component in Dutch
+              example: Stikstofdioxide (NO2)
+            EN:
+              type: string
+              description: Name of the component in English
+              example: Nitrogen dioxide (NO2)
+    Component_Details:
+      type: object
+      properties:
+        formula:
+          type: string
+          description: Chemical notation of the component
+          example: NO2
+        description:
+          type: object
+          properties:
+            NL:
+              type: string
+              description: Description of the component in Dutch
+            EN:
+              type: string
+              description: Description of the component in English
+        name:
+          type: object
+          properties:
+            NL:
+              type: string
+              description: Name of the component in Dutch
+              example: Stikstofdioxide (NO2)
+            EN:
+              type: string
+              description: Name of the component in English
+              example: Nitrogen dioxide (NO2)
+        limits:
+          type: array
+          items:
+            type: object
+            properties:
+              rating:
+                type: integer
+                example: 1
+              lowerband:
+                type: integer
+                example: null
+              upperband:
+                type: integer
+                example: 10
+              color:
+                type: string
+                example: #96c8ff
+              type:
+                type: string
+                example: website
+    Organization:
+      type: object
+      properties:
+        id:
+          type: integer
+          example: 2
+        name:
+          type: object
+          properties:
+            NL:
+              type: string
+              description: Name of the organization in Dutch
+              example: Stikstofdioxide (NO2)
+            EN:
+              type: string
+              description: Name of the organization in English
+              example: Nitrogen dioxide (NO2)
+    Station:
+      type: object
+      properties:
+        number:
+          type: string
+          description: Station number
+          example: NL01485
+        location:
+          type: string
+          description: Location of the station
+          example: Rotterdam-Hoogvliet
+    Station_Details:
+      type: object
+      properties:
+        type:
+          type: string
+          example: Regional
+        components:
+          type: array
+          items:
+            type: string
+          example: ["NO", "O3", "NO2"]
+        geometry:
+          type: object
+          properties:
+            type:
+              type: string
+              example: point
+            coordinates:
+              type: array
+              items:
+                type: number
+              example: [3.916623, 51.634706]
+        municipality:
+          type: string
+          example: Schouwen-Duiveland
+        url:
+          type: string
+          example: ""
+        province:
+          type: string
+          example: null
+        organisation:
+          type: string
+          example: RIVM
+        location:
+          type: string
+          example: Zierikzee-Lange Slikweg
+        year_start:
+          type: string
+          example: ""
+        description:
+          type: object
+          properties:
+            NL:
+              type: string
+              example: Zierikzee-Lange Slikweg
+            EN:
+              type: string
+              example: Zierikzee-Lange Slikweg
+    Measurement:
+      type: object
+      properties:
+        value:
+          type: number
+          description: The value of measurement in micrograms per cubic metre (μg/m3)
+          example: 16.2
+        timestamp_measured:
+          type: string
+          description: ISO8601 notation of the timestamp the measurement was made
+          example: 2023-04-17T19:00:00+00:00
+        formula:
+          type: string
+          description: Chemical notation of the measured component
+          example: NO2
+    Station_Measurement:
+      type: object
+      properties:
+        station_number:
+          type: string
+          description: Number of the station
+          example: NL49014
+        value:
+          type: number
+          description: The value of measurement in micrograms per cubic metre (μg/m3)
+          example: 16.2
+        timestamp_measured:
+          type: string
+          description: ISO8601 notation of the timestamp the measurement was made
+          example: 2023-04-17T19:00:00+00:00
+        formula:
+          type: string
+          description: Chemical notation of the measured component
+          example: NO2
+    LKI_Measurement:
+      type: object
+      properties:
+        station_number:
+          type: string
+          description: Number of the station
+          example: NL49014
+        value:
+          type: number
+          description: The calculated LKI number
+          example: 16.2
+        timestamp_measured:
+          type: string
+          description: ISO8601 notation of the timestamp the measurement was made
+          example: 2023-04-17T19:00:00+00:00
+        formula:
+          type: string
+          description: LKI is Dutch for Air Quality Indicator
+          example: LKI
