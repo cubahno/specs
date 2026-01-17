@@ -1,0 +1,123 @@
+openapi: 3.0.0
+info:
+  title: Wikipedia Table JSON API
+  version: 1.0.0
+  description: |
+    [https://github.com/atye/wikitable2json](https://github.com/atye/wikitable2json/)
+
+    - Tables with the HTML class `wikitable`, `standard`, and `toccolours` are returned
+    - If you are making automated requests, set a unique `User-Agent` header with an email address or URL contact page per the [Wikimedia REST API](https://en.wikipedia.org/api/rest_v1/)
+
+    ## Examples: 
+
+    ### Get all tables on page [Arhaan_Khan](https://en.wikipedia.org/wiki/Arhaan_Khan) in the default matrix format:
+    [https://wikitable2json.com/api/Arhaan_Khan](https://wikitable2json.com/api/Arhaan_Khan)
+
+    ### Get the first and second tables on page [Arhaan_Khan](https://en.wikipedia.org/wiki/Arhaan_Khan) in the default matrix format:
+    [https://wikitable2json.com/api/Arhaan_Khan?table=1&table=2](https://wikitable2json.com/api/Arhaan_Khan?table=1&table=2)
+
+    ### Get the second table on page [Arhaan_Khan](https://en.wikipedia.org/wiki/Arhaan_Khan) in a key-value format using the first row as keys:
+    [https://wikitable2json.com/api/Arhaan_Khan?table=1&keyRows=1](https://wikitable2json.com/api/Arhaan_Khan?table=1&keyRows=1)
+
+    ### Get the second table on page [1970–71_Chester_F.C._season](https://en.wikipedia.org/wiki/1970–71_Chester_F.C._season) in a key-value format using the first two rows as key:
+    [https://wikitable2json.com/api/1970–71_Chester_F.C._season?table=1&keyRows=2](https://wikitable2json.com/api/1970–71_Chester_F.C._season?table=1&keyRows=2)
+
+    ### Get all tables on German page [Liste_der_Baudenkmäler_in_Feucht](https://de.wikipedia.org/wiki/Liste_der_Baudenkmäler_in_Feucht) in the default matrix format: 
+    [https://wikitable2json.com/api/Liste_der_Baudenkmäler_in_Feucht?lang=de](https://wikitable2json.com/api/Liste_der_Baudenkmäler_in_Feucht?lang=de)
+
+    ### Get all tables on page [Template:COVID-19_pandemic_data](https://en.wikipedia.org/wiki/Template:COVID-19_pandemic_data) with reference link text removed:
+    [https://wikitable2json.com/api/Template:COVID-19_pandemic_data?cleanRef=true](https://wikitable2json.com/api/Template:COVID-19_pandemic_data?cleanRef=true)
+paths:
+  "/api/{page}":
+    get:
+      operationId: GetByPage
+      tags:
+        - API
+      parameters:
+        - name: page
+          description: Wikipedia page to get all tables from
+          example: Arhaan_Khan
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: table
+          description: Specific tables to get by index, starting from 0
+          in: query
+          required: false
+          explode: true
+          schema:
+            type: array
+            items:
+              type: integer
+              format: int64
+        - name: lang
+          description: Wikipedia language code of the page
+          in: query
+          required: false
+          schema:
+            type: string
+            default: en
+        - name: keyRows
+          description: |
+            Specify the first x rows to use for key values to get a key-value response
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: cleanRef
+          description: |
+            Set to true to remove the reference link texts<br/>
+          in: query
+          required: false
+          schema:
+            type: string
+            default: false
+      responses:
+        "200":
+          description: A successful response.
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/matrix"
+                  - $ref: "#/components/schemas/keyValue"
+        default:
+          description: An error response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+components:
+  schemas:
+    matrix:
+      description: List of tables in the default, 2D format
+      type: array
+      items:
+        type: array
+        items:
+          type: array
+          items:
+            type: string
+    keyValue:
+      description: |
+        List of tables in the key-value format with the keys being the first x rows specified in the keyRows query<br/>
+      type: array
+      items:
+        type: array
+        items:
+          type: object
+          additionalProperties:
+            type: string
+    error:
+      description: Error schema with a message, status code, and any details
+      type: object
+      properties:
+        error:
+          type: string
+        code:
+          type: integer
+          format: int64
+        details:
+          type: object
+          additionalProperties: true

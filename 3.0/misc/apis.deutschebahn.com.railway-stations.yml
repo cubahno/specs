@@ -1,0 +1,1919 @@
+components:
+  parameters:
+    Authorization:
+      description: |
+        HTTP basic authorization
+      in: header
+      name: Authorization
+      schema:
+        type: string
+    Email:
+      deprecated: true
+      description: |
+        DEPRECATED, use basic authorization! 
+        Email or name of the user, used together with the Upload-Token.
+      in: header
+      name: Email
+      schema:
+        type: string
+    Upload-Token:
+      deprecated: true
+      description: |
+        DEPRECATED authentication via personal Upload-Token!
+        Used together with Email header.
+      in: header
+      name: Upload-Token
+      schema:
+        type: string
+  schemas:
+    AdminInboxCommandResponse:
+      properties:
+        message:
+          type: string
+        status:
+          format: int32
+          type: integer
+      required:
+        - status
+        - message
+      type: object
+    ChangePassword:
+      properties:
+        newPassword:
+          type: string
+      required:
+        - newPassword
+      type: object
+    Country:
+      description: Supported Country with its configuration
+      properties:
+        active:
+          description: Is this an active country where we collect photos?
+          type: boolean
+        code:
+          $ref: '#/components/schemas/CountryCode'
+        email:
+          description: Email Address to send photos to
+          type: string
+        name:
+          description: Name of the country
+          type: string
+        overrideLicense:
+          description: if a country needs a special license
+          type: string
+        providerApps:
+          description: array with links to provider apps
+          items:
+            $ref: '#/components/schemas/ProviderApp'
+          type: array
+        timetableUrlTemplate:
+          description: |
+            URL template for the timetable, contains {title}, {id} and
+            {DS100} placeholders which need to be replaced
+          type: string
+        twitterTags:
+          description: Twitter Tags when sharing the photo on Twitter
+          type: string
+      required:
+        - code
+        - name
+        - active
+      type: object
+    CountryCode:
+      maxLength: 2
+      minLength: 2
+      type: string
+    GeneralErrorMessage:
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        path:
+          type: string
+        status:
+          format: int32
+          type: integer
+        timestamp:
+          format: int64
+          type: integer
+      required:
+        - status
+        - message
+      type: object
+    InboxCommand:
+      description: command to import or reject an inbox entry
+      properties:
+        DS100:
+          description: DS100 attribute of a new station
+          type: string
+        active:
+          description: active flag of a new station (default true)
+          type: boolean
+        command:
+          enum:
+            - IMPORT_PHOTO
+            - IMPORT_MISSING_STATION
+            - ACTIVATE_STATION
+            - DEACTIVATE_STATION
+            - DELETE_STATION
+            - DELETE_PHOTO
+            - MARK_SOLVED
+            - REJECT
+            - CHANGE_NAME
+            - UPDATE_LOCATION
+            - PHOTO_OUTDATED
+          type: string
+        conflictResolution:
+          description: how to handle conflicts
+          enum:
+            - DO_NOTHING
+            - OVERWRITE_EXISTING_PHOTO
+            - IMPORT_AS_NEW_PRIMARY_PHOTO
+            - IMPORT_AS_NEW_SECONDARY_PHOTO
+            - IGNORE_NEARBY_STATION
+          type: string
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        id:
+          format: int64
+          type: integer
+        lat:
+          format: double
+          type: number
+        lon:
+          format: double
+          type: number
+        rejectReason:
+          description: explanation of a rejection
+          type: string
+        stationId:
+          description: ID of a new station
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - command
+      type: object
+    InboxCountResponse:
+      description: counts the pending inbox entries
+      properties:
+        pendingInboxEntries:
+          format: int64
+          type: integer
+      required:
+        - pendingInboxEntries
+      type: object
+    InboxEntry:
+      description: Represents an uploaded photo with processing state
+      properties:
+        active:
+          description: active flag provided by the user
+          type: boolean
+        comment:
+          type: string
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        createdAt:
+          format: int64
+          type: integer
+        done:
+          description: true if this photo was already imported or rejected
+          type: boolean
+        filename:
+          description: name of the file in inbox
+          type: string
+        hasConflict:
+          description: conflict with another upload or existing photo
+          type: boolean
+        hasPhoto:
+          description: this station has already a photo (conflict)
+          type: boolean
+        id:
+          format: int64
+          type: integer
+        inboxUrl:
+          description: url of the photo in the inbox
+          type: string
+        isProcessed:
+          description: was this image process (e.g. pixelated)
+          type: boolean
+        lat:
+          format: double
+          type: number
+        lon:
+          format: double
+          type: number
+        newLat:
+          format: double
+          type: number
+        newLon:
+          format: double
+          type: number
+        newTitle:
+          type: string
+        photoId:
+          description: ID of the photo
+          format: int64
+          type: integer
+        photographerEmail:
+          type: string
+        photographerNickname:
+          type: string
+        problemReportType:
+          $ref: '#/components/schemas/ProblemReportType'
+        stationId:
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - photographerNickname
+        - comment
+        - createdAt
+        - done
+        - hasPhoto
+      type: object
+    InboxResponse:
+      description: Response status of photo uploads and problem reports
+      properties:
+        crc32:
+          description: CRC32 checksum of the uploaded photo
+          format: int64
+          type: integer
+        filename:
+          description: filename in inbox
+          type: string
+        id:
+          format: int64
+          type: integer
+        inboxUrl:
+          description: url of the photo in the inbox
+          type: string
+        message:
+          type: string
+        state:
+          enum:
+            - REVIEW
+            - LAT_LON_OUT_OF_RANGE
+            - NOT_ENOUGH_DATA
+            - UNSUPPORTED_CONTENT_TYPE
+            - PHOTO_TOO_LARGE
+            - CONFLICT
+            - UNAUTHORIZED
+            - ERROR
+          type: string
+      required:
+        - state
+      type: object
+    InboxStateQueryRequest:
+      properties:
+        id:
+          format: int64
+          type: integer
+      required:
+        - id
+      type: object
+    InboxStateQueryResponse:
+      description: Inbox state query
+      properties:
+        comment:
+          type: string
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        crc32:
+          description: CRC32 checksum of the uploaded photo
+          format: int64
+          type: integer
+        createdAt:
+          format: int64
+          type: integer
+        filename:
+          description: filename in inbox
+          type: string
+        id:
+          format: int64
+          type: integer
+        inboxUrl:
+          description: url of the photo in the inbox
+          type: string
+        lat:
+          format: double
+          type: number
+        lon:
+          format: double
+          type: number
+        newLat:
+          format: double
+          type: number
+        newLon:
+          format: double
+          type: number
+        newTitle:
+          type: string
+        problemReportType:
+          $ref: '#/components/schemas/ProblemReportType'
+        rejectedReason:
+          type: string
+        state:
+          enum:
+            - UNKNOWN
+            - REVIEW
+            - CONFLICT
+            - ACCEPTED
+            - REJECTED
+          type: string
+        stationId:
+          type: string
+        title:
+          type: string
+      required:
+        - id
+        - state
+      type: object
+    License:
+      description: the only accepted type is "CC0 1.0 Universell (CC0 1.0)", the others are listed for backward compatibility
+      enum:
+        - CC0
+        - CC0 1.0 Universell (CC0 1.0)
+        - CC4
+        - CC BY-SA 4.0
+        - UNKNOWN
+      type: string
+    NextZResponse:
+      properties:
+        nextZ:
+          type: string
+      required:
+        - nextZ
+      type: object
+    OAuthRevokeTokenRequest:
+      description: OAuth2 token revokation request
+      properties:
+        token:
+          type: string
+        token_type_hint:
+          enum:
+            - access_token
+            - refresh_token
+          type: string
+      required:
+        - token
+      type: object
+    OAuthTokenRequest:
+      description: OAuth2 token request
+      properties:
+        client_id:
+          type: string
+        code:
+          type: string
+        code_verifier:
+          type: string
+        grant_type:
+          enum:
+            - authorization_code
+            - refresh_token
+          type: string
+        redirect_uri:
+          format: uri
+          type: string
+        refresh_token:
+          type: string
+      required:
+        - grant_type
+        - client_id
+        - redirect_uri
+      type: object
+    OAuthTokenResponse:
+      description: OAuth2 token response
+      properties:
+        access_token:
+          type: string
+        expires_in:
+          format: int64
+          type: integer
+        refresh_token:
+          type: string
+        scope:
+          type: string
+        redirect:
+          format: uri
+          type: string
+        token_type:
+          enum:
+            - Bearer
+          type: string
+      required:
+        - access_token
+        - scope
+        - token_type
+        - redirect
+      type: object
+    Photo:
+      description: A photo of a station
+      properties:
+        createdAt:
+          description: |
+            Timestamp when the photo was created in the railway-stations
+            database (Epoche milliseconds since 1.1.1970)
+          format: int64
+          type: integer
+        id:
+          description: Unique id of a photo
+          format: int64
+          type: integer
+        license:
+          description: Id of the license used for this photo
+          type: string
+        outdated:
+          default: false
+          description: Indicates if this photo is outdated
+          type: boolean
+        path:
+          description: URL path to the photo, to be used together with the photoBaseUrl
+          type: string
+        photographer:
+          description: Name of the photographer
+          type: string
+      required:
+        - id
+        - photographer
+        - path
+        - createdAt
+        - license
+      type: object
+    PhotoLicense:
+      description: License used by a photo
+      properties:
+        id:
+          description: Unique id of the license
+          example: CC0
+          type: string
+        name:
+          description: Name of the license to display at the photo
+          example: CC0 1.0 Universell (CC0 1.0)
+          type: string
+        url:
+          description: URL of the license to link to from the photo
+          example: https://creativecommons.org/publicdomain/zero/1.0/
+          format: uri
+          type: string
+      required:
+        - id
+        - name
+        - url
+      type: object
+    PhotoStation:
+      description: A station with its photos
+      properties:
+        country:
+          $ref: '#/components/schemas/CountryCode'
+        id:
+          description: Id of the station within the country
+          example: '7054260'
+          type: string
+        inactive:
+          default: false
+          description: Indicates if this station is inactive
+          type: boolean
+        lat:
+          description: Latitude of the station
+          format: double
+          type: number
+        lon:
+          description: Longitute of the station
+          format: double
+          type: number
+        photos:
+          description: Photos of the station. If more than one photo is given, the first one is the primary photo. List might be empty or only the primary photo provided.
+          items:
+            $ref: '#/components/schemas/Photo'
+          type: array
+        shortCode:
+          description: Provider specific short code of the station, e.g. RIL100 or DS100 for german stations
+          type: string
+        title:
+          description: Title of the station
+          example: London Victoria
+          type: string
+      required:
+        - country
+        - id
+        - title
+        - lat
+        - lon
+        - photos
+      type: object
+    PhotoStations:
+      description: Stations with photos
+      properties:
+        licenses:
+          description: List of used licenses, might be empty if no photos available
+          items:
+            $ref: '#/components/schemas/PhotoLicense'
+          type: array
+        photoBaseUrl:
+          description: Base URL of all photos
+          example: https://api.railway-stations.org/photos/
+          type: string
+        photographers:
+          description: List of all photographers, might be empty if no photos available
+          items:
+            $ref: '#/components/schemas/Photographer'
+          type: array
+        stations:
+          description: List of the stations
+          items:
+            $ref: '#/components/schemas/PhotoStation'
+          type: array
+      required:
+        - photoBaseUrl
+        - licenses
+        - photographers
+        - stations
+      type: object
+    Photographer:
+      description: The creator of a photo
+      properties:
+        name:
+          description: Username of the photographer
+          type: string
+        url:
+          description: Link to the photographers social media account or homepage
+          format: uri
+          type: string
+      required:
+        - name
+      type: object
+    Photographers:
+      description: |
+        JSON Object with photographers nickname as parameter and number
+        of photos as their value
+      type: object
+    ProblemReport:
+      description: Represents a report of a problem with a station
+      properties:
+        comment:
+          type: string
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        lat:
+          description: new latitude value for the station
+          format: double
+          type: number
+        lon:
+          description: new longitude value for the station
+          format: double
+          type: number
+        photoId:
+          description: Unique id of a photo, can be used for WRONG_PHOTO and PHOTO_OUTDATED type.
+          format: int64
+          type: integer
+        stationId:
+          type: string
+        title:
+          description: a new title for the station
+          type: string
+        type:
+          $ref: '#/components/schemas/ProblemReportType'
+      required:
+        - countryCode
+        - stationId
+        - comment
+        - type
+      type: object
+    ProblemReportType:
+      enum:
+        - WRONG_LOCATION
+        - STATION_INACTIVE
+        - STATION_ACTIVE
+        - STATION_NONEXISTENT
+        - WRONG_NAME
+        - WRONG_PHOTO
+        - PHOTO_OUTDATED
+        - OTHER
+      type: string
+    Profile:
+      description: User profile information
+      properties:
+        admin:
+          type: boolean
+        anonymous:
+          type: boolean
+        email:
+          format: email
+          type: string
+        emailVerified:
+          type: boolean
+        license:
+          $ref: '#/components/schemas/License'
+        link:
+          format: uri
+          type: string
+        nickname:
+          type: string
+        photoOwner:
+          type: boolean
+        sendNotifications:
+          type: boolean
+      required:
+        - nickname
+        - license
+        - photoOwner
+      type: object
+    ProviderApp:
+      description: Provider App information
+      properties:
+        name:
+          type: string
+        type:
+          enum:
+            - android
+            - ios
+            - web
+          type: string
+        url:
+          type: string
+      required:
+        - type
+        - name
+        - url
+      type: object
+    PublicInboxEntry:
+      description: Represents an uploaded photo under review
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        lat:
+          format: double
+          type: number
+        lon:
+          format: double
+          type: number
+        stationId:
+          type: string
+        title:
+          type: string
+      required:
+        - countryCode
+        - stationId
+        - title
+        - lat
+        - lon
+      type: object
+    RegisterProfile:
+      description: User profile information
+      properties:
+        anonymous:
+          type: boolean
+        email:
+          format: email
+          type: string
+        license:
+          $ref: '#/components/schemas/License'
+        link:
+          format: uri
+          type: string
+        newPassword:
+          type: string
+        nickname:
+          type: string
+        photoOwner:
+          type: boolean
+        sendNotifications:
+          type: boolean
+      required:
+        - nickname
+        - email
+        - license
+        - photoOwner
+      type: object
+    Station:
+      description: A railway-station object with location and optional photo
+      properties:
+        DS100:
+          description: A short code of the station, depending on the country
+          type: string
+        active:
+          type: boolean
+        country:
+          $ref: '#/components/schemas/CountryCode'
+        createdAt:
+          description: |
+            Timestamp when the photo was created in the railway-stations
+            database (Epoche milliseconds since 1.1.1970)
+          format: int64
+          type: integer
+        id:
+          deprecated: true
+          description: Unique (numeric) ID of the station per country
+          format: int64
+          type: integer
+        idStr:
+          description: Unique ID of the station per country
+          type: string
+        lat:
+          description: Latitude of the station
+          format: double
+          type: number
+        license:
+          description: |
+            License of the photo, clients need to link to an online version
+            of the license text
+          type: string
+        licenseUrl:
+          description: |
+            The URL of the license text. Clients should use this to link
+            to the online version of the license text
+          type: string
+        lon:
+          description: Longitute of the station
+          format: double
+          type: number
+        outdated:
+          type: boolean
+        photoId:
+          description: ID of the photo
+          format: int64
+          type: integer
+        photoUrl:
+          description: URL of the photo
+          type: string
+        photographer:
+          description: Nickname of the photographer
+          type: string
+        photographerUrl:
+          description: Link to the photographer
+          type: string
+        title:
+          description: Name of the station
+          type: string
+      required:
+        - idStr
+        - country
+        - title
+        - lat
+        - lon
+        - active
+      type: object
+    Statistic:
+      description: Statistic of number of stations with and without photos
+      properties:
+        countryCode:
+          $ref: '#/components/schemas/CountryCode'
+        photographers:
+          format: int64
+          type: integer
+        total:
+          format: int64
+          type: integer
+        withPhoto:
+          format: int64
+          type: integer
+        withoutPhoto:
+          format: int64
+          type: integer
+      required:
+        - total
+        - withPhoto
+        - withoutPhoto
+        - photographers
+      type: object
+    UpdateProfile:
+      description: User profile information
+      properties:
+        anonymous:
+          type: boolean
+        email:
+          format: email
+          maxLength: 100
+          minLength: 3
+          type: string
+        license:
+          $ref: '#/components/schemas/License'
+        link:
+          format: uri
+          type: string
+        nickname:
+          maxLength: 50
+          minLength: 3
+          type: string
+        photoOwner:
+          type: boolean
+        sendNotifications:
+          type: boolean
+      required:
+        - nickname
+        - email
+        - license
+        - photoOwner
+      type: object
+info:
+  description: |
+    Backend Service for https://railway-stations.org/. 
+    Sourcecode available at: https://github.com/RailwayStations/RSAPI.
+  license:
+    name: MIT
+    url: https://github.com/RailwayStations/RSAPI/blob/master/LICENSE.txt
+  title: RSAPI
+  version: 202300709.1000.74
+  x-ibm-name: rsapi
+openapi: 3.0.1
+paths:
+  /adminInbox:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InboxEntry'
+                type: array
+          description: array of inbox objects
+        '401':
+          description: not authorized
+        '403':
+          description: forbidden
+      summary: Get the current inbox, photos and problem reports under review.
+      tags:
+        - inbox
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/InboxCommand'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInboxCommandResponse'
+          description: command successfully
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminInboxCommandResponse'
+          description: Bad Request
+        '401':
+          description: not authorized
+        '403':
+          description: forbidden
+      summary: |
+        Import or reject an uploaded photo or a problem report from the inbox
+      tags:
+        - inbox
+      x-codegen-request-body-name: UploadCommand
+  /adminInboxCount:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxCountResponse'
+          description: count of pending inbox items
+      summary: Count pending inbox items
+      tags:
+        - inbox
+  /changePassword:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - deprecated: true
+          description: new password, deprecated use body message for proper encoding
+          in: header
+          name: New-Password
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChangePassword'
+        description: ChangePassword
+      responses:
+        '200':
+          description: password changed
+        '400':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Bad Request
+        '404':
+          description: User not found
+      summary: Change user password
+      tags:
+        - profile
+  /countries:
+    get:
+      parameters:
+        - description: return only active countries? Defaults to true.
+          in: query
+          name: onlyActive
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Country'
+                type: array
+          description: successful operation
+      summary: List of all supported countries with their configuration
+      tags:
+        - countries
+  /countries.json:
+    get:
+      deprecated: true
+      parameters:
+        - description: return only active countries? Defaults to true.
+          in: query
+          name: onlyActive
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Country'
+                type: array
+          description: successful operation
+      summary: List of all supported countries with their configuration
+      tags:
+        - countries
+  /emailVerification/{token}:
+    get:
+      parameters:
+        - in: path
+          name: token
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: email successfully verified
+        '404':
+          description: token not found, verification failed
+      summary: Verify eMail-Address with verification token
+      tags:
+        - profile
+  /inbox/done/{filename}:
+    get:
+      parameters:
+        - description: filename of the photo
+          in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+        - description: scale the image to the given width
+          in: query
+          name: width
+          schema:
+            format: int32
+            type: integer
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: ok
+        '404':
+          description: file not found
+      summary: downloads the given photo from the done inbox
+      tags:
+        - photoDownload
+  /inbox/processed/{filename}:
+    get:
+      parameters:
+        - description: filename of the photo
+          in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+        - description: scale the image to the given width
+          in: query
+          name: width
+          schema:
+            format: int32
+            type: integer
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: ok
+        '404':
+          description: file not found
+      summary: downloads the given photo from the processed inbox
+      tags:
+        - photoDownload
+  /inbox/rejected/{filename}:
+    get:
+      parameters:
+        - description: filename of the photo
+          in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+        - description: scale the image to the given width
+          in: query
+          name: width
+          schema:
+            format: int32
+            type: integer
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: ok
+        '404':
+          description: file not found
+      summary: downloads the given photo from the rejected inbox
+      tags:
+        - photoDownload
+  /inbox/{filename}:
+    get:
+      parameters:
+        - description: filename of the photo
+          in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+        - description: scale the image to the given width
+          in: query
+          name: width
+          schema:
+            format: int32
+            type: integer
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: ok
+        '404':
+          description: file not found
+      summary: downloads the given photo from the inbox
+      tags:
+        - photoDownload
+  /myProfile:
+    delete:
+      description: |
+        The delete request closes the account of the logged in user on railway-stations.org.
+        The account will be changed to anonymous. 
+        The email-address, nickname, link and credentials will be removed from the account.
+        All OAuth tokens will be removed as well. No further login will be possible.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Upload-Token'
+        - $ref: '#/components/parameters/Email'
+      responses:
+        '204':
+          description: delete action has been enacted, no further information
+        '401':
+          description: authorization failed
+        '403':
+          description: forbidden
+      summary: Delete the users profile.
+      tags:
+        - profile
+    get:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Upload-Token'
+        - $ref: '#/components/parameters/Email'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Profile'
+          description: ok
+        '401':
+          description: authorization failed
+        '403':
+          description: forbidden
+      summary: Get the users profile
+      tags:
+        - profile
+    post:
+      description: |
+        In case the email has been changed, only the email is saved and a new password is send.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Upload-Token'
+        - $ref: '#/components/parameters/Email'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProfile'
+        description: Userprofile
+        required: true
+      responses:
+        '200':
+          description: ok
+        '400':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Bad Request
+        '401':
+          description: authorization failed
+        '403':
+          description: forbidden
+        '409':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: conflict with existing name or email
+      summary: Update the users profile.
+      tags:
+        - profile
+      x-codegen-request-body-name: profile
+  /nextZ:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NextZResponse'
+          description: next Z-StationId value
+      summary: Get next Z-StationId for missing stations
+      tags:
+        - inbox
+  /oauth2/authorize:
+    get:
+      description: |
+        Redirect the user to this URL to start the authorization code flow.
+        Specification: https://datatracker.ietf.org/doc/html/rfc6749#section-3.1
+        PKCE: https://tools.ietf.org/html/rfc7636
+      parameters:
+        - in: query
+          name: client_id
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: scope
+          required: true
+          schema:
+            enum:
+              - all
+            type: string
+        - in: query
+          name: response_type
+          required: true
+          schema:
+            enum:
+              - code
+              - token
+            type: string
+        - in: query
+          name: redirect_uri
+          required: true
+          schema:
+            format: uri
+            type: string
+        - in: query
+          name: state
+          schema:
+            type: string
+        - description: BASE64URL-ENCODE(SHA256(ASCII(code_verifier)))
+          in: query
+          name: code_challenge
+          schema:
+            type: string
+        - in: query
+          name: code_challenge_method
+          schema:
+            enum:
+              - S256
+            type: string
+      responses:
+        '302':
+          description: redirect to `redirect_uri` with `code` and `state` query parameter
+      summary: OAuth2 authorization endpoint
+      tags:
+        - oauth
+  /oauth2/revoke:
+    post:
+      description: https://datatracker.ietf.org/doc/html/rfc7009#section-2.1
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OAuthRevokeTokenRequest'
+        required: true
+      responses:
+        '200':
+          description: successfully revoked the token
+      summary: OAuth2 revoke token endpoint
+      tags:
+        - oauth
+  /oauth2/token:
+    post:
+      description: https://datatracker.ietf.org/doc/html/rfc6749#section-3.2
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/OAuthTokenRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OAuthTokenResponse'
+          description: successfull token request
+      summary: OAuth2 token endpoint
+      tags:
+        - oauth
+  /photoStationById/{country}/{id}:
+    get:
+      parameters:
+        - description: country code
+          in: path
+          name: country
+          required: true
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+        - description: id of the station
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoStations'
+          description: successful operation
+        '404':
+          description: Station not found
+      summary: Get a railway station of a country by its id with all its photos
+      tags:
+        - photoStations
+  /photoStationsByCountry/{country}:
+    get:
+      description: |
+        Returns only the primary photo of each station.
+        Stations can optionally be filtered by 'hasPhoto' and/or 'isActive' flag.
+      parameters:
+        - description: country code
+          in: path
+          name: country
+          required: true
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+        - description: filter by photo available/missing
+          in: query
+          name: hasPhoto
+          schema:
+            type: boolean
+        - description: filter on active/inactive stations
+          in: query
+          name: isActive
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoStations'
+          description: successful operation
+      summary: List stations by country
+      tags:
+        - photoStations
+  /photoStationsByPhotographer/{photographer}:
+    get:
+      description: |
+        Returns only the photos of a station which belong to the photographer.
+        Can return several photos per station, not necessarily the primary photo.
+      parameters:
+        - description: photographer name
+          in: path
+          name: photographer
+          required: true
+          schema:
+            type: string
+        - description: country code
+          in: query
+          name: country
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoStations'
+          description: successful operation
+      summary: List stations with photos by the given photographer
+      tags:
+        - photoStations
+  /photoStationsByRecentPhotoImports:
+    get:
+      description: |
+        Returns only the recently imported photos of a station, defined by the sinceHours parameter.
+        Can return several photos per station, not necessarily the primary photo.
+      parameters:
+        - description: |
+            defines the timeframe since when to look for recent photo uploads,
+            default is 10h
+          in: query
+          name: sinceHours
+          schema:
+            default: 10
+            format: int32
+            maximum: 800
+            minimum: 1
+            type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PhotoStations'
+          description: successful operation
+      summary: List stations with photos uploaded in the last 24h
+      tags:
+        - photoStations
+  /photoUpload:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/Upload-Token'
+        - $ref: '#/components/parameters/Email'
+        - description: country code
+          in: header
+          name: Country
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+        - description: id of the railwaystation
+          in: header
+          name: Station-Id
+          schema:
+            type: string
+        - description: mime type of the image, "image/png" or "image/jpeg"
+          in: header
+          name: Content-Type
+          required: true
+          schema:
+            type: string
+        - description: name of the station, for upload of missing stations (needs to be URL-encoded with UTF-8 charset)
+          in: header
+          name: Station-Title
+          schema:
+            type: string
+        - description: latitude, for upload of missing stations
+          in: header
+          name: Latitude
+          schema:
+            format: double
+            type: number
+        - description: longitude, for upload of missing stations
+          in: header
+          name: Longitude
+          schema:
+            format: double
+            type: number
+        - description: comment of the photographer to the reviewer (needs to be URL-encoded with UTF-8 charset)
+          in: header
+          name: Comment
+          schema:
+            type: string
+        - description: is this station active?
+          in: header
+          name: Active
+          schema:
+            type: boolean
+      requestBody:
+        content:
+          application/octet-stream:
+            schema:
+              format: byte
+              type: string
+          image/jpeg:
+            schema:
+              format: byte
+              type: string
+          image/png:
+            schema:
+              format: byte
+              type: string
+        description: image, required for existing station, optional for missing stations
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: upload successful
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: authorization failed
+        '403':
+          description: forbidden
+        '409':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: photo already exists
+        '413':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: image too large (maximum 20 MB)
+      summary: Upload a new Photo
+      tags:
+        - photoUpload
+      x-codegen-request-body-name: image
+  /photographers:
+    get:
+      parameters:
+        - description: filter by country code
+          in: query
+          name: country
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Photographers'
+          description: successful operation
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Bad Request
+      summary: List of all photographers with their number of photos taken
+      tags:
+        - photographers
+  /photos/{country}/{filename}:
+    get:
+      parameters:
+        - description: country code
+          in: path
+          name: country
+          required: true
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+        - description: filename of the photo
+          in: path
+          name: filename
+          required: true
+          schema:
+            type: string
+        - description: scale the image to the given width
+          in: query
+          name: width
+          schema:
+            format: int32
+            type: integer
+      responses:
+        '200':
+          content:
+            image/jpeg:
+              schema:
+                format: binary
+                type: string
+            image/png:
+              schema:
+                format: binary
+                type: string
+          description: ok
+        '404':
+          description: file not found
+      summary: downloads the given photo
+      tags:
+        - photoDownload
+  /publicInbox:
+    get:
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/PublicInboxEntry'
+                type: array
+          description: array of public inbox objects
+      summary: Get the current public inbox, stations where photos have been uploaded
+      tags:
+        - inbox
+  /registration:
+    post:
+      deprecated: true
+      description: |
+        DEPRECATED: use oauth instead
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterProfile'
+        description: Registration information
+        required: true
+      responses:
+        '202':
+          description: registration accepted
+        '400':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Bad Request
+        '409':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: conflict with existing name or email
+        '422':
+          description: unprocessable entity, Registration input document error
+      summary: Register a new account
+      tags:
+        - profile
+      x-codegen-request-body-name: registration
+  /reportProblem:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        content:
+          '*/*':
+            schema:
+              $ref: '#/components/schemas/ProblemReport'
+        description: The problem report
+        required: true
+      responses:
+        '202':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: report successful
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: Bad Request
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/InboxResponse'
+          description: authorization failed
+        '403':
+          description: forbidden
+      summary: Report a for a Railway-Station
+      tags:
+        - inbox
+      x-codegen-request-body-name: problemReport
+  /resendEmailVerification:
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      responses:
+        '200':
+          description: email successfully sent
+      summary: Sends a new eMail-Verification mail
+      tags:
+        - profile
+  /resetPassword:
+    post:
+      deprecated: true
+      description: |
+        DEPRECATED: use oauth instead
+      parameters:
+        - description: name or email of the user
+          in: header
+          name: NameOrEmail
+          required: true
+          schema:
+            type: string
+      responses:
+        '202':
+          description: request accepted, email with new password will be sent
+        '400':
+          content:
+            text/plain:
+              schema:
+                type: string
+          description: Bad Request
+      summary: Requests a new password only
+      tags:
+        - profile
+  /stations:
+    get:
+      deprecated: true
+      parameters:
+        - description: filter by country code, defaults to "de" if missing, limits to max three countries
+          in: query
+          name: country
+          schema:
+            items:
+              $ref: '#/components/schemas/CountryCode'
+            type: array
+        - description: filter by photo available/missing
+          in: query
+          name: hasPhoto
+          schema:
+            type: boolean
+        - description: filter by nickname of a photographer
+          in: query
+          name: photographer
+          schema:
+            type: string
+        - description: filter on active/inactive stations
+          in: query
+          name: active
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Station'
+                type: array
+          description: successful operation
+      summary: Finds railway stations by various query criteria
+      tags:
+        - stations
+  /stats:
+    get:
+      parameters:
+        - description: filter by country code
+          in: query
+          name: country
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistic'
+          description: successful operation
+        '404':
+          description: Country not found
+      summary: Overall statistic of photos with and without photos
+      tags:
+        - statistic
+  /userInbox:
+    get:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InboxStateQueryResponse'
+                type: array
+          description: array of InboxStateQueryResponse objects
+      summary: Query all uploads of the authorized user
+      tags:
+        - inbox
+    post:
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              items:
+                $ref: '#/components/schemas/InboxStateQueryRequest'
+              type: array
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/InboxStateQueryResponse'
+                type: array
+          description: array of InboxStateQueryResponse objects
+      summary: Query the state of photo uploads of the authorized user
+      tags:
+        - inbox
+      x-codegen-request-body-name: UploadStateQueries
+  /{country}/photographers:
+    get:
+      deprecated: true
+      parameters:
+        - description: filter by country code
+          in: path
+          name: country
+          required: true
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Photographers'
+          description: successful operation
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Bad Request
+        '404':
+          description: Country not found
+      summary: List of all photographers of a given country with their number of photos taken
+      tags:
+        - photographers
+  /{country}/stations:
+    get:
+      deprecated: true
+      parameters:
+        - description: filter by country code
+          in: path
+          name: country
+          required: true
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+        - description: filter by photo availalbe/missing
+          in: query
+          name: hasPhoto
+          schema:
+            type: boolean
+        - description: filter by nickname of a photographer
+          in: query
+          name: photographer
+          schema:
+            type: string
+        - description: filter on active/inactive stations
+          in: query
+          name: active
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                items:
+                  $ref: '#/components/schemas/Station'
+                type: array
+          description: successful operation
+        '404':
+          description: Country not found
+      summary: Finds railway stations by various query criteria
+      tags:
+        - stations
+  /{country}/stations/{id}:
+    get:
+      deprecated: true
+      parameters:
+        - description: country code
+          in: path
+          name: country
+          required: true
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+        - description: id of the station
+          in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Station'
+          description: successful operation
+        '404':
+          description: Station not found
+      summary: Find a railway station by its ID
+      tags:
+        - stations
+  /{country}/stats:
+    get:
+      deprecated: true
+      parameters:
+        - description: filter by country code
+          in: path
+          name: country
+          required: true
+          schema:
+            $ref: '#/components/schemas/CountryCode'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Statistic'
+          description: successful operation
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: Bad Request
+        '404':
+          description: Country not found
+      summary: Statistic of photos with and without photos by country
+      tags:
+        - statistic
+servers:
+  - url: https://apis.deutschebahn.com/db-api-marketplace/apis/api.railway-stations.org
+tags:
+  - description: Photos of railway stations
+    externalDocs:
+      description: Find out more
+      url: https://railway-stations.org
+    name: bahnhofsfotos
+x-ibm-configuration:
+  phase: realized
+  testable: true
+  enforced: true
+  application-authentication:
+    certificate: false
+  type: rest
+  cors:
+    enabled: true
+x-ibm-endpoints:
+  - url: https://apis.deutschebahn.com/db-api-marketplace/apis/api.railway-stations.org

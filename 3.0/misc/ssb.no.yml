@@ -1,0 +1,129 @@
+openapi: 3.0.1
+info:
+  title: 'API: Ferdige datasett'
+  version: '0'
+  description: >-
+    API med 250 ferdige datasett fra SSBs statistikkbank
+    [https://data.ssb.no/api/v0/dataset?lang=no](https://data.ssb.no/api/v0/dataset?lang=no)
+  contact:
+    email: statistikkbanken@ssb.no
+  license:
+    name: CC-4 BY
+    url: 'https://creativecommons.org/licenses/by/4.0/deed.no'
+externalDocs:
+  description: Dokumentasjon / Brukerveiledning
+  url: 'https://ssb.no/api/slik-bruker-du-api-med-ferdige-datasett'
+servers:
+  - url: '{protocol}://data.ssb.no/api/'
+    variables:
+      protocol:
+        enum:
+          - http
+          - https
+        default: https
+
+paths:
+  /v0/dataset/list:
+    get:
+      summary: homepage
+      description: homepage
+      responses:
+        200:
+          description: OK. Returns html homepage with list
+          content:
+            'text/html':
+              schema:
+                type: object
+
+  /v0/dataset/list.{format}:
+    get:
+      summary: list datasets
+      description: List all datasets
+      parameters:
+        - name: format
+          in: path
+          description: json or csv
+          required: true
+          schema:
+            type: string
+
+        - name: lang
+          description: 'Language, either en or no. no is default'
+          in: query
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: OK. Returns a list of datasets
+        404:
+          $ref: '#/components/responses/NotFound'
+
+
+
+  /v0/dataset/{id}.{format}:
+    get:
+      summary: list datasets
+      description: homepage
+      parameters:
+        - name: format
+          in: path
+          description: output format either json or csv
+          required: true
+          schema:
+            type: string
+        - name: id
+          in: path
+          description: id
+          required: true
+          schema:
+            type: string
+        - name: lang
+          in: query
+          schema:
+            type: string
+
+      responses:
+        200:
+          description: OK. Returns a list
+          content:
+              text/html:
+                schema:
+                  type: object
+
+        404:
+           $ref: '#/components/responses/NotFound'
+components:
+
+  responses:
+    BadRequest:
+      description: '400. Bad request. The request was badly formed, i.e. the client has used an invalid request. The response will include an error providing further information'
+      content:
+        text:
+          schema:
+            $ref: '#/components/schemas/ErrorText'
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        text/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+    NotFound:
+      description: '404 Not found. The requested resource did not exist. The response will include an error providing further information'
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+        text/xml:
+          schema:
+            $ref: '#/components/schemas/Error'
+  schemas:
+    ErrorText:
+      type: string
+    Error:
+      type: object
+      properties:
+        message:
+          type: string
+      required:
+        - mesage

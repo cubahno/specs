@@ -1,0 +1,456 @@
+openapi: 3.0.0
+info:
+  version: 0.0.2
+  title: TheCocktailDB
+  description: |
+    # TheCocktailDB Overview
+    TheCocktailDB is an open, crowdsourced database of cocktails and other drinks from around the world. Its JSON API lets users search for drinks based on various criteria, from a drink's name to the glass it's served in.
+servers:
+  - url: https://thecocktaildb.com/api/json/v1
+    description: Public server
+paths:
+  /1/search.php:
+    get:
+      operationId: searchDrinks
+      summary: Searches for drinks by name or by their first letter. Can also search for ingredients. Searches are not case sensitive.
+      description: Searches for drinks by name or by their first letter. Can also search for ingredients. Searches are not case sensitive.
+      tags:
+        - Public
+      parameters:
+        - name: s
+          description: |
+            Modifies the endpoint to search for drinks by name. Includes partial matches. For example, "jito" will return "Mojito" as well as "Mojito Extra" and "Blueberry Mojito."
+
+            Returns null if no results are found. Otherwise, returns an array containing one or more **drinkObject**.
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: f
+          description: |
+            Modifies the endpoint to search for drinks by the first letter of their names. For example, "m" will return will return "Mojito" but not "Blueberry Mojito."
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: i
+          description: |
+            Modifies the endpoint to search for ingredients by name. Does not include partial matches. For example, "gin" will return "Gin," but not "ginger."
+          in: query
+          schema:
+            type: string
+          required: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/searchResultDrink'
+                  - $ref: '#/components/schemas/searchResultIngredient'
+  /1/lookup.php:
+    get:
+      summary: Searches for drinks or ingredients by their exact ID in the database.
+      description: Searches for drinks or ingredients by their exact ID in the database.
+      operationId: lookupDrinks
+      tags:
+        - Public
+      parameters:
+        - name: i
+          description: |
+            Modifies the endpoint to search for drinks by exact ID.
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: iid
+          description: |
+            Modifies the endpoint to search for ingredients by exact ID.
+          in: query
+          schema:
+            type: string
+          required: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/searchResultDrink'
+                  - $ref: '#/components/schemas/searchResultIngredient'
+  /1/random.php:
+    get:
+      summary: Returns a random drink.
+      description: Returns a random drink.
+      operationId: randomDrinks
+      tags:
+        - Public
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/searchResultDrink'
+  /1/filter.php:
+    get:
+      summary: Filters drinks based on search criteria.
+      description: Filters drinks based on search criteria.
+      operationId: filterDrinks
+      tags:
+        - Public
+      parameters:
+        - name: i
+          description: |
+            Ingredient to search drinks by.
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: a
+          description: |
+            Searches for drinks by alcohol content.
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: c
+          description: |
+            Searches for drinks by their category.
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: g
+          description: |
+            Searches for drinks by their serving glass.
+          in: query
+          schema:
+            type: string
+          required: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/searchResultFilter'
+  /1/list.php:
+    get:
+      summary: Returns the list of options for each parameter of the **filter** endpoint.
+      description: Returns the list of options for each parameter of the **filter** endpoint.
+      operationId: listDrinks
+      tags:
+        - Public
+      parameters:
+        - name: c
+          description: |
+            Lists the **c** (category) parameter's options.
+          in: query
+          schema:
+            type: string
+            enum:
+              - list
+          required: false
+        - name: g
+          description: |
+            Lists the **g** (glass) parameter's options.
+          in: query
+          schema:
+            type: string
+            enum:
+              - list
+          required: false
+        - name: i
+          description: |
+            Lists the **i** (ingredient) parameter's options.
+          in: query
+          schema:
+            type: string
+            enum:
+              - list
+          required: false
+        - name: a
+          description: |
+            Lists the **a** (alcoholic) parameter's options.
+          in: query
+          schema:
+            type: string
+            enum:
+              - list
+          required: false
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/searchResultListCategory'
+                  - $ref: '#/components/schemas/searchResultListGlass'
+                  - $ref: '#/components/schemas/searchResultListIngredient'
+                  - $ref: '#/components/schemas/searchResultListAlcoholic'
+components:
+  schemas:
+    searchResultDrink:
+      type: object
+      properties:
+        drinks:
+          type: array
+          description: The array of search results.
+          items:
+            $ref: '#/components/schemas/drinkObject'
+    drinkObject:
+      properties:
+        idDrink:
+          type: integer
+          description: The ID number of the drink in the database.
+        strDrink:
+          type: string
+          description: The name of the drink.
+        strDrinkAlternate:
+          type: string
+          description: The alternate name of the drink.
+        strTags:
+          type: string
+          description: All of the drink's metadata tags.
+        strVideo:
+          type: string
+          description: The URL for the video associated with the drink.
+        strCategory:
+          type: string
+          description: The metadata tag describing the drink's type.
+        strIBA:
+          type: string
+          description: The metadata tag describing the drink's International Bartenders Association (IBA) category.
+        strAlcoholic:
+          type: string
+          description: The metadata tag describing whether or not the drink is alcoholic.
+        strGlass:
+          type: string
+          description: The metadata tag describing the drink's serving glass.
+        strInstructions:
+          type: string
+          description: Instructions for making the drink in English.
+        strInstructionsES:
+          type: string
+          description: Instructions for making the drink in Spanish.
+        strInstructionsDE:
+          type: string
+          description: Instructions for making the drink in German.
+        strInstructionsFR:
+          type: string
+          description: Instructions for making the drink in French.
+        strInstructionsIT:
+          type: string
+          description: Instructions for making the drink in Italian.
+        strInstructionsZH-HANS:
+          type: string
+          description: Instructions for making the drink in Chinese Simplified Script.
+        strInstructionsZH-HANT:
+          type: string
+          description: Instructions for making the drink in Chinese Traditional Script.
+        strIngredient1:
+          type: string
+          description: Name of the first ingredient.
+        strIngredient2:
+          type: string
+          description: Name of the second ingredient.
+        strIngredient3:
+          type: string
+          description: Name of the third ingredient.
+        strIngredient4:
+          type: string
+          description: Name of the fourth ingredient.
+        strIngredient5:
+          type: string
+          description: Name of the fifth ingredient.
+        strIngredient6:
+          type: string
+          description: Name of the sixth ingredient.
+        strIngredient7:
+          type: string
+          description: Name of the seventh ingredient.
+        strIngredient8:
+          type: string
+          description: Name of the eighth ingredient.
+        strIngredient9:
+          type: string
+          description: Name of the ninth ingredient.
+        strIngredient10:
+          type: string
+          description: Name of the tenth ingredient.
+        strIngredient11:
+          type: string
+          description: Name of the eleventh ingredient.
+        strIngredient12:
+          type: string
+          description: Name of the twelfth ingredient.
+        strIngredient13:
+          type: string
+          description: Name of the thirteenth ingredient.
+        strIngredient14:
+          type: string
+          description: Name of the fourteenth ingredient.
+        strIngredient15:
+          type: string
+          description: Name of the fifteenth ingredient.
+        strMeasure1:
+          type: string
+          description: The exact amount of the first ingredient.
+        strMeasure2:
+          type: string
+          description: The exact amount of the second ingredient.
+        strMeasure3:
+          type: string
+          description: The exact amount of the third ingredient.
+        strMeasure4:
+          type: string
+          description: The exact amount of the fourth ingredient.
+        strMeasure5:
+          type: string
+          description: The exact amount of the fifth ingredient.
+        strMeasure6:
+          type: string
+          description: The exact amount of the sixth ingredient.
+        strMeasure7:
+          type: string
+          description: The exact amount of the seventh ingredient.
+        strMeasure8:
+          type: string
+          description: The exact amount of the eighth ingredient.
+        strMeasure9:
+          type: string
+          description: The exact amount of the ninth ingredient.
+        strMeasure10:
+          type: string
+          description: The exact amount of the tenth ingredient.
+        strMeasure11:
+          type: string
+          description: The exact amount of the eleventh ingredient.
+        strMeasure12:
+          type: string
+          description: The exact amount of the twelfth ingredient.
+        strMeasure13:
+          type: string
+          description: The exact amount of the thirteenth ingredient.
+        strMeasure14:
+          type: string
+          description: The exact amount of the fourteenth ingredient.
+        strMeasure15:
+          type: string
+          description: The exact amount of the fifteenth ingredient.
+        strImageSource:
+          type: string
+          description: The drink image's URL.
+        strImageAttribution:
+          type: string
+          description: The description of the image's source.
+        strCreativeCommonsConfirmed:
+          type: string
+          description: Whether or not the image has a Creative Commons license.
+        dateModified:
+          type: string
+          description: The date the drink was last modified. Format is YYYY-MM-DD HH:MM:SS.
+    searchResultIngredient:
+      type: object
+      properties:
+        ingredients:
+          type: array
+          description: The array of search results.
+          items:
+            $ref: '#/components/schemas/ingredientObject'
+    ingredientObject:
+      properties:
+        idIngredient:
+          type: integer
+          description: The ID number of the ingredient in the database.
+        strIngredient:
+          type: string
+          description: The name of the ingredient.
+        strDescription:
+          type: string
+          description: The description of the ingredient.
+        strType:
+          type: string
+          description: The type of the ingredient.
+        strAlcohol:
+          type: string
+          description: Whether or not the ingredient is alcoholic.
+        strABV:
+          type: string
+          description: The ABV (alcohol by volume) of the ingredient.
+    searchResultFilter:
+      type: object
+      properties:
+        drinks:
+          type: array
+          description: The array of search results.
+          items:
+            $ref: '#/components/schemas/filterObject'
+    filterObject:
+      properties:
+        strDrink:
+          type: string
+          description: The name of the drink.
+        strDrinkThumb:
+          type: string
+          description: The URL of the thumbnail of the drink's image.
+        idDrink:
+          type: integer
+          description: The ID number of the drink in the database.
+    searchResultListCategory:
+      type: object
+      properties:
+        drinks:
+          type: array
+          description: The array of search results.
+          items:
+            $ref: '#/components/schemas/categoryListObject'
+    categoryListObject:
+      properties:
+        strCategory:
+          type: string
+          description: The metadata tag describing the drink's type.
+    searchResultListGlass:
+      type: object
+      properties:
+        drinks:
+          type: array
+          description: The array of search results.
+          items:
+            $ref: '#/components/schemas/glassListObject'
+    glassListObject:
+      properties:
+        strGlass:
+          type: string
+          description: The metadata tag describing the drink's serving glass.
+    searchResultListIngredient:
+      type: object
+      properties:
+        drinks:
+          type: array
+          description: The array of search results.
+          items:
+            $ref: '#/components/schemas/ingredientListObject'
+    ingredientListObject:
+      properties:
+        strIngredient1:
+          type: string
+          description: The name of the ingredient.
+    searchResultListAlcoholic:
+      type: object
+      properties:
+        drinks:
+          type: array
+          description: The array of search results.
+          items:
+            $ref: '#/components/schemas/alcoholicListObject'
+    alcoholicListObject:
+      properties:
+        strAlcoholic:
+          type: string
+          description: The metadata tag describing whether or not the drink is alcoholic.

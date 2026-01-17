@@ -1,0 +1,952 @@
+openapi: 3.0.1
+info:
+  title: Navigation Service
+  description: A service to help navigating through content mainly for SPAs/PWAs
+  contact:
+    name: Crownpeak Technology GmbH
+    url: https://e-spirit.com
+    email: support@crownpeak.com
+  version: 1.10.11
+
+security:
+  - bearerAuth: []
+paths:
+  /navigation/{navigationId}:
+    parameters:
+      - $ref: '#/components/parameters/language'
+      - $ref: '#/components/parameters/Accept-Language'
+
+    get:
+      operationId: get
+      summary: Get a navigation
+      description: Request a specified navigation
+      tags:
+        - Navigation CRUD
+      parameters:
+      - $ref: '#/components/parameters/navigationId'
+      - $ref: '#/components/parameters/depth'
+      - $ref: '#/components/parameters/format'
+      - $ref: '#/components/parameters/IfNoneMatch'
+
+      responses:
+        200:
+          $ref: '#/components/responses/NavigationFound'
+        304:
+          $ref: '#/components/responses/NotModified'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      operationId: upsert
+      summary: Create or update a navigation
+      description: Creates or updates a navigation with the specified id. The previous navigation will be completely replaced.
+      tags:
+        - Navigation CRUD
+      parameters:
+      - $ref: '#/components/parameters/navigationId'
+      requestBody:
+        $ref: '#/components/requestBodies/NavigationUpsertRequest'
+      responses:
+        201:
+          $ref: '#/components/responses/NavigationUpsertSuccess'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      operationId: deleteElement
+      summary: Delete a navigation.
+      description: Deletes a navigation with the specified id. Does not care whether the navigation existed at all.
+      tags:
+        - Navigation CRUD
+      parameters:
+      - $ref: '#/components/parameters/navigationId'
+      responses:
+        204:
+          $ref: '#/components/responses/Deleted'
+
+
+  /navigation:
+    parameters:
+      - $ref: '#/components/parameters/language'
+      - $ref: '#/components/parameters/Accept-Language'
+
+    post:
+      operationId: insert
+      summary: Create a navigation
+      description: Create a navigation with a random id.
+      tags:
+        - Navigation CRUD
+      requestBody:
+        $ref: '#/components/requestBodies/NavigationUpsertRequest'
+      responses:
+        201:
+          $ref: '#/components/responses/NavigationUpsertSuccess'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+    get:
+      operationId: list
+      summary: List navigation identifiers
+      description: Lists all navigations identifiers (tenant, navigation and language id), paginated.
+      tags:
+        - Navigation List
+      parameters:
+      - name: from
+        description: Start listing from specified navigation id alphabetically, inclusive.
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/NavigationId'
+      - name: after
+        description: Start listing from specified navigation id alphabetically, exclusive.
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/NavigationId'
+      - name: before
+        description: Start listing up to specified navigation id alphabetically, exclusive.
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/NavigationId'
+      - name: until
+        description: Start listing up to specified navigation id alphabetically, inclusive.
+        in: query
+        required: false
+        schema:
+          $ref: '#/components/schemas/NavigationId'
+
+      - name: limit
+        description: "Limits the amount of returned results. ATTENTION: the limit is calculated by distinct navigation ids. As such the amount of entries in the response list might be higher than the limit!"
+        in: query
+        required: false
+        schema:
+          minimum: 0
+          type: integer
+          format: int32
+          nullable: true
+          default: 50
+
+      responses:
+        200:
+          description: A list of navigation identifiers.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NavSearchResult'
+
+  /navigation/{navigationId}/node/{elementId}:
+    parameters:
+      - $ref: '#/components/parameters/navigationId'
+      - $ref: '#/components/parameters/navElementId'
+      - $ref: '#/components/parameters/language'
+      - $ref: '#/components/parameters/Accept-Language'
+
+    get:
+      operationId: getSubElement
+      summary: Get a subtree of a navigation
+      description: Returns a subtree of a navigation with the specified navigation element as the root element.
+          Should the navigation contain multiple elements with the same id, the first found will be returned.
+      tags:
+        - Navigation Subtree
+      parameters:
+      - $ref: '#/components/parameters/depth'
+      - $ref: '#/components/parameters/format'
+      - $ref: '#/components/parameters/IfNoneMatch'
+
+      responses:
+        200:
+          $ref: '#/components/responses/NavigationFound'
+        304:
+          $ref: '#/components/responses/NotModified'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    put:
+      operationId: upsertSubElement
+      summary: Update a subtree of a navigation
+      description: Finds the specified navigation element and replaces with with the navigation in this request.
+      tags:
+        - Navigation Subtree
+      requestBody:
+        $ref: '#/components/requestBodies/NavigationUpsertRequest'
+
+      responses:
+        201:
+          $ref: '#/components/responses/NavigationUpsertSuccess'
+        400:
+          $ref: '#/components/responses/BadRequest'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+    delete:
+      operationId: deleteSubElement
+      summary: Delete a subtree of a navigation
+      description: Deletes a specified navigation element. Any of its children are gone as well. Does not care whether the navigation or the element existed.
+      tags:
+        - Navigation Subtree
+      responses:
+        204:
+          $ref: '#/components/responses/Deleted'
+
+
+  /navigation/{navigationId}/node/{elementId}/path:
+    parameters:
+      - $ref: '#/components/parameters/language'
+      - $ref: '#/components/parameters/Accept-Language'
+
+    get:
+      operationId: breadCrumbsToElement
+      summary: Get breadcrumbs to element
+      description: Returns a flat array of navigation elements, which represent the path from the root element (which is always the first element in the array) to the specified element (which is always the last element in the array).
+      tags:
+        - Breadcrumbs
+      parameters:
+        - $ref: '#/components/parameters/navigationId'
+        - $ref: '#/components/parameters/navElementId'
+        - $ref: '#/components/parameters/IfNoneMatch'
+      responses:
+        200:
+          description: The array of navigation elements.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Array<NavElementPathResponseV1>'
+        304:
+          $ref: '#/components/responses/NotModified'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /navigation/{navigationId}/by-seo-route/{seoRoute}:
+    get:
+      operationId: seoRoute
+      summary: Get a either a subtree of or a complete navigation identified by the seo route
+      description:  Returns a subtree of a navigation starting from the first found element identified with a matching value for the seo route attribute. If no such element can be found the seoRouteRegex attribute is used for matching instead.
+      tags:
+        - Search by SEO Route
+      parameters:
+        - $ref: '#/components/parameters/navigationId'
+        - name: seoRoute
+          description: The seoRoute to be matched, e.g. /foo/bar. If you don't supply a value, the complete navigation starting from the root element is returned. Leading and trailing "/" are trimmed away while matching.
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: all
+          description: If set, returns the complete navigation instead of the identified subtree. Value is irrelevant, except for "false"
+          in: path
+          required: false
+          schema:
+            type: string
+        - $ref: '#/components/parameters/depth'
+        - $ref: '#/components/parameters/format'
+        - $ref: '#/components/parameters/IfNoneMatch'
+        - $ref: '#/components/parameters/languageOptional'
+        - $ref: '#/components/parameters/Accept-LanguageOptional'
+      responses:
+        200:
+          $ref: '#/components/responses/NavigationFound'
+        304:
+          $ref: '#/components/responses/NotModified'
+        404:
+          $ref: '#/components/responses/NotFound'
+
+  /config/authentication:
+    get:
+      operationId: get
+      summary: Get authentication config
+      description: Returns the authentication config of the tenant. If no config was persisted returns the default config.
+      tags:
+        - Authentication configuration
+
+      responses:
+        200:
+          description: The previously persisted config. If no config was persisted returns the default config.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationConfig'
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+    put:
+      operationId: put
+      summary: Upsert authentication config
+      description: Creates or updates the authentication config. Be careful! Due to a cache it can take up to 5 minutes for the change to take effect.
+      tags:
+        - Authentication configuration
+      requestBody:
+        $ref: '#/components/requestBodies/AuthenticationConfig'
+
+      responses:
+        200:
+          description: The config was successfully upserted
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+    delete:
+      operationId: delete
+      summary: Delete authentication config
+      description: Deletes the authentication config. Due to a cache it can take up to 5 minutes for the change to take effect. After deleting the 
+          config, the default config will be used for auth.
+      tags:
+        - Authentication configuration
+
+      responses:
+        204:
+          description: The config was successfully deleted.
+        401:
+          $ref: '#/components/responses/Unauthorized'
+        403:
+          $ref: '#/components/responses/Forbidden'
+
+  /docs:
+    get:
+      summary: User-facing endpoint to see all available documentation for this service
+      operationId: docs
+      tags:
+        - Documentation
+      parameters: []
+      responses:
+        200:
+          description: A webpage with links.
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /docs/swagger-ui:
+    get:
+      summary: Link to the Swagger UI
+      operationId: swaggerUi
+      tags:
+        - Documentation
+      parameters: []
+      responses:
+        200:
+          description: The Swagger UI.
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /docs/redoc:
+    get:
+      summary: Link to ReDoc
+      operationId: reDoc
+      tags:
+        - Documentation
+      parameters: []
+      responses:
+        200:
+          description: The ReDoc.
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /docs/rapidoc:
+    get:
+      summary: Link to RapiDoc
+      operationId: rapiDoc
+      tags:
+        - Documentation
+      parameters: []
+      responses:
+        200:
+          description: The RapiDoc.
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /docs/user:
+    get:
+      summary: Provide User documentation
+      operationId: userDocs
+      tags:
+        - Documentation
+      parameters:
+      - $ref: '#/components/parameters/language'
+      - $ref: '#/components/parameters/Accept-Language'
+      responses:
+        200:
+          description: The documentation for this service.
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /docs/releasenotes:
+    get:
+      summary: Provide release notes
+      operationId: releasenotesDocs
+      tags:
+        - Documentation
+      parameters:
+        - $ref: '#/components/parameters/language'
+        - $ref: '#/components/parameters/Accept-Language'
+      responses:
+        200:
+          description: The release notes for this service.
+          content:
+            text/html:
+              schema:
+                type: string
+
+  /docs/api/swagger.yml:
+    get:
+      operationId: swaggerYamlRedirect
+      summary: Provide API definition as swagger file
+      tags:
+        - Documentation
+      parameters: []
+      responses:
+        default:
+          description: The swagger.yml file
+          content:
+            application/x-yaml:
+              schema:
+                type: string
+components:
+  schemas:
+    NavigationId:
+      type: string
+      nullable: false
+
+    NavElementV1Request:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NavElementId'
+        label:
+          $ref: '#/components/schemas/Label'
+        seoRoute:
+          $ref: '#/components/schemas/SeoRoute'
+        seoRouteRegex:
+          $ref: '#/components/schemas/SeoRouteRegex'
+        contentReference:
+          $ref: '#/components/schemas/ContentReference'
+        customData:
+          $ref: '#/components/schemas/CustomData'
+        visible:
+          $ref: '#/components/schemas/Visible'
+        permissions:
+          $ref: '#/components/schemas/Permissions'
+        _links:
+          $ref: '#/components/schemas/Links'
+        children:
+          description: A list of child navigation elements
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/NavElementV1Request'
+
+    NavElementV1Response:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NavElementId'
+        label:
+          $ref: '#/components/schemas/Label'
+        seoRoute:
+          $ref: '#/components/schemas/SeoRoute'
+        seoRouteRegex:
+          $ref: '#/components/schemas/SeoRouteRegex'
+        contentReference:
+          $ref: '#/components/schemas/ContentReference'
+        customData:
+          $ref: '#/components/schemas/CustomData'
+        visible:
+          $ref: '#/components/schemas/Visible'
+        permissions:
+          $ref: '#/components/schemas/Permissions'
+        _links:
+          $ref: '#/components/schemas/Links'
+        hasChildren:
+          description: True if this element has children. Relevant when children might be cut off by the depth request parameter.
+          type: boolean
+        children:
+          description: A list of child navigation elements
+          type: array
+          nullable: true
+          items:
+            $ref: '#/components/schemas/NavElementV1Response'
+
+    NavElementCaasResponse:
+      description: A format that is optimised for frontend development using CAAS. Instead of the standard navigation tree format, the navigation is split into multiple data structures according to use cases.
+      type: object
+      properties:
+        idMap:
+          $ref: '#/components/schemas/IdMap'
+        seoRouteMap:
+          $ref: '#/components/schemas/SeoRouteMap'
+        structure:
+          $ref: '#/components/schemas/Structure'
+        pages:
+          $ref: '#/components/schemas/Pages'
+        meta:
+          $ref: '#/components/schemas/Meta'
+
+    IdMap:
+      description: This map contains all nodes of the navigation mapped by their id. The root element of the default navigation tree is explicitely excluded, as it is usually not relevant when working with navigations in the frontend.
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/NavMappedElement'
+
+    SeoRouteMap:
+      description: "This map contains all nav element ids mapped by their seo routes. In case of duplicates, the id of the first element found is
+      used. If you queried a dynamic seo route that was matched by the seoRouteRegex, your query seoRoute with the corresponding result is added as
+      an entry to this map."
+      type: object
+      additionalProperties:
+        $ref: '#/components/schemas/NavElementId'
+
+    Pages:
+      description: This map contains chosen seo routes mapped by their special behaviour. Currently contains at least an index, which is set to the seo route of the navigation root element (that was explicitely excluded from other maps). It is generally assumed that when using CAAS, at least one other nav element will have the same seo route, so that you can get its id using the seo route map.
+      type: object
+      properties:
+        index:
+          $ref: '#/components/schemas/SeoRoute'
+      additionalProperties:
+        $ref: '#/components/schemas/SeoRoute'
+
+    Meta:
+      description: Contains meta information about this navigation.
+      type: object
+      properties:
+        identifier:
+          $ref: '#/components/schemas/Identifier'
+
+    Identifier:
+      description: Uniquely identifies this navigation.
+      type: object
+      properties:
+        tenantId:
+          type: string
+          nullable: false
+        navigationId:
+          type: string
+          nullable: false
+        languageId:
+          type: string
+          nullable: false
+
+    Structure:
+      description: A list of navigation trees, with the root elements being the direct children of the source navigation root element. Only nav elements that are visible and have non-null content references are included.
+      type: array
+      items:
+        $ref: '#/components/schemas/StructureNode'
+
+    StructureNode:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NavElementId'
+        children:
+          type: array
+          items:
+            $ref: '#/components/schemas/StructureNode'
+
+    NavMappedElement:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NavElementId'
+        parentIds:
+          description: Contains the parent ids of the nodes. The parent id of the root element is excluded.
+          type: array
+          items:
+            $ref: '#/components/schemas/NavElementId'
+        label:
+          $ref: '#/components/schemas/Label'
+        contentReference:
+          $ref: '#/components/schemas/ContentReference'
+        caasDocumentId:
+          description: If the contentReference is a CAAS url, this value is the parsed document uuid from that url. Otherwise this value is null.
+          type: string
+          nullable: true
+        seoRoute:
+          $ref: '#/components/schemas/SeoRoute'
+        seoRouteRegex:
+          $ref: '#/components/schemas/SeoRouteRegex'
+        customData:
+          $ref: '#/components/schemas/CustomData'
+        permissions:
+          $ref: '#/components/schemas/Permissions'
+
+    NavElementId:
+      description: Id of this navigation tree element.
+      type: string
+      nullable: false
+
+    Label:
+      description: The label of this navigation element.
+      type: string
+      nullable: false
+
+    ContentReference:
+      description: The actual location of the content, for example a CaaS url.
+      type: string
+      nullable: true
+
+    SeoRoute:
+      description: The url where a customer might access this content.
+      type: string
+      nullable: true
+
+    SeoRouteRegex:
+      description: The regex pattern that is used to identify elements with seo routes that contain variables.
+      type: string
+      nullable: true
+
+    CustomData:
+      description: Arbitrary custom data that you can provide.
+      type: object
+      nullable: true
+      maximum: 5
+      additionalProperties:
+        oneOf:
+          - type: string
+          - type: number
+          - type: boolean
+
+    Visible:
+      description: Whether this element of the navigation should actually be displayed in the PWA/SPA.
+      type: boolean
+
+    Permissions:
+      description: Permission information. Typically a list of roles that are allowed/forbidden to see this navigation element.
+      type: object
+      nullable: true
+      properties:
+        allowed:
+          type: array
+          nullable: false
+          items:
+            type: string
+        forbidden:
+          type: array
+          nullable: false
+          items:
+            type: string
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: integer
+          nullable: false
+        message:
+          type: string
+          nullable: true
+        traceId:
+          type: string
+          nullable: false
+
+    Links:
+      description: HATEOAS links. Typically contains at least a self link.
+      type: object
+      required: false
+      nullable: false
+      additionalProperties:
+        $ref: '#/components/schemas/Link'
+
+    Link:
+      description: A single link.
+      type: object
+      properties:
+        href:
+          type: string
+          nullable: false
+
+    NavSearchResult:
+      description: List of navigations identifiers.
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/Links'
+        _embedded:
+          type: array
+          items:
+            $ref: '#/components/schemas/NavSearchResultItem'
+
+    NavSearchResultItem:
+      description: A single navigation identifier.
+      type: object
+      properties:
+        _links:
+          $ref: '#/components/schemas/Links'
+        tenantId:
+          type: string
+        navigationId:
+          type: string
+        languageId:
+          type: string
+
+    Array<NavElementPathResponseV1>:
+      description: Array of navigation elements
+      type: array
+      items:
+        $ref: '#/components/schemas/NavElementPathResponseV1'
+
+    NavElementPathResponseV1:
+      description: A single element in the path
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NavElementId'
+        label:
+          description: The label of this navigation element.
+          type: string
+        seoRoute:
+          description: The url where a customer might access this content.
+          type: string
+          nullable: true
+        contentReference:
+          description: The actual location of the content, for example a CaaS url.
+          type: string
+          nullable: true
+        customData:
+          $ref: '#/components/schemas/CustomData'
+        visible:
+          description: Whether this element of the navigation should actually be displayed in the PWA/SPA.
+          type: boolean
+        _links:
+          $ref: '#/components/schemas/Links'
+
+    AuthenticationConfig:
+      type: object
+      properties:
+        authenticationRequirements:
+          description: The list of authentication requirements. Only the AuthenticationRequirement with the most specific url prefix will be evaluated during auth.
+          type: array
+          items:
+            $ref: '#/components/schemas/AuthenticationRequirement'
+
+    AuthenticationRequirement:
+      type: object
+      properties:
+        url:
+          description: The url prefix.
+          type: string
+          nullable: false
+        methods:
+          description: A list of HTTP methods, i.e. GET, POST, etc.
+          type: array
+          items:
+            type: string
+
+
+  parameters:
+    language:
+      name: language
+      description: "The language as a query param. Overrides the Accept-Language header, if set. Either this parameter or the Accept-Language header
+       must be set. Value must consist of two-letter (ISO 639 & ISO 3166-1) codes (e.g., both 'en' and 'en_US' are valid). Numerical representations of codes are not supported."
+      in: query
+      required: false
+      schema:
+        type: string
+        nullable: true
+
+    Accept-Language:
+      name: Accept-Language
+      description: "The language as a header. Overridden by language query param, if set. Either this header or the language query param must be set.
+       Value must consist of two-letter (ISO 639 & ISO 3166-1) codes (e.g., both 'en' and 'en_US' are valid). Numerical representations of codes are not supported. 
+       Note that if you are using a browser, it will probably set this header automatically."
+      in: header
+      required: false
+      schema:
+        type: string
+        nullable: true
+
+    languageOptional:
+      name: language
+      description: "The language as a query param. Overrides the Accept-Language header, if set. If neither is specified, all available locales will be searched. 
+        Value must consist of two-letter (ISO 639 & ISO 3166-1) codes (e.g., both 'en' and 'en_US' are valid). Numerical representations of codes are not supported."
+      in: query
+      required: false
+      schema:
+        type: string
+        nullable: true
+
+    Accept-LanguageOptional:
+      name: Accept-Language
+      description: "The language as a header. Overridden by language query param, if set. If neither is specified, all available locales will be searched.
+       Value must consist of two-letter (ISO 639 & ISO 3166-1) codes (e.g., both 'en' and 'en_US' are valid). Numerical representations of codes are not supported. 
+       Note that if you are using a browser, it will probably set this header automatically."
+      in: header
+      required: false
+      schema:
+        type: string
+        nullable: true
+
+    navigationId:
+      name: navigationId
+      description: The id of the navigation.
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/NavigationId'
+
+    IfNoneMatch:
+      name: If-None-Match
+      description: ETag, if specified and the values match, you will get an ampty NOT_MODIFIED 304 response.
+      in: header
+      required: false
+      schema:
+        type: string
+        nullable: true
+
+    depth:
+      name: depth
+      description: The depth of the navigation tree. Parts of the tree that would exceed this value are cut off.
+      in: query
+      required: false
+      schema:
+        minimum: 0
+        type: integer
+        format: int32
+        nullable: true
+        default: 10
+
+    format:
+      name: format
+      description: The format of the response. Supported formats are "default" and "caas".
+      in: query
+      required: false
+      schema:
+        type: string
+        nullable: true
+        default: "default"
+
+    navElementId:
+      name: elementId
+      description: The id of the navigation element in the navigation tree.
+      in: path
+      required: true
+      schema:
+        $ref: '#/components/schemas/NavElementId'
+
+
+  requestBodies:
+    NavigationUpsertRequest:
+      description: A JSON object representing a navigation to be upserted.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/NavElementV1Request'
+          example:
+            id: foo
+            label: bar
+            visible: true
+            seoRoute: /foo
+            contentReference: http://caas.url
+            _links:
+              custom:
+                href: http://localhost/foo/bar
+            children:
+              - id: childFoo
+                label: childBar
+                visible: false
+                seoRoute: /foo/:item
+                customData:
+                  fooKey: barValue
+      required: true
+
+    AuthenticationConfig:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticationConfig'
+          example:
+            authenticationRequirements:
+              - url: "/navigation/preview"
+                methods:
+                  - GET
+                  - POST
+                  - PUT
+                  - DELETE
+
+  responses:
+    NavigationUpsertSuccess:
+      description: Navigation was created or updated successfully.
+      headers:
+        Location:
+          description: The url of the newly created navigation
+          schema:
+            type: string
+
+    NavigationFound:
+      description: The specified navigation exists and was returned
+      content:
+        application/json:
+          schema:
+            oneOf:
+              - $ref: '#/components/schemas/NavElementV1Response'
+              - $ref: '#/components/schemas/NavElementCaasResponse'
+
+    Deleted:
+      description: Confirmation, that the delete operation was successful
+
+    NotModified:
+      description: ETag matches, not modified.
+
+    BadRequest:
+      description: Error, in case the request was invalid
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    AuthenticationConfig:
+      description: The authentication config.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthenticationConfig'
+
+    Unauthorized:
+      description: Error, you need to supply a valid Bearer token.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Error, you are not allowed to write to this resource.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Error, what you are searching for does not exist.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+
+  securitySchemes:
+    bearerAuth:            # arbitrary name for the security scheme
+      type: http
+      scheme: bearer
+      bearerFormat: JWT    # optional, arbitrary value for documentation purposes
+
